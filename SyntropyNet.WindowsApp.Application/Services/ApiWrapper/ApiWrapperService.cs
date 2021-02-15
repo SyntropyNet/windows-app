@@ -9,10 +9,11 @@ using Websocket.Client.Exceptions;
 using Newtonsoft.Json;
 using SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers;
 using SyntropyNet.WindowsApp.Application.Domain.Models.Messages;
+using SyntropyNet.WindowsApp.Application.Contracts;
 
 namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
 {
-    public class ApiWrapperService
+    public class ApiWrapperService: IApiWrapperService
     {
         private string _url;
         private string _authorizationKey;

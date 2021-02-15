@@ -38,12 +38,6 @@ namespace SyntropyNet.WindowsApp.Views
             m_notifyIcon.Icon = new System.Drawing.Icon("syntropy-icon.ico");
             m_notifyIcon.Click += new EventHandler(m_notifyIcon_Click);
 
-            // ToDo:: implement config & API Code window
-            // temporary pass const data for development
-            var apiService = new ApiWrapperService("wss://controller-sandbox-platform-agents.syntropystack.com", "jFJ4OvvgJmpEhkrggbeXq5VKkgmau8nN", "Sibers", "test", "0.0.75");
-
-            apiService.Run();
-
             InitializeComponent();
         }
 
