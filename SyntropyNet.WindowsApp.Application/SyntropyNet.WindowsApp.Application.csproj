@@ -88,10 +88,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Contracts\IApiWrapperService.cs" />
+    <Compile Include="Contracts\IAppSettings.cs" />
+    <Compile Include="Contracts\IUserConfig.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\ApiWrapper\ApiWrapperService.cs" />
     <Compile Include="Services\ApiWrapper\Handlers\AutoPingHandler.cs" />
     <Compile Include="Services\ApiWrapper\Handlers\BaseHandler.cs" />
+    <Compile Include="Services\UserConfig.cs" />
+    <Compile Include="ViewModels\AddTokenViewModel.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -103,6 +107,9 @@
       <Project>{B18AA660-C236-4B77-95BA-E26CAF169E69}</Project>
       <Name>SyntropyNet.WindowsApp.Application.Domain</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Exceptions\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

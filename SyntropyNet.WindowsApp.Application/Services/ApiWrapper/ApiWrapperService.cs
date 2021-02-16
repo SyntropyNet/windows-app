@@ -15,29 +15,36 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
 {
     public class ApiWrapperService: IApiWrapperService
     {
-        private string _url;
-        private string _authorizationKey;
-        private string _deviceId;
-        private string _deviceName;
-        private string _agentVersion;
+        private readonly IAppSettings _appSettings;
+        private readonly IUserConfig _userConfig;
 
+        private ManualResetEvent exitEvent { get; set;}
+        private bool Running { get; set; }
 
         private AutoPingHandler autoPingHandler;
-        public ApiWrapperService(string url, string authorizationKey, string deviceId, string deviceName, string agentVersion)
+        public ApiWrapperService(IAppSettings appSettings, IUserConfig userConfig)
         {
-            _url = url;
-            _authorizationKey = authorizationKey;
-            _deviceId = deviceId;
-            _deviceName = deviceName;
-            _agentVersion = agentVersion;
+            _appSettings = appSettings;
+            _userConfig = userConfig;
         }
 
         public void Run()
         {
+            if (Running)
+            {
+                // Already started
+                return;
+            }
+            if(!_userConfig.IsAuthenticated || String.IsNullOrEmpty(_userConfig.AgentToken))
+            {
+                // User needs to enter Agent Token & Name
+                // ToDo:: add custom exception here;
+                return;
+            }
             new Thread(() =>
             {
-                var exitEvent = new ManualResetEvent(false);
-                var url = new Uri(_url);
+                exitEvent = new ManualResetEvent(false);
+                var url = new Uri(_appSettings.ControllerUrl);
                 // Use custom Func as a ClientWebSocket factory to provide required headers
                 var factory = new Func<ClientWebSocket>(() =>
                 {
@@ -48,10 +55,10 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                         KeepAliveInterval = TimeSpan.FromSeconds(30)
                     }
                     };
-                    wsCLient.Options.SetRequestHeader("Authorization", _authorizationKey);
-                    wsCLient.Options.SetRequestHeader("X-DeviceId", _deviceId);
-                    wsCLient.Options.SetRequestHeader("X-DeviceName", _deviceName);
-                    wsCLient.Options.SetRequestHeader("X-AgentVersion", _agentVersion);
+                    wsCLient.Options.SetRequestHeader("Authorization", _userConfig.AgentToken);
+                    wsCLient.Options.SetRequestHeader("X-DeviceId", _appSettings.DeviceId);
+                    wsCLient.Options.SetRequestHeader("X-DeviceName", _userConfig.DeviceName);
+                    wsCLient.Options.SetRequestHeader("X-AgentVersion", _appSettings.AgentVersion);
 
                     return wsCLient;
                 });
@@ -95,17 +102,37 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                     });
                     try
                     {
-                        client.StartOrFail().GetAwaiter().GetResult();
+                        client.Start();
+                        Running = true;
                     }
                     catch (WebsocketException e)
                     {
                         Debug.WriteLine($"Exception");
+                        exitEvent.Set();
+                        throw e;
                     }
-
+                    Debug.WriteLine($"WebSocket connection started");
                     exitEvent.WaitOne();
+                    Debug.WriteLine($"Connection finished");
 
                 }
             }).Start();
+        }
+
+        public void Stop()
+        {
+            if(exitEvent != null)
+            {
+                // set ManualResetEvent to stop the Thread
+                // client will be disposed in using
+                exitEvent.Set();
+            }
+            if (autoPingHandler != null)
+            {
+                autoPingHandler.Interrupt();
+                autoPingHandler = null;
+            }
+            Running = false;
         }
     }
 }

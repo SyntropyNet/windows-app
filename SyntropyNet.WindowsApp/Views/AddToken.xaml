@@ -1,0 +1,41 @@
+﻿<UserControl x:Class="SyntropyNet.WindowsApp.Views.AddToken"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:SyntropyNet.WindowsApp.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="150" d:DesignWidth="350">
+    <StackPanel Orientation="Vertical" HorizontalAlignment="Center" Margin="0 20 0 0">
+        <Grid Margin="0 10 0 0">
+            <TextBox  Width="300"  VerticalAlignment="Center" HorizontalAlignment="Left" x:Name="nameTextBox"/>
+            <TextBlock IsHitTestVisible="False" Text="Name Agent Token" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="10,0,0,0" Foreground="DarkGray">
+                <TextBlock.Style>
+                    <Style TargetType="{x:Type TextBlock}">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Text, ElementName=nameTextBox}" Value="">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+        </Grid>
+        <Grid Margin="0 10 0 0">
+            <TextBox  Width="300"  VerticalAlignment="Center" HorizontalAlignment="Left" x:Name="agentTokenTextBox"/>
+            <TextBlock IsHitTestVisible="False" Text="Paste API key" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="10,0,0,0" Foreground="DarkGray">
+                <TextBlock.Style>
+                    <Style TargetType="{x:Type TextBlock}">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Text, ElementName=agentTokenTextBox}" Value="">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+        </Grid>
+    </StackPanel>
+</UserControl>

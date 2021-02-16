@@ -39,6 +39,8 @@ namespace SyntropyNet.WindowsApp.Views
             m_notifyIcon.Click += new EventHandler(m_notifyIcon_Click);
 
             InitializeComponent();
+            BrushConverter bc = new BrushConverter();
+            addTokenBtn.Background = (Brush)bc.ConvertFrom("#0178d4");
         }
 
         void OnClose(object sender, CancelEventArgs args)

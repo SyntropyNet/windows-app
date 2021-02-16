@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace SyntropyNet.WindowsApp.Application.Contracts
 {
-    public interface IApiWrapperService
+    public interface IUserConfig
     {
-        void Run();
-        void Stop();
+        bool IsAuthenticated { get; set; }
+        string DeviceName { get; set; }
+        string AgentToken { get; set; }
     }
 }
-

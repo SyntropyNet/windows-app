@@ -6,9 +6,15 @@
         xmlns:prism="http://prismlibrary.com/"
         xmlns:local="clr-namespace:SyntropyNet.WindowsApp"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800"
+        ResizeMode="CanMinimize"
+        Title="MainWindow" Height="475" Width="350"
         Closing="OnClose" StateChanged="OnStateChanged" IsVisibleChanged="OnIsVisibleChanged">
     <Grid>
-        
+        <StackPanel Orientation="Vertical" HorizontalAlignment="Center" Margin="0 20 0 0">
+            <Image Source="..\Images\syntropy-logo-80.jpg" Width="80" Height="80"/>
+            <Label FontWeight="DemiBold" FontSize="16">Add Agent token</Label>
+            <Button x:Name="addTokenBtn" Foreground="White" BorderThickness="0" Padding="5 5 5 5">Add</Button>
+        </StackPanel>
     </Grid>
+    
 </Window>
