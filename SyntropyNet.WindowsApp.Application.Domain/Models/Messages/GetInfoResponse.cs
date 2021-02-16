@@ -8,6 +8,11 @@ namespace SyntropyNet.WindowsApp.Application.Domain.Models.Messages
 {
     public class GetInfoResponse : BaseMessage
     {
+        public GetInfoResponse()
+        {
+            Type = "GET_INFO";
+        }
+
         public GetInfoResponseData Data { get; set; }
     }
 
