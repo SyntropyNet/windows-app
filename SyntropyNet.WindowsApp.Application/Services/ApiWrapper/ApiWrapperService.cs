@@ -22,6 +22,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
         private bool Running { get; set; }
 
         private AutoPingHandler autoPingHandler;
+        private GetInfoHandler getInfoHandler;
         public ApiWrapperService(IAppSettings appSettings, IUserConfig userConfig)
         {
             _appSettings = appSettings;
@@ -89,6 +90,19 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
 
                                 autoPingHandler = new AutoPingHandler(client);
                                 autoPingHandler.Start(autoPingRequest);
+
+                                break;
+                            case "GET_INFO":
+                                var getInfoRequest = JsonConvert.DeserializeObject<GetInfoRequest>(msg.Text);
+
+                                if (getInfoHandler != null)
+                                {
+                                    getInfoHandler.Interrupt();
+                                    getInfoHandler = null;
+                                }
+
+                                getInfoHandler = new GetInfoHandler(client);
+                                getInfoHandler.Start(getInfoRequest);
 
                                 break;
                             default:

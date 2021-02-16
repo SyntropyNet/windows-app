@@ -44,6 +44,8 @@
     <Compile Include="Models\Messages\AutoPingRequest.cs" />
     <Compile Include="Models\Messages\AutoPingResponse.cs" />
     <Compile Include="Models\Messages\BaseMessage.cs" />
+    <Compile Include="Models\Messages\GetInfoRequest.cs" />
+    <Compile Include="Models\Messages\GetInfoResponse.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
