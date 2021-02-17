@@ -11,5 +11,8 @@ namespace SyntropyNet.WindowsApp.Application.Contracts
         bool IsAuthenticated { get; set; }
         string DeviceName { get; set; }
         string AgentToken { get; set; }
+
+        void Authenticate(string deviceName, string agentToken);
+        void Quit();
     }
 }

@@ -111,6 +111,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Services\AppSettings.cs" />
+    <Compile Include="Services\WpfContext.cs" />
     <Compile Include="Views\AddToken.xaml.cs">
       <DependentUpon>AddToken.xaml</DependentUpon>
     </Compile>

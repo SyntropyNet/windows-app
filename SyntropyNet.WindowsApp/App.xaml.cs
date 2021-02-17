@@ -46,6 +46,7 @@ namespace SyntropyNet.WindowsApp
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
         {
             // register other needed services here
+            containerRegistry.Register<IContext, WpfContext>();
             containerRegistry.RegisterSingleton<IAppSettings, AppSettings>();
             containerRegistry.RegisterSingleton<IUserConfig, UserConfig>();
             containerRegistry.RegisterSingleton<IApiWrapperService, ApiWrapperService>();

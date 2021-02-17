@@ -9,9 +9,22 @@ namespace SyntropyNet.WindowsApp.Application.Services
 {
     public class UserConfig: IUserConfig
     {
-        // ToDo:: temporary hardcode values until we have an AddToken window.
-        public bool IsAuthenticated { get; set; } = true;
-        public string DeviceName { get; set; } = "test";
-        public string AgentToken { get; set; } = "jFJ4OvvgJmpEhkrggbeXq5VKkgmau8nN";
+        public bool IsAuthenticated { get; set; }
+        public string DeviceName { get; set; }
+        public string AgentToken { get; set; }
+
+        public void Authenticate(string deviceName, string agentToken)
+        {
+            IsAuthenticated = true;
+            DeviceName = deviceName;
+            AgentToken = agentToken;
+        }
+
+        public void Quit()
+        {
+            IsAuthenticated = false;
+            DeviceName = string.Empty;
+            AgentToken = string.Empty;
+        }
     }
 }

@@ -89,6 +89,7 @@
   <ItemGroup>
     <Compile Include="Contracts\IApiWrapperService.cs" />
     <Compile Include="Contracts\IAppSettings.cs" />
+    <Compile Include="Contracts\IContext.cs" />
     <Compile Include="Contracts\IUserConfig.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\ApiWrapper\ApiWrapperService.cs" />

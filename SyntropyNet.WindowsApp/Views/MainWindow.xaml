@@ -8,13 +8,38 @@
         mc:Ignorable="d"
         ResizeMode="CanMinimize"
         Title="MainWindow" Height="475" Width="350"
+        Padding="10 0 10 0"
         Closing="OnClose" StateChanged="OnStateChanged" IsVisibleChanged="OnIsVisibleChanged">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisConverter" />
+    </Window.Resources>
     <Grid>
-        <StackPanel Orientation="Vertical" HorizontalAlignment="Center" Margin="0 20 0 0">
+        <StackPanel Orientation="Vertical" 
+                    HorizontalAlignment="Center"
+                    Visibility="{Binding Path=AddTokenVisible, Converter={StaticResource BoolToVisConverter} }" 
+                    Margin="0 20 0 0">
             <Image Source="..\Images\syntropy-logo-80.jpg" Width="80" Height="80"/>
             <Label FontWeight="DemiBold" FontSize="16">Add Agent token</Label>
-            <Button x:Name="addTokenBtn" Foreground="White" BorderThickness="0" Padding="5 5 5 5">Add</Button>
+            <Button x:Name="addTokenBtn" 
+                    Foreground="White" 
+                    BorderThickness="0" 
+                    Padding="5 5 5 5"
+                    Command="{Binding CommandAddToken}">Add</Button>
         </StackPanel>
+        <DockPanel HorizontalAlignment="Stretch"
+                   VerticalAlignment="Top"
+                    Visibility="{Binding Path=LoggedIn, Converter={StaticResource BoolToVisConverter} }" 
+                    Margin="0 0 0 0">
+            <DockPanel DockPanel.Dock="Top" HorizontalAlignment="Stretch" Height="50"
+                       Background="LightGray">
+                <StackPanel DockPanel.Dock="Left" Orientation="Vertical">
+                    <Label>Agent Token</Label>
+                    <Label Content="{Binding Name}"
+                            Foreground="DarkSlateGray"></Label>
+                </StackPanel>
+                
+            </DockPanel>
+        </DockPanel>
     </Grid>
     
 </Window>

@@ -23,6 +23,8 @@ namespace SyntropyNet.WindowsApp.Views
         public AddToken()
         {
             InitializeComponent();
+            BrushConverter bc = new BrushConverter();
+            addBtn.Background = (Brush)bc.ConvertFrom("#0178d4");
         }
     }
 }
