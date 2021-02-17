@@ -17,6 +17,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
     {
         private readonly IAppSettings _appSettings;
         private readonly IUserConfig _userConfig;
+        private readonly IWGConfigService _WGConfigService;
 
         private ManualResetEvent exitEvent { get; set;}
         private bool Running { get; set; }
@@ -25,10 +26,14 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
         private GetInfoHandler getInfoHandler;
         private ConfigInfoHandler configInfoHandler;
 
-        public ApiWrapperService(IAppSettings appSettings, IUserConfig userConfig)
+        public ApiWrapperService(
+            IAppSettings appSettings, 
+            IUserConfig userConfig,
+            IWGConfigService WGConfigService)
         {
             _appSettings = appSettings;
             _userConfig = userConfig;
+            _WGConfigService = WGConfigService;
         }
 
         public void Run()
@@ -103,7 +108,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                                     configInfoHandler = null;
                                 }
 
-                                configInfoHandler = new ConfigInfoHandler(client);
+                                configInfoHandler = new ConfigInfoHandler(client, _WGConfigService);
                                 configInfoHandler.Start(configInfoRequest);
 
                                 break;

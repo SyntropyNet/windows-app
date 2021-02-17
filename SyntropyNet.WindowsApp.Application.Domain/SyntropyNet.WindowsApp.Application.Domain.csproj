@@ -47,6 +47,7 @@
     <Compile Include="Models\Messages\ConfigInfoRequest.cs" />
     <Compile Include="Models\Messages\GetInfoRequest.cs" />
     <Compile Include="Models\Messages\GetInfoResponse.cs" />
+    <Compile Include="Models\Messages\UpdateAgentConfigRequest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

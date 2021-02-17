@@ -91,6 +91,7 @@
     <Compile Include="Contracts\IAppSettings.cs" />
     <Compile Include="Contracts\IContext.cs" />
     <Compile Include="Contracts\IUserConfig.cs" />
+    <Compile Include="Contracts\IWGConfigService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\ApiWrapper\ApiWrapperService.cs" />
     <Compile Include="Services\ApiWrapper\Handlers\AutoPingHandler.cs" />
@@ -98,6 +99,7 @@
     <Compile Include="Services\ApiWrapper\Handlers\ConfigInfoHandler.cs" />
     <Compile Include="Services\ApiWrapper\Handlers\GetInfoHandler.cs" />
     <Compile Include="Services\UserConfig.cs" />
+    <Compile Include="Services\WireGuard\WGConfigService.cs" />
     <Compile Include="ViewModels\AddTokenViewModel.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
   </ItemGroup>

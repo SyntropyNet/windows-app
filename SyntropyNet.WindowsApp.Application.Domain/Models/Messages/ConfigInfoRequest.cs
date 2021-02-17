@@ -35,7 +35,7 @@ namespace SyntropyNet.WindowsApp.Application.Domain.Models.Messages
     {
         public string InternalIp { get; set; }
         public string PublicKey { get; set; }
-        public int ListenPort { get; set; }
+        public int? ListenPort { get; set; }
     }
 
     public class VpnConfig
