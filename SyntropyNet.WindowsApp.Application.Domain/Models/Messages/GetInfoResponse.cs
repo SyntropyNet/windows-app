@@ -22,24 +22,7 @@ namespace SyntropyNet.WindowsApp.Application.Domain.Models.Messages
         public bool ServiceStatus { get; set; }
         public IEnumerable<string> AgentTags { get; set; }
         public string ExternalIp { get; set; }
-        public IEnumerable<BaseNetworkInfo> NetworkInfo { get; set; }
         public IEnumerable<ContainerInfo> ContainerInfo { get; set; }
-    }
-
-    public abstract class BaseNetworkInfo { }
-
-    public class AgentNetworkInfo : BaseNetworkInfo
-    {
-        public string AgentNetworkId { get; set; }
-        public string AgentNetworkName { get; set; }
-        public IEnumerable<string> AgentNetworkSubnets { get; set; }
-    }
-
-    public class DockerNetworkInfo : BaseNetworkInfo
-    {
-        public string DockerNetworkId { get; set; }
-        public string DockerNetworkName { get; set; }
-        public IEnumerable<string> DockerNetworkSubnets { get; set; }
     }
 
     public class ContainerInfo

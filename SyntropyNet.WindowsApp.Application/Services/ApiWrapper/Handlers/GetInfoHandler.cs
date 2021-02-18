@@ -30,7 +30,6 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                 responseData.ServiceStatus = GetServiceStatus();
                 responseData.AgentTags = GetAgentTags();
                 responseData.ExternalIp = GetExternalIp();
-                responseData.NetworkInfo = GetNetworkInfo();
                 responseData.ContainerInfo = GetContainerInfo();
 
                 var response = new GetInfoResponse
@@ -55,12 +54,6 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
         private IEnumerable<ContainerInfo> GetContainerInfo()
         {
             //ToDo: Need to implement the GetContainerInfo method
-            return null;
-        }
-
-        private IEnumerable<BaseNetworkInfo> GetNetworkInfo()
-        {
-            //ToDo: Need to implement the GetNetworkInfo method
             return null;
         }
 
