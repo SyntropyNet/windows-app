@@ -10,6 +10,7 @@ using Newtonsoft.Json;
 using SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers;
 using SyntropyNet.WindowsApp.Application.Domain.Models.Messages;
 using SyntropyNet.WindowsApp.Application.Contracts;
+using SyntropyNet.WindowsApp.Application.Helpers;
 
 namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
 {
@@ -103,7 +104,8 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
 
                                 break;
                             case "CONFIG_INFO":
-                                var configInfoRequest = JsonConvert.DeserializeObject<ConfigInfoRequest>(msg.Text);
+                                var configInfoRequest = JsonConvert.DeserializeObject<ConfigInfoRequest>(
+                                    msg.Text, JsonSettings.GetSnakeCaseNamingStrategy());
 
                                 if (configInfoHandler != null)
                                 {
@@ -116,7 +118,8 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
 
                                 break;
                             case "GET_INFO":
-                                var getInfoRequest = JsonConvert.DeserializeObject<GetInfoRequest>(msg.Text);
+                                var getInfoRequest = JsonConvert.DeserializeObject<GetInfoRequest>(
+                                    msg.Text, JsonSettings.GetSnakeCaseNamingStrategy());
 
                                 if (getInfoHandler != null)
                                 {

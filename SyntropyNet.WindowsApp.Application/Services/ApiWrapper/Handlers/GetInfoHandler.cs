@@ -2,6 +2,7 @@
 using SyntropyNet.WindowsApp.Application.Constants;
 using SyntropyNet.WindowsApp.Application.Contracts;
 using SyntropyNet.WindowsApp.Application.Domain.Models.Messages;
+using SyntropyNet.WindowsApp.Application.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -45,7 +46,8 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                     Type = request.Type
                 };
 
-                var message = JsonConvert.SerializeObject(response);
+                var message = JsonConvert.SerializeObject(response, 
+                    JsonSettings.GetSnakeCaseNamingStrategy());
                 Debug.WriteLine($"auto ping: {message}");
                 Client.Send(message);
             });

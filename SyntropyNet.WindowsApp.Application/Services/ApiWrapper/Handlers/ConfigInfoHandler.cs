@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using SyntropyNet.WindowsApp.Application.Contracts;
 using SyntropyNet.WindowsApp.Application.Domain.Models.Messages;
+using SyntropyNet.WindowsApp.Application.Helpers;
 using SyntropyNet.WindowsApp.Application.Services.WireGuard;
 using System;
 using System.Collections.Generic;
@@ -38,7 +39,8 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                     if (!_WGConfigService.CheckPrivateKey(
                         request.Data.Network.Public.PublicKey))
                     {
-                        var message = JsonConvert.SerializeObject(CreatePublicKeyAndPort(request, true, false));
+                        var message = JsonConvert.SerializeObject(CreatePublicKeyAndPort(request, true, false), 
+                            JsonSettings.GetSnakeCaseNamingStrategy());
                         Debug.WriteLine($"Update agent config: {message}");
                         Client.Send(message);
                         return;
@@ -49,7 +51,8 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                     if (!_WGConfigService.CheckListenPort(
                         (int)request.Data.Network.Public.ListenPort))
                     {
-                        var message = JsonConvert.SerializeObject(CreatePublicKeyAndPort(request, false));
+                        var message = JsonConvert.SerializeObject(CreatePublicKeyAndPort(request, false),
+                            JsonSettings.GetSnakeCaseNamingStrategy());
                         Debug.WriteLine($"Update agent config: {message}");
                         Client.Send(message);
                         return;
@@ -61,7 +64,8 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                 //Public_key and listen_port should be created by agent
                 else
                 {
-                    var message = JsonConvert.SerializeObject(CreatePublicKeyAndPort(request));
+                    var message = JsonConvert.SerializeObject(CreatePublicKeyAndPort(request),
+                        JsonSettings.GetSnakeCaseNamingStrategy());
                     Debug.WriteLine($"Update agent config: {message}");
                     Client.Send(message);
                 }

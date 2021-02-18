@@ -94,6 +94,7 @@
     <Compile Include="Contracts\IHttpRequestService.cs" />
     <Compile Include="Contracts\IUserConfig.cs" />
     <Compile Include="Contracts\IWGConfigService.cs" />
+    <Compile Include="Helpers\JsonSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\ApiWrapper\ApiWrapperService.cs" />
     <Compile Include="Services\ApiWrapper\Handlers\AutoPingHandler.cs" />
