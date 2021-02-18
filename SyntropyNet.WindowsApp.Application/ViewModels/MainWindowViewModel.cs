@@ -60,6 +60,19 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
             }
         }
 
+        private DelegateCommand _commandLogout = null;
+        public DelegateCommand CommandLogout =>
+            _commandLogout ?? (_commandLogout = new DelegateCommand(CommandLogoutExecute));
+
+        private void CommandLogoutExecute()
+        {
+            _userConfig.Quit();
+            _apiService.Stop();
+            Name = string.Empty;
+            LoggedIn = false;
+        }
+
+
         private DelegateCommand _commandAddToken = null;
         public DelegateCommand CommandAddToken =>
             _commandAddToken ?? (_commandAddToken = new DelegateCommand(CommandAddTokenExecute));
@@ -72,8 +85,6 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
                 {
                     var name = r.Parameters.GetValue<string>("Name");
                     var agentToken = r.Parameters.GetValue<string>("AgentToken");
-                    _userConfig.Authenticate(name,agentToken);
-                    _apiService.Run();
                     SetUserAuthentication(true,name);
                 }
             });
