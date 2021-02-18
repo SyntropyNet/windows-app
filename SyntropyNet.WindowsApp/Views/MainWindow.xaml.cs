@@ -16,6 +16,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using FontAwesome.WPF;
 using SyntropyNet.WindowsApp.Application.Services.ApiWrapper;
 using Websocket.Client;
 using Websocket.Client.Exceptions;
@@ -80,6 +81,23 @@ namespace SyntropyNet.WindowsApp.Views
         {
             if (m_notifyIcon != null)
                 m_notifyIcon.Visible = show;
+        }
+
+        private void ImageAwesome_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Left)
+            {
+                var rectangle = sender as ImageAwesome;
+                ContextMenu contextMenu = rectangle.ContextMenu;
+                contextMenu.PlacementTarget = rectangle;
+                contextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Left;
+                contextMenu.IsOpen = true;
+            }
+        }
+
+        private void Quit_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
         }
     }
 }

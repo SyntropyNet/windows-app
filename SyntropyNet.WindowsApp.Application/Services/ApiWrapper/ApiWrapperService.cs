@@ -10,6 +10,8 @@ using Newtonsoft.Json;
 using SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers;
 using SyntropyNet.WindowsApp.Application.Domain.Models.Messages;
 using SyntropyNet.WindowsApp.Application.Contracts;
+using SyntropyNet.WindowsApp.Application.Domain.Models;
+using System.Windows.Controls;
 
 namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
 {
@@ -39,7 +41,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
             _httpRequestService = httpRequestService;
         }
 
-        public void Run()
+        public void Run(Action<WSConnectionResponse> callback)
         {
             if (Running)
             {
@@ -52,7 +54,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                 // ToDo:: add custom exception here;
                 return;
             }
-            new Thread(() =>
+            new Thread(async () =>
             {
                 exitEvent = new ManualResetEvent(false);
                 var url = new Uri(_appSettings.ControllerUrl);
@@ -137,17 +139,31 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                         Debug.WriteLine($"Disconnect: {x.Type}");
                         exitEvent.Set();
                     });
+
                     try
                     {
-                        client.Start();
-                        Running = true;
+                        await client.StartOrFail();
                     }
                     catch (WebsocketException e)
                     {
-                        Debug.WriteLine($"Exception");
+                        Debug.WriteLine($"Failed to connect");
+                        var error = e.Message;
+                        if(e.InnerException != null)
+                        {
+                            error = e.InnerException.Message;
+                        }
+                        callback?.Invoke(new WSConnectionResponse{
+                             State = Domain.Enums.WSConnectionState.Failed,
+                             Error = error
+                        });
                         exitEvent.Set();
-                        throw e;
+                        return;
                     }
+                    Running = true;
+                    callback?.Invoke(new WSConnectionResponse
+                    {
+                        State = Domain.Enums.WSConnectionState.Connected
+                    });
                     Debug.WriteLine($"WebSocket connection started");
                     exitEvent.WaitOne();
                     Debug.WriteLine($"Connection finished");

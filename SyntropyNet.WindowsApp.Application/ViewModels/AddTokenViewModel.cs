@@ -1,6 +1,8 @@
 ﻿using Prism.Commands;
 using Prism.Mvvm;
 using Prism.Services.Dialogs;
+using SyntropyNet.WindowsApp.Application.Contracts;
+using SyntropyNet.WindowsApp.Application.Domain.Models;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -13,11 +15,20 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
 {
     public class AddTokenViewModel : BindableBase, IDialogAware, INotifyDataErrorInfo
     {
-
+        private readonly IApiWrapperService _apiService;
+        private readonly IUserConfig _userConfig;
+        private readonly IContext _appContext;
         private readonly Dictionary<string, List<string>> _errorsByPropertyName = new Dictionary<string, List<string>>();
         public string Title => "Add Agent Token";
         public bool HasErrors => _errorsByPropertyName.Any();
         public event EventHandler<DataErrorsChangedEventArgs> ErrorsChanged;
+
+        public AddTokenViewModel(IApiWrapperService apiService, IContext appContext, IUserConfig userConfig)
+        {
+            _apiService = apiService;
+            _appContext = appContext;
+            _userConfig = userConfig;
+        }
 
         public IEnumerable GetErrors(string propertyName)
         {
@@ -90,6 +101,50 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
             }
         }
 
+        private string _connectionError = string.Empty;
+        public string ConnectionError
+        {
+            get { return _connectionError; }
+            set
+            {
+                ValidateAgentToken(value);
+                SetProperty(ref _connectionError, value);
+            }
+        }
+
+        private bool _connectionErrorVisible = false;
+        public bool ConnectionErrorVisible
+        {
+            get { return _connectionErrorVisible; }
+            set
+            {
+               SetProperty(ref _connectionErrorVisible, value);
+            }
+        }
+
+        private bool _loading = false;
+        public bool Loading
+        {
+            get { return _loading; }
+            set
+            {
+                if (SetProperty(ref _loading, value))
+                {
+                  IsEnabled = !value;
+                }
+            }
+        }
+
+        private bool _isEnabled = true;
+        public bool IsEnabled
+        {
+            get { return _isEnabled; }
+            set
+            {
+                SetProperty(ref _isEnabled, value);
+            }
+        }
+
         public event Action<IDialogResult> RequestClose;
 
         private DelegateCommand<string> _closeDialogCommand;
@@ -98,6 +153,8 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
 
         protected virtual void CloseDialog(string parameter)
         {
+            ConnectionError = string.Empty;
+            ConnectionErrorVisible = false;
             ButtonResult result = ButtonResult.None;
             bool parsed;
             if (string.IsNullOrEmpty(parameter) || !bool.TryParse(parameter, out parsed) || !parsed)
@@ -115,8 +172,43 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
                 }
                 result = ButtonResult.OK;
             }
+            // try to connect to WS controller
+            Loading = true;
+            _userConfig.Authenticate(Name, AgentToken);
+            _apiService.Run((WSConnectionResponse response) =>
+            {
+                if(response.State == Domain.Enums.WSConnectionState.Failed)
+                {
+                    _userConfig.Quit();
+                    ShowConnectionError(response.Error);
+                }
+                else
+                {
+                    FinishDialog();
+                }
+            });
+        }
 
-            RaiseRequestClose(new DialogResult(result, new Prism.Services.Dialogs.DialogParameters(){
+        private void ShowConnectionError(string error)
+        {
+            if (!_appContext.IsSynchronized)
+            {
+                _appContext.BeginInvoke(ShowConnectionError, error);
+                return;
+            }
+            ConnectionError = error;
+            ConnectionErrorVisible = true;
+            Loading = false;
+        }
+
+        private void FinishDialog()
+        {
+            if (!_appContext.IsSynchronized)
+            {
+                _appContext.BeginInvoke(FinishDialog);
+                return;
+            }
+            RaiseRequestClose(new DialogResult(ButtonResult.OK, new Prism.Services.Dialogs.DialogParameters(){
                     { "Name", Name },
                     { "AgentToken", AgentToken }
                 })
