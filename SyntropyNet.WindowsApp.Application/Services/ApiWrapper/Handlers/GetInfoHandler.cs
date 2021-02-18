@@ -1,4 +1,6 @@
 ﻿using Newtonsoft.Json;
+using SyntropyNet.WindowsApp.Application.Constants;
+using SyntropyNet.WindowsApp.Application.Contracts;
 using SyntropyNet.WindowsApp.Application.Domain.Models.Messages;
 using System;
 using System.Collections.Generic;
@@ -12,10 +14,13 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
 {
     class GetInfoHandler : BaseHandler
     {
+        private readonly IHttpRequestService _httpRequestService;
         private Thread mainTask;
 
-        public GetInfoHandler(WebsocketClient client) : base(client)
+        public GetInfoHandler(WebsocketClient client, IHttpRequestService httpRequestService) 
+            : base(client)
         {
+            _httpRequestService = httpRequestService;
         }
 
         public void Start(GetInfoRequest request)
@@ -59,20 +64,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
 
         private string GetExternalIp()
         {
-            // ToDo:: url hardcode values
-            var request = WebRequest.CreateHttp("https://ip.syntropystack.com/");
-            var response = request.GetResponseAsync().GetAwaiter().GetResult();
-
-            string data = "";
-            using (Stream stream = response.GetResponseStream())
-            {
-                using (StreamReader reader = new StreamReader(stream))
-                {
-                    data = reader.ReadLine();
-                }
-            }
-
-            return data.Trim('\"');
+            return _httpRequestService.GetResponse(AppConstants.EXTERNAL_IP_URL);
         }
 
         private IEnumerable<string> GetAgentTags()

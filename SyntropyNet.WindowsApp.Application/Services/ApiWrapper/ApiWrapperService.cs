@@ -18,6 +18,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
         private readonly IAppSettings _appSettings;
         private readonly IUserConfig _userConfig;
         private readonly IWGConfigService _WGConfigService;
+        private readonly IHttpRequestService _httpRequestService;
 
         private ManualResetEvent exitEvent { get; set;}
         private bool Running { get; set; }
@@ -29,11 +30,13 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
         public ApiWrapperService(
             IAppSettings appSettings, 
             IUserConfig userConfig,
-            IWGConfigService WGConfigService)
+            IWGConfigService WGConfigService,
+            IHttpRequestService httpRequestService)
         {
             _appSettings = appSettings;
             _userConfig = userConfig;
             _WGConfigService = WGConfigService;
+            _httpRequestService = httpRequestService;
         }
 
         public void Run()
@@ -121,7 +124,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                                     getInfoHandler = null;
                                 }
 
-                                getInfoHandler = new GetInfoHandler(client);
+                                getInfoHandler = new GetInfoHandler(client, _httpRequestService);
                                 getInfoHandler.Start(getInfoRequest);
 
                                 break;

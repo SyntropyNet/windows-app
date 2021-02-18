@@ -4,6 +4,7 @@ using Prism.Unity;
 using SyntropyNet.WindowsApp.Application.Contracts;
 using SyntropyNet.WindowsApp.Application.Services;
 using SyntropyNet.WindowsApp.Application.Services.ApiWrapper;
+using SyntropyNet.WindowsApp.Application.Services.HttpRequest;
 using SyntropyNet.WindowsApp.Application.Services.WireGuard;
 using SyntropyNet.WindowsApp.Application.ViewModels;
 using SyntropyNet.WindowsApp.Services;
@@ -52,6 +53,7 @@ namespace SyntropyNet.WindowsApp
             containerRegistry.RegisterSingleton<IUserConfig, UserConfig>();
             containerRegistry.RegisterSingleton<IApiWrapperService, ApiWrapperService>();
             containerRegistry.RegisterSingleton<IWGConfigService, WGConfigService>();
+            containerRegistry.RegisterSingleton<IHttpRequestService, HttpRequestService>();
             containerRegistry.RegisterDialog<AddToken, AddTokenViewModel>();
         }
 
