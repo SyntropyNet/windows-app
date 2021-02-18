@@ -4,6 +4,7 @@ using SyntropyNet.WindowsApp.Application.Contracts;
 using SyntropyNet.WindowsApp.Application.Domain.Models.Messages;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
@@ -75,14 +76,13 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
 
         private bool GetServiceStatus()
         {
-            return Convert.ToBoolean(
-                Environment.GetEnvironmentVariable("SYNTROPY_SERVICES_STATUS"));
+            return Convert.ToBoolean(ConfigurationManager.AppSettings.Get("SYNTROPY_SERVICES_STATUS"));
         }
 
         private int? GetAgentProvider()
         {
             bool isParsable = int.TryParse(
-                Environment.GetEnvironmentVariable("SYNTROPY_PROVIDER"), out int result);
+                ConfigurationManager.AppSettings.Get("SYNTROPY_PROVIDER"), out int result);
             if (isParsable)
                 return result;
 
