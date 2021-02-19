@@ -46,9 +46,12 @@
     <Compile Include="Models\Messages\AutoPingResponse.cs" />
     <Compile Include="Models\Messages\BaseMessage.cs" />
     <Compile Include="Models\Messages\ConfigInfoRequest.cs" />
+    <Compile Include="Models\Messages\GetConfigInfoRequest.cs" />
     <Compile Include="Models\Messages\GetInfoRequest.cs" />
     <Compile Include="Models\Messages\GetInfoResponse.cs" />
     <Compile Include="Models\Messages\UpdateAgentConfigRequest.cs" />
+    <Compile Include="Models\Messages\WGConfResponse.cs" />
+    <Compile Include="Models\Messages\WGRouteStatusRequest.cs" />
     <Compile Include="Models\WSConnectionResponse.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

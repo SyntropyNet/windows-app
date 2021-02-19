@@ -18,6 +18,11 @@ namespace SyntropyNet.WindowsApp.Application.Domain.Models.Messages
 
     public class GetInfoResponseData
     {
+        public GetInfoResponseData()
+        {
+            AgentTags = new List<string>();
+            ContainerInfo = new List<ContainerInfo>();
+        }
         public int? AgentProvider { get; set; }
         public bool ServiceStatus { get; set; }
         public IEnumerable<string> AgentTags { get; set; }

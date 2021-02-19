@@ -11,6 +11,7 @@ namespace SyntropyNet.WindowsApp.Application.Contracts
     {
         string CreatePublicKey();
         int CreateListenPort();
+        string GetIfName();
         bool CheckPrivateKey(string key);
         bool CheckListenPort(int port);
     }

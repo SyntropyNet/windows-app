@@ -18,6 +18,11 @@ namespace SyntropyNet.WindowsApp.Application.Domain.Models.Messages
 
     public class ConfigInfoRequestData
     {
+        public ConfigInfoRequestData()
+        {
+            Vpn = new List<VpnConfig>();
+        }
+
         public int AgentId { get; set; }
         public Network Network { get; set; }
         public IEnumerable<VpnConfig> Vpn { get; set; }

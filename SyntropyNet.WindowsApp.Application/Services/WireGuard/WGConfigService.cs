@@ -21,13 +21,19 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
         public int CreateListenPort()
         {
             //Todo: Implement the CreateListenPort method
-            return 123;
+            return 63834;
         }
 
         public string CreatePublicKey()
         {
             //Todo: Implement the CreatePublicKey method
-            return "key";
+            return "V1Iezqb8ohwC+lkqvahQH1tDpreRWKTh162ggwJmN34=";
+        }
+
+        public string GetIfName()
+        {
+            //Todo: Implement the GetIfName method
+            return "Tunnel";
         }
     }
 }

@@ -68,6 +68,11 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                         JsonSettings.GetSnakeCaseNamingStrategy());
                     Debug.WriteLine($"Update agent config: {message}");
                     Client.Send(message);
+
+                    var message3 = JsonConvert.SerializeObject(new GetConfigInfoRequest(),
+                        JsonSettings.GetSnakeCaseNamingStrategy());
+                    Debug.WriteLine($"Get config info: {message3}");
+                    Client.Send(message3);
                 }
             });
 
@@ -90,24 +95,68 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
             if(createListenPort)
                 listenPort = _WGConfigService.CreateListenPort();
 
+            
+
             var createInterfaceData = new CreateInterfaceData
             {
-                //ToDo: what to put in ifname
-                Ifname = string.Empty,
+                Ifname = _WGConfigService.GetIfName(),
                 InternalIp = request.Data.Network.Public.InternalIp,
                 PublicKey = publicKey == "" ? request.Data.Network.Public.PublicKey : publicKey,
                 ListenPort = listenPort == 0 ? (int)request.Data.Network.Public.ListenPort : listenPort,
             };
 
-            var createInterface = new CreateInterface
+            var createInterfacePublic = new CreateInterface
             {
-                Data = createInterfaceData
+                Data = new CreateInterfaceData
+                {
+                    Ifname = _WGConfigService.GetIfName(),
+                    InternalIp = request.Data.Network.Public.InternalIp,
+                    PublicKey = publicKey == "" ? request.Data.Network.Public.PublicKey : publicKey,
+                    ListenPort = listenPort == 0 ? (int)request.Data.Network.Public.ListenPort : listenPort,
+                }
+            };
+
+            var createInterfaceSdn1 = new CreateInterface
+            {
+                Data = new CreateInterfaceData
+                {
+                    Ifname = _WGConfigService.GetIfName(),
+                    InternalIp = request.Data.Network.Sdn1.InternalIp,
+                    PublicKey = publicKey == "" ? request.Data.Network.Public.PublicKey : publicKey,
+                    ListenPort = listenPort == 0 ? (int)request.Data.Network.Public.ListenPort : listenPort,
+                }
+            };
+
+            var createInterfaceSdn2 = new CreateInterface
+            {
+                Data = new CreateInterfaceData
+                {
+                    Ifname = _WGConfigService.GetIfName(),
+                    InternalIp = request.Data.Network.Sdn2.InternalIp,
+                    PublicKey = publicKey == "" ? request.Data.Network.Public.PublicKey : publicKey,
+                    ListenPort = listenPort == 0 ? (int)request.Data.Network.Public.ListenPort : listenPort,
+                }
+            };
+            var createInterfaceSdn3 = new CreateInterface
+            {
+                Data = new CreateInterfaceData
+                {
+                    Ifname = _WGConfigService.GetIfName(),
+                    InternalIp = request.Data.Network.Sdn3.InternalIp,
+                    PublicKey = publicKey == "" ? request.Data.Network.Public.PublicKey : publicKey,
+                    ListenPort = listenPort == 0 ? (int)request.Data.Network.Public.ListenPort : listenPort,
+                }
             };
 
             var updateRequest = new UpdateAgentConfigRequest<CreateInterface>
             {
-                Id = request.Id,
-                Data = createInterface
+                Id = $"Id{DateTime.UtcNow.Ticks / TimeSpan.TicksPerMillisecond}",
+                Data = new List<CreateInterface> { 
+                    createInterfacePublic, 
+                    createInterfaceSdn1, 
+                    createInterfaceSdn2, 
+                    createInterfaceSdn3
+                }
             };
 
             return updateRequest;

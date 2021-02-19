@@ -10,10 +10,12 @@ namespace SyntropyNet.WindowsApp.Application.Domain.Models.Messages
     {
         public UpdateAgentConfigRequest()
         {
+            Id = $"Id{DateTime.UtcNow.Ticks / TimeSpan.TicksPerMillisecond}";
             Type = "UPDATE_AGENT_CONFIG";
+            Data = new List<DataModel>();
         }
 
-        public DataModel Data { get; set; }
+        public IEnumerable<DataModel> Data { get; set; }
     }
 
     public class CreateInterface

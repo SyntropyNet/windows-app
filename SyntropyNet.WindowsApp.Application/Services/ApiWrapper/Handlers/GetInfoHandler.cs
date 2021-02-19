@@ -43,12 +43,11 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                 {
                     Id = request.Id,
                     Data = responseData,
-                    Type = request.Type
                 };
 
                 var message = JsonConvert.SerializeObject(response, 
                     JsonSettings.GetSnakeCaseNamingStrategy());
-                Debug.WriteLine($"auto ping: {message}");
+                Debug.WriteLine($"Get info: {message}");
                 Client.Send(message);
             });
 
