@@ -7,5 +7,6 @@
             Exit="Application_Exit">
     <Application.Resources>
        
+        
     </Application.Resources>
 </prism:PrismApplication>

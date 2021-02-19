@@ -6,13 +6,20 @@
         xmlns:fa="http://schemas.fontawesome.io/icons/"
         xmlns:prism="http://prismlibrary.com/"
         xmlns:local="clr-namespace:SyntropyNet.WindowsApp"
+        xmlns:convs="clr-namespace:SyntropyNet.WindowsApp.Converter"
         mc:Ignorable="d"
         ResizeMode="CanMinimize"
-        Title="MainWindow" Height="475" Width="350"
-        Padding="10 0 10 0"
+        Title="" Height="475" Width="350"
+        Padding="20 10 20 10"
         Closing="OnClose" StateChanged="OnStateChanged" IsVisibleChanged="OnIsVisibleChanged">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVisConverter" />
+        <Color x:Key="AppGray">#e2e2e2</Color>
+        <SolidColorBrush x:Key="AppGrayBrush">#e2e2e2</SolidColorBrush>
+        <SolidColorBrush x:Key="AppMainBrush">#ebebeb</SolidColorBrush>
+        <Style TargetType="{x:Type GridViewColumnHeader}" BasedOn="{StaticResource {x:Type GridViewColumnHeader}}">
+            <Setter Property="Background" Value="Transparent"/>
+        </Style>
         <Style TargetType="{x:Type ContextMenu}">
             <Setter Property="OverridesDefaultStyle" Value="True" />
             <Setter Property="SnapsToDevicePixels" Value="True" />
@@ -288,15 +295,15 @@
                     Command="{Binding CommandAddToken}">Add</Button>
         </StackPanel>
         <DockPanel HorizontalAlignment="Stretch"
-                   VerticalAlignment="Top"
+                   VerticalAlignment="Stretch"
+                   LastChildFill="True"
                     Visibility="{Binding Path=LoggedIn, Converter={StaticResource BoolToVisConverter} }" 
                     Margin="0 0 0 0">
-            <DockPanel DockPanel.Dock="Top" HorizontalAlignment="Stretch" Height="50"
-                       Background="LightGray">
+            <DockPanel Margin="15 0 15 0" DockPanel.Dock="Top" HorizontalAlignment="Stretch" Height="50" >
                 <StackPanel DockPanel.Dock="Left" Orientation="Vertical">
                     <Label>Agent Token</Label>
                     <Label Content="{Binding Name}"
-                            Foreground="DarkSlateGray"></Label>
+                            Foreground="Gray"></Label>
                 </StackPanel>
                 <StackPanel DockPanel.Dock="Right" Orientation="Vertical" Width="35">
                     <fa:ImageAwesome Icon="Bars" Width="18" Height="18"
@@ -324,6 +331,43 @@
                 </StackPanel>
                 <Label></Label>
             </DockPanel>
+            <Separator Margin="15 15 15 10" DockPanel.Dock="Top" Background="LightGray"></Separator>
+            <!-- Status & Errors-->
+            <StackPanel Margin="15 0 15 0" DockPanel.Dock="Top" Orientation="Vertical">
+                <Label>Status</Label>
+            </StackPanel>
+            <Separator Margin="15 15 15 10" DockPanel.Dock="Top" Background="LightGray"></Separator>
+            <!-- Host-->
+            <StackPanel Margin="15 0 15 15" DockPanel.Dock="Top" Orientation="Vertical">
+                <Label>Host Name</Label>
+                <Label Content="{Binding Host}" Foreground="Gray"></Label>
+            </StackPanel>
+            <DockPanel HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="{DynamicResource AppMainBrush}">
+                <Label Margin="15 10 15 0" DockPanel.Dock="Top">Service List</Label>
+                <StackPanel  Margin="15 0 0 0" DockPanel.Dock="Top" 
+                            Orientation="Horizontal">
+                    <Label Width="150" Foreground="Gray" FontSize="11">Service name</Label>
+                    <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Background="Gray"/>
+                    <Label Margin="10 0 0 0"  Foreground="Gray" FontSize="11">IP address</Label>
+                </StackPanel>
+                <Separator DockPanel.Dock="Top" Margin="15 -3 0 0" Background="Gray" />
+                <ScrollViewer>
+                    <ItemsControl BorderThickness="0"  Margin="15 0 0 0"  ItemsSource="{Binding Services}" Background="{DynamicResource AppMainBrush}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Vertical">
+                                    <StackPanel Margin="0 5 0 0" Orientation="Horizontal">
+                                        <Label Width="150" Content="{Binding Path=Name}" />
+                                        <Label Margin="10 0 0 0" Foreground="Gray" Content="{Binding Path=Ip}"  />
+                                    </StackPanel>
+                                    <Separator Margin="0 5 0 0" Background="Gray" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </DockPanel>
+            
         </DockPanel>
     </Grid>
     

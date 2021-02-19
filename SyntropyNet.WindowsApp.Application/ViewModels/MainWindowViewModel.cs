@@ -1,9 +1,11 @@
 ﻿using Prism.Commands;
 using Prism.Mvvm;
 using SyntropyNet.WindowsApp.Application.Contracts;
+using SyntropyNet.WindowsApp.Application.Models;
 using SyntropyNet.WindowsApp.Application.Services.ApiWrapper;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -25,7 +27,18 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
             _apiService = apiService;
             _userConfig = userConfig;
             _appContext = appContext;
+            for(var i = 0;i < 20; i++)
+            {
+                Services.Add(new ServiceModel
+                {
+                    Name = $"test {i}",
+                    Ip = $"{i}.1.1.1"
+                });
+            }
+            
         }
+
+        public ObservableCollection<ServiceModel> Services{ get; private set; } = new ObservableCollection<ServiceModel>();
 
         private bool _loggedIn = false;
         public bool LoggedIn
@@ -57,6 +70,16 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
             set
             {
                 SetProperty(ref _name, value);
+            }
+        }
+
+        private string _host = "Test";
+        public string Host
+        {
+            get { return _host; }
+            set
+            {
+                SetProperty(ref _host, value);
             }
         }
 

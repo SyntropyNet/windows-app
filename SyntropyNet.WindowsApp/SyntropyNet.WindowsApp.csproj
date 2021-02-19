@@ -113,6 +113,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Converter\StarWidthConverter.cs" />
     <Compile Include="Services\AppSettings.cs" />
     <Compile Include="Services\WpfContext.cs" />
     <Compile Include="Views\AddToken.xaml.cs">
