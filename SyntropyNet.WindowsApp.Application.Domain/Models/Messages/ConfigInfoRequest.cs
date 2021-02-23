@@ -68,5 +68,14 @@ namespace SyntropyNet.WindowsApp.Application.Domain.Models.Messages
         public string DeviceName { get; set; }
         public string DevicePublicIpv4 { get; set; }
         public int ConnectionId { get; set; }
+        public IEnumerable<AllowedIpsInfo> AllowedIpsInfo { get; set; }
+    }
+
+    public class AllowedIpsInfo
+    {
+        public string AgentServiceName { get; set; }
+        public IEnumerable<int> AgentServiceTcpPorts { get; set; }
+        public IEnumerable<int> AgentServiceUdpPorts { get; set; }
+        public string AgentServiceSubnetIp { get; set; }
     }
 }
