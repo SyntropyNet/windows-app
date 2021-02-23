@@ -355,7 +355,7 @@
                 </StackPanel>
                 <Separator DockPanel.Dock="Top" Margin="15 -3 0 0" Background="Gray" />
                 <ScrollViewer>
-                    <ItemsControl BorderThickness="0"  Margin="15 0 0 0"  ItemsSource="{Binding Services}" Background="{DynamicResource AppMainBrush}">
+                    <ItemsControl BorderThickness="0"  Margin="15 0 0 0"  ItemsSource="{Binding Services}" Background="{DynamicResource AppGrayBrush}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Vertical">
