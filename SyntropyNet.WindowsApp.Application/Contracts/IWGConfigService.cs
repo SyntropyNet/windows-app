@@ -1,4 +1,4 @@
-﻿using SyntropyNet.WindowsApp.Application.Domain.Models.Messages;
+﻿using SyntropyNet.WindowsApp.Application.Domain.Models.WireGuard;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,12 +7,14 @@ using System.Threading.Tasks;
 
 namespace SyntropyNet.WindowsApp.Application.Contracts
 {
-    public interface IWGConfigService
+    public interface IWGConfigService : IDisposable
     {
-        string CreatePublicKey();
-        int CreateListenPort();
-        string GetIfName();
-        bool CheckPrivateKey(string key);
-        bool CheckListenPort(int port);
+        string InterfaceName { get; }
+        string PublicKey { get; }
+
+        Interface GetInterface();
+        IEnumerable<Peer> GetPeers();
+        void SetInterface(Interface @interface);
+        void SetPeers(IEnumerable<Peer> peers);
     }
 }

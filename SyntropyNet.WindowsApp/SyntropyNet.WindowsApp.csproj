@@ -72,6 +72,7 @@
     <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\System.ValueTuple.4.5.0\lib\net47\System.ValueTuple.dll</HintPath>
     </Reference>
+    <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Windows" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
@@ -152,6 +153,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\SyntropyNet.WindowsApp.Application.Domain\SyntropyNet.WindowsApp.Application.Domain.csproj">
+      <Project>{b18aa660-c236-4b77-95ba-e26caf169e69}</Project>
+      <Name>SyntropyNet.WindowsApp.Application.Domain</Name>
+    </ProjectReference>
     <ProjectReference Include="..\SyntropyNet.WindowsApp.Application\SyntropyNet.WindowsApp.Application.csproj">
       <Project>{4757291B-3036-409E-9C58-083E9D291002}</Project>
       <Name>SyntropyNet.WindowsApp.Application</Name>

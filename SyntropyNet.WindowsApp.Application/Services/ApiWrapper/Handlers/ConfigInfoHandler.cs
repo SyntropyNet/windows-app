@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using SyntropyNet.WindowsApp.Application.Contracts;
 using SyntropyNet.WindowsApp.Application.Domain.Models.Messages;
+using SyntropyNet.WindowsApp.Application.Domain.Models.WireGuard;
 using SyntropyNet.WindowsApp.Application.Helpers;
 using SyntropyNet.WindowsApp.Application.Services.WireGuard;
 using System;
@@ -36,25 +37,20 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                     //If CONFIG_INFO contains public_key, but agent didn’t 
                     //have private_key anymore, or its out of date,  
                     //agent should generate new public_key
-                    if (!_WGConfigService.CheckPrivateKey(
-                        request.Data.Network.Public.PublicKey))
-                    {
-                        var message = JsonConvert.SerializeObject(CreatePublicKeyAndPort(request, true, false), 
-                            JsonSettings.GetSnakeCaseNamingStrategy());
-                        Debug.WriteLine($"Update agent config: {message}");
-                        Client.Send(message);
-                        return;
-                    }
-
                     //If CONFIG_INFO contains listen_port, but you cannot assign 
                     //anything to this port because its already taken or closed you have to assign new port 
-                    if (!_WGConfigService.CheckListenPort(
-                        (int)request.Data.Network.Public.ListenPort))
+                    if (!CheckPublicKeyAndPort(request))
                     {
-                        var message = JsonConvert.SerializeObject(CreatePublicKeyAndPort(request, false),
+                        var message = JsonConvert.SerializeObject(SetPublicKeyAndPort(request), 
                             JsonSettings.GetSnakeCaseNamingStrategy());
                         Debug.WriteLine($"Update agent config: {message}");
                         Client.Send(message);
+
+                        var message2 = JsonConvert.SerializeObject(new GetConfigInfoRequest(),
+                            JsonSettings.GetSnakeCaseNamingStrategy());
+                        Debug.WriteLine($"Get config info: {message2}");
+                        Client.Send(message2);
+
                         return;
                     }
 
@@ -64,15 +60,15 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                 //Public_key and listen_port should be created by agent
                 else
                 {
-                    var message = JsonConvert.SerializeObject(CreatePublicKeyAndPort(request),
+                    var message = JsonConvert.SerializeObject(SetPublicKeyAndPort(request),
                         JsonSettings.GetSnakeCaseNamingStrategy());
                     Debug.WriteLine($"Update agent config: {message}");
                     Client.Send(message);
 
-                    var message3 = JsonConvert.SerializeObject(new GetConfigInfoRequest(),
+                    var message2 = JsonConvert.SerializeObject(new GetConfigInfoRequest(),
                         JsonSettings.GetSnakeCaseNamingStrategy());
-                    Debug.WriteLine($"Get config info: {message3}");
-                    Client.Send(message3);
+                    Debug.WriteLine($"Get config info: {message2}");
+                    Client.Send(message2);
                 }
             });
 
@@ -84,35 +80,41 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
             mainTask?.Abort();
         }
 
-        private UpdateAgentConfigRequest<CreateInterface> CreatePublicKeyAndPort(
-            ConfigInfoRequest request, bool createPublicKey = true, bool createListenPort = true)
+        private bool CheckPublicKeyAndPort(ConfigInfoRequest request)
         {
-            string publicKey = "";
-            int listenPort = 0;
+            bool check = true;
+            string publicKey = _WGConfigService.PublicKey;
+            int listenPort = _WGConfigService.GetInterface().ListenPort;
 
-            if(createPublicKey)
-                publicKey = _WGConfigService.CreatePublicKey();
-            if(createListenPort)
-                listenPort = _WGConfigService.CreateListenPort();
+            if (request.Data.Network.Public.PublicKey != publicKey ||
+                request.Data.Network.Sdn1.PublicKey != publicKey ||
+                request.Data.Network.Sdn2.PublicKey != publicKey ||
+                request.Data.Network.Sdn3.PublicKey != publicKey)
+                check = false;
 
-            
+            if (request.Data.Network.Public.ListenPort != listenPort ||
+                request.Data.Network.Sdn1.ListenPort != listenPort ||
+                request.Data.Network.Sdn2.ListenPort != listenPort ||
+                request.Data.Network.Sdn3.ListenPort != listenPort)
+                check = false;
 
-            var createInterfaceData = new CreateInterfaceData
-            {
-                Ifname = _WGConfigService.GetIfName(),
-                InternalIp = request.Data.Network.Public.InternalIp,
-                PublicKey = publicKey == "" ? request.Data.Network.Public.PublicKey : publicKey,
-                ListenPort = listenPort == 0 ? (int)request.Data.Network.Public.ListenPort : listenPort,
-            };
+            return check;
+        }
+
+        private UpdateAgentConfigRequest<CreateInterface> SetPublicKeyAndPort(ConfigInfoRequest request)
+        {
+            string interfaceName = _WGConfigService.InterfaceName;
+            string publicKey = _WGConfigService.PublicKey;
+            int listenPort = _WGConfigService.GetInterface().ListenPort;
 
             var createInterfacePublic = new CreateInterface
             {
                 Data = new CreateInterfaceData
                 {
-                    Ifname = _WGConfigService.GetIfName(),
+                    Ifname = interfaceName,
                     InternalIp = request.Data.Network.Public.InternalIp,
-                    PublicKey = publicKey == "" ? request.Data.Network.Public.PublicKey : publicKey,
-                    ListenPort = listenPort == 0 ? (int)request.Data.Network.Public.ListenPort : listenPort,
+                    PublicKey = publicKey,
+                    ListenPort = listenPort,
                 }
             };
 
@@ -120,10 +122,10 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
             {
                 Data = new CreateInterfaceData
                 {
-                    Ifname = _WGConfigService.GetIfName(),
+                    Ifname = interfaceName,
                     InternalIp = request.Data.Network.Sdn1.InternalIp,
-                    PublicKey = publicKey == "" ? request.Data.Network.Public.PublicKey : publicKey,
-                    ListenPort = listenPort == 0 ? (int)request.Data.Network.Public.ListenPort : listenPort,
+                    PublicKey = publicKey,
+                    ListenPort = listenPort,
                 }
             };
 
@@ -131,20 +133,20 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
             {
                 Data = new CreateInterfaceData
                 {
-                    Ifname = _WGConfigService.GetIfName(),
+                    Ifname = interfaceName,
                     InternalIp = request.Data.Network.Sdn2.InternalIp,
-                    PublicKey = publicKey == "" ? request.Data.Network.Public.PublicKey : publicKey,
-                    ListenPort = listenPort == 0 ? (int)request.Data.Network.Public.ListenPort : listenPort,
+                    PublicKey = publicKey,
+                    ListenPort = listenPort,
                 }
             };
             var createInterfaceSdn3 = new CreateInterface
             {
                 Data = new CreateInterfaceData
                 {
-                    Ifname = _WGConfigService.GetIfName(),
+                    Ifname = interfaceName,
                     InternalIp = request.Data.Network.Sdn3.InternalIp,
-                    PublicKey = publicKey == "" ? request.Data.Network.Public.PublicKey : publicKey,
-                    ListenPort = listenPort == 0 ? (int)request.Data.Network.Public.ListenPort : listenPort,
+                    PublicKey = publicKey,
+                    ListenPort = listenPort,
                 }
             };
 

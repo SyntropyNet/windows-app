@@ -1,7 +1,9 @@
 ﻿using Prism.Ioc;
 using Prism.Mvvm;
 using Prism.Unity;
+using SyntropyNet.WindowsApp.Application.Constants.WireGuard;
 using SyntropyNet.WindowsApp.Application.Contracts;
+using SyntropyNet.WindowsApp.Application.Domain.Models.WireGuard;
 using SyntropyNet.WindowsApp.Application.Services;
 using SyntropyNet.WindowsApp.Application.Services.ApiWrapper;
 using SyntropyNet.WindowsApp.Application.Services.HttpRequest;
@@ -13,8 +15,11 @@ using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
@@ -28,6 +33,27 @@ namespace SyntropyNet.WindowsApp
     {
         protected override void OnStartup(StartupEventArgs e)
         {
+            if (e.Args.Any() && e.Args.Contains("/service"))
+            {
+                var t = new Thread(() =>
+                {
+                    try
+                    {
+                        var currentProcess = Process.GetCurrentProcess();
+                        var uiProcess = Process.GetProcessById(int.Parse(e.Args[2]));
+                        if (uiProcess.MainModule.FileName != currentProcess.MainModule.FileName)
+                            return;
+                        uiProcess.WaitForExit();
+                        WGConfigService.Remove(e.Args[1], false);
+                    }
+                    catch { }
+                });
+                t.Start();
+                WGConfigService.Run(e.Args[1]);
+                t.Interrupt();
+                return;
+            }
+
             base.OnStartup(e);
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
             this.Dispatcher.UnhandledException += App_DispatcherUnhandledException;
@@ -52,8 +78,10 @@ namespace SyntropyNet.WindowsApp
             containerRegistry.RegisterSingleton<IAppSettings, AppSettings>();
             containerRegistry.RegisterSingleton<IUserConfig, UserConfig>();
             containerRegistry.RegisterSingleton<IApiWrapperService, ApiWrapperService>();
-            containerRegistry.RegisterSingleton<IWGConfigService, WGConfigService>();
             containerRegistry.RegisterSingleton<IHttpRequestService, HttpRequestService>();
+            containerRegistry.RegisterInstance(new TunnelSettings(
+                WireGuardConstants.CONFIG_FILE_LOCATION, WireGuardConstants.INTERFACE_NAME));
+            containerRegistry.RegisterSingleton<IWGConfigService, WGConfigService>();
             containerRegistry.RegisterDialog<AddToken, AddTokenViewModel>();
         }
 
