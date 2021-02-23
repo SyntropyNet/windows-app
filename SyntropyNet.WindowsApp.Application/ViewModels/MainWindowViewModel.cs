@@ -15,14 +15,17 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
     public class MainWindowViewModel: BindableBase
     {
         private readonly IApiWrapperService _apiService;
+        private readonly IAppSettings _appSettings;
         private readonly IUserConfig _userConfig;
         private readonly IContext _appContext;
         private readonly Prism.Services.Dialogs.IDialogService _prismDialogs;
         public MainWindowViewModel(IApiWrapperService apiService,
                                    Prism.Services.Dialogs.IDialogService prismDialogs,
                                    IUserConfig userConfig,
-                                   IContext appContext)
+                                   IContext appContext,
+                                   IAppSettings appSettings)
         {
+            _appSettings = appSettings;
             _prismDialogs = prismDialogs;
             _apiService = apiService;
             _userConfig = userConfig;
@@ -102,8 +105,10 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
 
         private void CommandAddTokenExecute()
         {
+            _appSettings.ModalWindowActivated = true;
             _prismDialogs.ShowDialog("AddToken", new Prism.Services.Dialogs.DialogParameters(){
             }, r => {
+                _appSettings.ModalWindowActivated = false;
                 if (r.Result == Prism.Services.Dialogs.ButtonResult.OK)
                 {
                     var name = r.Parameters.GetValue<string>("Name");

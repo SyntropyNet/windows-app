@@ -10,6 +10,7 @@
         mc:Ignorable="d"
         ResizeMode="CanMinimize"
         Title="" Height="475" Width="350"
+        WindowStyle="None"
         Padding="20 10 20 10"
         Closing="OnClose" StateChanged="OnStateChanged" IsVisibleChanged="OnIsVisibleChanged">
     <Window.Resources>
@@ -297,6 +298,7 @@
         <DockPanel HorizontalAlignment="Stretch"
                    VerticalAlignment="Stretch"
                    LastChildFill="True"
+                   Background="{DynamicResource AppMainBrush}"
                     Visibility="{Binding Path=LoggedIn, Converter={StaticResource BoolToVisConverter} }" 
                     Margin="0 0 0 0">
             <DockPanel Margin="15 0 15 0" DockPanel.Dock="Top" HorizontalAlignment="Stretch" Height="50" >
@@ -333,8 +335,9 @@
             </DockPanel>
             <Separator Margin="15 15 15 10" DockPanel.Dock="Top" Background="LightGray"></Separator>
             <!-- Status & Errors-->
-            <StackPanel Margin="15 0 15 0" DockPanel.Dock="Top" Orientation="Vertical">
+            <StackPanel Margin="15 0 15 0" DockPanel.Dock="Top" Orientation="Vertical" HorizontalAlignment="Left">
                 <Label>Status</Label>
+                <ToggleButton Width="40" Height="20"></ToggleButton>
             </StackPanel>
             <Separator Margin="15 15 15 10" DockPanel.Dock="Top" Background="LightGray"></Separator>
             <!-- Host-->
@@ -342,7 +345,7 @@
                 <Label>Host Name</Label>
                 <Label Content="{Binding Host}" Foreground="Gray"></Label>
             </StackPanel>
-            <DockPanel HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="{DynamicResource AppMainBrush}">
+            <DockPanel HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="{DynamicResource AppGrayBrush}" >
                 <Label Margin="15 10 15 0" DockPanel.Dock="Top">Service List</Label>
                 <StackPanel  Margin="15 0 0 0" DockPanel.Dock="Top" 
                             Orientation="Horizontal">

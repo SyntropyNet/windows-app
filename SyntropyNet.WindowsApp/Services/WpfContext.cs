@@ -13,7 +13,7 @@ namespace SyntropyNet.WindowsApp.Services
     public class WpfContext : IContext
     {
         private readonly Dispatcher _dispatcher;
-
+        public bool ModalWindowActivated { get; set; }
         public bool IsSynchronized
         {
             get

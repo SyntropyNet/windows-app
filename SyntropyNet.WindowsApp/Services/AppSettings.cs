@@ -21,5 +21,7 @@ namespace SyntropyNet.WindowsApp.Services
                 return "Sibers";
             }
         }
+
+        public bool ModalWindowActivated { get; set; }
     }
 }

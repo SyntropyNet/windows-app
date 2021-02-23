@@ -17,7 +17,9 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using FontAwesome.WPF;
+using SyntropyNet.WindowsApp.Application.Contracts;
 using SyntropyNet.WindowsApp.Application.Services.ApiWrapper;
+using SyntropyNet.WindowsApp.Helpers;
 using Websocket.Client;
 using Websocket.Client.Exceptions;
 
@@ -28,8 +30,10 @@ namespace SyntropyNet.WindowsApp.Views
     /// </summary>
     public partial class MainWindow : Window
     {
+        #region Tray Icon
         private System.Windows.Forms.NotifyIcon m_notifyIcon;
-        public MainWindow()
+
+        private void PrepareNotifyIcon()
         {
             // Tray Icon setup
             m_notifyIcon = new System.Windows.Forms.NotifyIcon();
@@ -39,15 +43,18 @@ namespace SyntropyNet.WindowsApp.Views
             m_notifyIcon.Icon = new System.Drawing.Icon("syntropy-icon.ico");
             m_notifyIcon.Click += new EventHandler(m_notifyIcon_Click);
 
-            InitializeComponent();
-            BrushConverter bc = new BrushConverter();
-            addTokenBtn.Background = (Brush)bc.ConvertFrom("#0178d4");
-        }
+            var trayMenu = new System.Windows.Forms.ContextMenu();
+            var quitItem = new System.Windows.Forms.MenuItem();
 
-        void OnClose(object sender, CancelEventArgs args)
-        {
-            m_notifyIcon.Dispose();
-            m_notifyIcon = null;
+            // Initialize contextMenu1
+            trayMenu.MenuItems.AddRange(
+                        new System.Windows.Forms.MenuItem[] { quitItem });
+
+            // Initialize menuItem1
+            quitItem.Index = 0;
+            quitItem.Text = "Q&uit";
+            quitItem.Click += new System.EventHandler(TrayQuit_Click);
+            m_notifyIcon.ContextMenu = trayMenu;
         }
 
         private WindowState m_storedWindowState = WindowState.Normal;
@@ -69,6 +76,9 @@ namespace SyntropyNet.WindowsApp.Views
 
         void m_notifyIcon_Click(object sender, EventArgs e)
         {
+            var pos = WindowHelpers.GetWindowPosition(true);
+            this.Left = pos.Item1;
+            this.Top = pos.Item2;
             Show();
             WindowState = m_storedWindowState;
         }
@@ -83,6 +93,27 @@ namespace SyntropyNet.WindowsApp.Views
                 m_notifyIcon.Visible = show;
         }
 
+        #endregion
+        private readonly IAppSettings _appSettings;
+        public MainWindow(IAppSettings appSettings)
+        {
+            _appSettings = appSettings;
+            PrepareNotifyIcon();
+            var pos = WindowHelpers.GetWindowPosition();
+            this.Left = pos.Item1;
+            this.Top = pos.Item2;
+            this.Topmost = true;
+            InitializeComponent();
+            BrushConverter bc = new BrushConverter();
+            addTokenBtn.Background = (Brush)bc.ConvertFrom("#0178d4");
+        }
+
+        void OnClose(object sender, CancelEventArgs args)
+        {
+            m_notifyIcon.Dispose();
+            m_notifyIcon = null;
+        }
+
         private void ImageAwesome_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.ChangedButton == MouseButton.Left)
@@ -93,6 +124,21 @@ namespace SyntropyNet.WindowsApp.Views
                 contextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Left;
                 contextMenu.IsOpen = true;
             }
+        }
+
+        protected override void OnDeactivated(EventArgs e)
+        {
+            base.OnDeactivated(e);
+            if (!_appSettings.ModalWindowActivated)
+            {
+                WindowState = WindowState.Minimized;
+            }
+        }
+
+        private void TrayQuit_Click(object Sender, EventArgs e)
+        {
+            // Close the form, which closes the application.
+            this.Close();
         }
 
         private void Quit_Click(object sender, RoutedEventArgs e)
