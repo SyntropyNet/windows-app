@@ -54,7 +54,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                         return;
                     }
 
-                    //ToDo: Configure Wireguard connection
+                    SetPeers(request);
                 }
                 //If you’re connecting first time you only get internal_ip.
                 //Public_key and listen_port should be created by agent
@@ -78,6 +78,36 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
         public void Interrupt()
         {
             mainTask?.Abort();
+        }
+
+        private void SetPeers(ConfigInfoRequest request)
+        {
+            var @interface = _WGConfigService.GetInterface();
+            List<string> address = new List<string>();
+            if (@interface.Address != null)
+                address = @interface.Address.ToList<string>();
+
+            List<Peer> peers = new List<Peer>();
+
+            if(request.Data.Vpn.Count() > 0)
+            {
+                foreach (var item in request.Data.Vpn)
+                {
+                    if (!address.Contains(item.Args.GwIpv4))
+                        address.Add(item.Args.GwIpv4);
+
+                    peers.Add(new Peer
+                    {
+                        PublicKey = item.Args.PublicKey,
+                        AllowedIPs = item.Args.AllowedIps,
+                        Endpoint = $"{item.Args.EndpointIpv4}:{item.Args.EndpointPort}"
+                    });
+                }
+
+                @interface.Address = address;
+                _WGConfigService.SetInterface(@interface);
+                _WGConfigService.SetPeers(peers);
+            }
         }
 
         private bool CheckPublicKeyAndPort(ConfigInfoRequest request)

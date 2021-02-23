@@ -36,6 +36,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
             config.Interface = @interface;
 
             SetTunnelConfig(config);
+            Add(_tunnelSettings.FileLocation, false);
         }
 
         public Interface GetInterface()
@@ -51,6 +52,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
             config.Peers = peers;
 
             SetTunnelConfig(config);
+            Add(_tunnelSettings.FileLocation, false);
         }
 
         public IEnumerable<Peer> GetPeers()

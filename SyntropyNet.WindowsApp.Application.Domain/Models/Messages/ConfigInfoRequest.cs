@@ -46,7 +46,7 @@ namespace SyntropyNet.WindowsApp.Application.Domain.Models.Messages
     public class VpnConfig
     {
         public string Fn { get; set; }
-        public VpnArgs Ags { get; set; }
+        public VpnArgs Args { get; set; }
         public VpnMetadata Metadata { get; set; }
     }
 
