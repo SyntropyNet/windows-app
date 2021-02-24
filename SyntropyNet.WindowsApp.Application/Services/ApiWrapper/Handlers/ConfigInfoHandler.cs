@@ -107,6 +107,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                 @interface.Address = address;
                 _WGConfigService.SetInterface(@interface);
                 _WGConfigService.SetPeers(peers);
+                _WGConfigService.ApplyChange();
             }
         }
 

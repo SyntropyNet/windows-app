@@ -11,6 +11,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
 {
@@ -36,7 +37,6 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
             config.Interface = @interface;
 
             SetTunnelConfig(config);
-            Add(_tunnelSettings.FileLocation, false);
         }
 
         public Interface GetInterface()
@@ -52,7 +52,12 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
             config.Peers = peers;
 
             SetTunnelConfig(config);
-            Add(_tunnelSettings.FileLocation, false);
+        }
+
+        public void ApplyChange()
+        {
+            Remove(_tunnelSettings.FileLocation, true);
+            Add(_tunnelSettings.FileLocation, true);
         }
 
         public IEnumerable<Peer> GetPeers()

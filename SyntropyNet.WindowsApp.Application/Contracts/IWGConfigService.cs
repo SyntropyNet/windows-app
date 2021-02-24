@@ -16,5 +16,6 @@ namespace SyntropyNet.WindowsApp.Application.Contracts
         IEnumerable<Peer> GetPeers();
         void SetInterface(Interface @interface);
         void SetPeers(IEnumerable<Peer> peers);
+        void ApplyChange();
     }
 }
