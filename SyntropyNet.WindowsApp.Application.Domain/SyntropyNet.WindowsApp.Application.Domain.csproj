@@ -50,6 +50,7 @@
     <Compile Include="Models\Messages\GetInfoRequest.cs" />
     <Compile Include="Models\Messages\GetInfoResponse.cs" />
     <Compile Include="Models\Messages\UpdateAgentConfigRequest.cs" />
+    <Compile Include="Models\Messages\WGConfRequest.cs" />
     <Compile Include="Models\Messages\WGConfResponse.cs" />
     <Compile Include="Models\Messages\WGRouteStatusRequest.cs" />
     <Compile Include="Models\WireGuard\Keypair.cs" />

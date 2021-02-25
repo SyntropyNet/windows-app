@@ -29,6 +29,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
         private AutoPingHandler autoPingHandler;
         private GetInfoHandler getInfoHandler;
         private ConfigInfoHandler configInfoHandler;
+        private WGConfHandler WGConfHandler;
 
         public ApiWrapperService(
             IAppSettings appSettings, 
@@ -131,6 +132,20 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
 
                                 getInfoHandler = new GetInfoHandler(client, _httpRequestService);
                                 getInfoHandler.Start(getInfoRequest);
+
+                                break;
+                           case "WG_CONF":
+                                var WGConfRequest = JsonConvert.DeserializeObject<WGConfRequest>(
+                                    msg.Text, JsonSettings.GetSnakeCaseNamingStrategy());
+
+                                if (WGConfHandler != null)
+                                {
+                                    WGConfHandler.Interrupt();
+                                    WGConfHandler = null;
+                                }
+
+                                WGConfHandler = new WGConfHandler(client, _WGConfigService);
+                                WGConfHandler.Start(WGConfRequest);
 
                                 break;
                             default:

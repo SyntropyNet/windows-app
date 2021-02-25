@@ -17,5 +17,8 @@ namespace SyntropyNet.WindowsApp.Application.Contracts
         void SetInterface(Interface @interface);
         void SetPeers(IEnumerable<Peer> peers);
         void ApplyChange();
+        void CreateConfig();
+        void RemoveConfig();
+        string PathToConfigFile();
     }
 }

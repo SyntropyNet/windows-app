@@ -24,5 +24,19 @@ namespace SyntropyNet.WindowsApp.Application.Domain.Models.WireGuard
         public string PublicKey { get; set; }
         public IEnumerable<string> AllowedIPs { get; set; }
         public string Endpoint { get; set; }
+        public bool Equals(Peer peer)
+        {
+            if (peer.PublicKey != PublicKey)
+                return false;
+            if (peer.Endpoint != Endpoint)
+                return false;
+
+            var list1 = AllowedIPs ?? new List<string>();
+            var list2 = peer.AllowedIPs ?? new List<string>();
+            if (!list1.SequenceEqual(list2))
+                return false;
+
+            return true;
+        }
     }
 }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SyntropyNet.WindowsApp.Application.Domain.Models.Messages
 {
-    class WGRouteStatusRequest : BaseMessage
+    public class WGRouteStatusRequest : BaseMessage
     {
         public WGRouteStatusRequest()
         {

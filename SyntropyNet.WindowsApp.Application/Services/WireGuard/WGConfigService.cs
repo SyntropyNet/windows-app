@@ -60,6 +60,23 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
             Add(_tunnelSettings.FileLocation, true);
         }
 
+        public void CreateConfig()
+        {
+            GenerateNewConfig();
+            Add(_tunnelSettings.FileLocation, true);
+        }
+
+        public void RemoveConfig()
+        {
+            Remove(_tunnelSettings.FileLocation, true);
+            File.Delete(_tunnelSettings.FileLocation);
+        }
+
+        public string PathToConfigFile()
+        {
+            return _tunnelSettings.FileLocation;
+        }
+
         public IEnumerable<Peer> GetPeers()
         {
             TunnelConfig config = GetTunnelConfig();
