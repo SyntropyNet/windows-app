@@ -19,6 +19,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -31,8 +32,32 @@ namespace SyntropyNet.WindowsApp
     /// </summary>
     public partial class App: PrismApplication
     {
+        const uint LOAD_LIBRARY_SEARCH_DEFAULT_DIRS = 0x00001000;
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        static extern bool SetDefaultDllDirectories(uint DirectoryFlags);
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        static extern int AddDllDirectory(string NewDirectory);
+
         protected override void OnStartup(StartupEventArgs e)
         {
+            // Setup correct references to tunnel.dll
+            if (Environment.Is64BitProcess)
+            {
+                SetDefaultDllDirectories(LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
+
+                // Add the directory of the native dll
+                AddDllDirectory("x64");
+            }
+            else
+            {
+                SetDefaultDllDirectories(LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
+
+                // Add the directory of the native dll
+                AddDllDirectory("x86");
+            }
+
             if (e.Args.Any() && e.Args.Contains("/service"))
             {
                 var t = new Thread(() =>
