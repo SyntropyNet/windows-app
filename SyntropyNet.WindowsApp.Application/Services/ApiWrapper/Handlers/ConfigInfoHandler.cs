@@ -32,43 +32,17 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
 
             mainTask = new Thread(async () =>
             {
-                if (request.Data.Vpn.Count() != 0)
+                if (!CheckPublicKeyAndPort(request))
                 {
-                    //If CONFIG_INFO contains public_key, but agent didn’t 
-                    //have private_key anymore, or its out of date,  
-                    //agent should generate new public_key
-                    //If CONFIG_INFO contains listen_port, but you cannot assign 
-                    //anything to this port because its already taken or closed you have to assign new port 
-                    if (!CheckPublicKeyAndPort(request))
-                    {
-                        var message = JsonConvert.SerializeObject(SetPublicKeyAndPort(request), 
-                            JsonSettings.GetSnakeCaseNamingStrategy());
-                        Debug.WriteLine($"Update agent config: {message}");
-                        Client.Send(message);
-
-                        var message2 = JsonConvert.SerializeObject(new GetConfigInfoRequest(),
-                            JsonSettings.GetSnakeCaseNamingStrategy());
-                        Debug.WriteLine($"Get config info: {message2}");
-                        Client.Send(message2);
-
-                        return;
-                    }
-
-                    SetPeers(request);
-                }
-                //If you’re connecting first time you only get internal_ip.
-                //Public_key and listen_port should be created by agent
-                else
-                {
-                    var message = JsonConvert.SerializeObject(SetPublicKeyAndPort(request),
+                    var message = JsonConvert.SerializeObject(SetPublicKeyAndPort(request), 
                         JsonSettings.GetSnakeCaseNamingStrategy());
                     Debug.WriteLine($"Update agent config: {message}");
                     Client.Send(message);
+                }
 
-                    var message2 = JsonConvert.SerializeObject(new GetConfigInfoRequest(),
-                        JsonSettings.GetSnakeCaseNamingStrategy());
-                    Debug.WriteLine($"Get config info: {message2}");
-                    Client.Send(message2);
+                if (request.Data.Vpn.Count() != 0)
+                {
+                    SetPeers(request);
                 }
             });
 
