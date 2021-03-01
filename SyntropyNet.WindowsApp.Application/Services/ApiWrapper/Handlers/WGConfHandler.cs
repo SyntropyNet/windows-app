@@ -151,7 +151,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
 
                     WgPeer.AllowedIPs = allowedIps;
                     _WGConfigService.SetPeers(WgPeers);
-
+                    _WGConfigService.ApplyChange();
                     return;
                 }
             }
@@ -179,6 +179,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
 
             WgPeers.Add(requestPeer);
             _WGConfigService.SetPeers(WgPeers);
+            _WGConfigService.ApplyChange();
         }
 
         private void RemovePeer(WGConfRequestData data)
@@ -191,6 +192,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                 {
                     WgPeers.Remove(WgPeer);
                     _WGConfigService.SetPeers(WgPeers);
+                    _WGConfigService.ApplyChange();
                     return;
                 }
             }
