@@ -42,7 +42,7 @@ namespace SyntropyNet.WindowsApp.Views
             m_notifyIcon.Text = "Syntropy";
             m_notifyIcon.Icon = new System.Drawing.Icon("syntropy-icon.ico");
             m_notifyIcon.Click += new EventHandler(m_notifyIcon_Click);
-
+            m_notifyIcon.Visible = true;
             var trayMenu = new System.Windows.Forms.ContextMenu();
             var quitItem = new System.Windows.Forms.MenuItem();
 
@@ -71,7 +71,7 @@ namespace SyntropyNet.WindowsApp.Views
         }
         void OnIsVisibleChanged(object sender, DependencyPropertyChangedEventArgs args)
         {
-            CheckTrayIcon();
+            //CheckTrayIcon();
         }
 
         void m_notifyIcon_Click(object sender, EventArgs e)
@@ -110,6 +110,7 @@ namespace SyntropyNet.WindowsApp.Views
 
         void OnClose(object sender, CancelEventArgs args)
         {
+            m_notifyIcon.Visible = false;
             m_notifyIcon.Dispose();
             m_notifyIcon = null;
         }
@@ -123,6 +124,14 @@ namespace SyntropyNet.WindowsApp.Views
                 contextMenu.PlacementTarget = rectangle;
                 contextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Left;
                 contextMenu.IsOpen = true;
+            }
+        }
+
+        private void Copy_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if(sender is ImageAwesome)
+            {
+                System.Windows.Forms.Clipboard.SetText((sender as ImageAwesome).ToolTip.ToString());
             }
         }
 

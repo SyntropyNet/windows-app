@@ -13,6 +13,7 @@ using SyntropyNet.WindowsApp.Application.Contracts;
 using SyntropyNet.WindowsApp.Application.Domain.Models;
 using System.Windows.Controls;
 using SyntropyNet.WindowsApp.Application.Helpers;
+using SyntropyNet.WindowsApp.Application.Models;
 
 namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
 {
@@ -22,6 +23,9 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
         private readonly IUserConfig _userConfig;
         private readonly IHttpRequestService _httpRequestService;
         private readonly IWGConfigService _WGConfigService;
+
+        public delegate void ServicesUpdated(IEnumerable<ServiceModel> services);
+        public event ServicesUpdated ServicesUpdatedEvent;
 
         private ManualResetEvent exitEvent { get; set;}
         private bool Running { get; set; }
@@ -118,6 +122,38 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
 
                                 configInfoHandler = new ConfigInfoHandler(client, _WGConfigService);
                                 configInfoHandler.Start(configInfoRequest);
+
+                                // prepare Services Liset
+                                var newServices = new List<ServiceModel>();
+                                foreach(var vpnData in configInfoRequest.Data.Vpn)
+                                {
+                                    if(vpnData.Metadata != null)
+                                    {
+                                        foreach(var service in vpnData.Metadata.AllowedIpsInfo)
+                                        {
+                                            foreach(var tcpPort in service.AgentServiceTcpPorts)
+                                            {
+                                                newServices.Add(new ServiceModel{
+                                                    Name = service.AgentServiceName,
+                                                    Ip = service.AgentServiceSubnetIp,
+                                                    Port = tcpPort.ToString()
+                                                });
+                                            }
+
+                                            foreach (var udpPort in service.AgentServiceUdpPorts)
+                                            {
+                                                newServices.Add(new ServiceModel
+                                                {
+                                                    Name = service.AgentServiceName,
+                                                    Ip = service.AgentServiceSubnetIp,
+                                                    Port = udpPort.ToString()
+                                                });
+                                            }
+                                        }
+                                    }
+                                }
+
+                                ServicesUpdatedEvent?.Invoke(newServices);
 
                                 break;
                             case "GET_INFO":

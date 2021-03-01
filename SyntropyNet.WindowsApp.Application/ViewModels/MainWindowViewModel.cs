@@ -30,15 +30,30 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
             _apiService = apiService;
             _userConfig = userConfig;
             _appContext = appContext;
-            for(var i = 0;i < 20; i++)
-            {
-                Services.Add(new ServiceModel
-                {
-                    Name = $"test {i}",
-                    Ip = $"{i}.1.1.1"
-                });
-            }
+
+            _apiService.ServicesUpdatedEvent += UpdateServices;
+            //for(var i = 0;i < 20; i++)
+            //{
+            //    Services.Add(new ServiceModel
+            //    {
+            //        Name = $"test {i}",
+            //        Ip = $"{i}.1.1.1"
+            //    });
+            //}
             
+        }
+
+        public void UpdateServices(IEnumerable<ServiceModel> services)
+        {
+            if (!_appContext.IsSynchronized)
+            {
+                _appContext.BeginInvoke(UpdateServices, services);
+                return;
+            }
+
+            Services.Clear();
+            Services.AddRange(services);
+
         }
 
         public ObservableCollection<ServiceModel> Services{ get; private set; } = new ObservableCollection<ServiceModel>();
