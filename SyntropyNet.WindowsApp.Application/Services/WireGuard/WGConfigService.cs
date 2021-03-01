@@ -110,7 +110,9 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
                         .AppendLine(
                             TunnelConfigConstants.ALLOWED_IPs + String.Join(",", item.AllowedIPs))
                         .AppendLine(
-                            TunnelConfigConstants.ENDPOINT + item.Endpoint);
+                            TunnelConfigConstants.ENDPOINT + item.Endpoint)
+                        .AppendLine(
+                            TunnelConfigConstants.PERSISTEN_KEEPALIVE);
                 }
             }
 

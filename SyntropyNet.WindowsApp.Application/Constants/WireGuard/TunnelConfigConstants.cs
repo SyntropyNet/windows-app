@@ -14,5 +14,6 @@ namespace SyntropyNet.WindowsApp.Application.Constants.WireGuard
         public const string ADDRESS = "Address = ";
         public const string ALLOWED_IPs = "AllowedIPs = ";
         public const string ENDPOINT = "Endpoint = ";
+        public const string PERSISTEN_KEEPALIVE = "PersistentKeepalive = 15";
     }
 }
