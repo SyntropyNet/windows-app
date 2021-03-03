@@ -23,6 +23,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
         private readonly IUserConfig _userConfig;
         private readonly IHttpRequestService _httpRequestService;
         private readonly IWGConfigService _WGConfigService;
+        private readonly IDockerApiService _dockerApiService;
 
         public delegate void ServicesUpdated(IEnumerable<ServiceModel> services);
         public event ServicesUpdated ServicesUpdatedEvent;
@@ -39,12 +40,14 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
             IAppSettings appSettings, 
             IUserConfig userConfig,
             IHttpRequestService httpRequestService,
-            IWGConfigService WGConfigService)
+            IWGConfigService WGConfigService,
+            IDockerApiService dockerApiService)
         {
             _appSettings = appSettings;
             _userConfig = userConfig;
             _httpRequestService = httpRequestService;
             _WGConfigService = WGConfigService;
+            _dockerApiService = dockerApiService;
         }
 
         public void Run(Action<WSConnectionResponse> callback)
@@ -166,7 +169,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                                     getInfoHandler = null;
                                 }
 
-                                getInfoHandler = new GetInfoHandler(client, _httpRequestService);
+                                getInfoHandler = new GetInfoHandler(client, _httpRequestService, _dockerApiService);
                                 getInfoHandler.Start(getInfoRequest);
 
                                 break;

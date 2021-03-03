@@ -3,6 +3,7 @@ using SyntropyNet.WindowsApp.Application.Constants;
 using SyntropyNet.WindowsApp.Application.Contracts;
 using SyntropyNet.WindowsApp.Application.Domain.Models.Messages;
 using SyntropyNet.WindowsApp.Application.Helpers;
+using SyntropyNet.WindowsApp.Application.Services.DockerApi;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -17,12 +18,16 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
     class GetInfoHandler : BaseHandler
     {
         private readonly IHttpRequestService _httpRequestService;
+        private readonly IDockerApiService _dockerApiService;
         private Thread mainTask;
 
-        public GetInfoHandler(WebsocketClient client, IHttpRequestService httpRequestService) 
+        public GetInfoHandler(WebsocketClient client, 
+            IHttpRequestService httpRequestService,
+            IDockerApiService dockerApiService) 
             : base(client)
         {
             _httpRequestService = httpRequestService;
+            _dockerApiService = dockerApiService;
         }
 
         public void Start(GetInfoRequest request)
@@ -60,8 +65,8 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
 
         private IEnumerable<ContainerInfo> GetContainerInfo()
         {
-            //ToDo: Need to implement the GetContainerInfo method
-            return null;
+            var test = _dockerApiService.GetContainers();
+            return _dockerApiService.GetContainers();
         }
 
         private string GetExternalIp()

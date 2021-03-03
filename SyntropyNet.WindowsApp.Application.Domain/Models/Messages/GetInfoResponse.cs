@@ -32,6 +32,14 @@ namespace SyntropyNet.WindowsApp.Application.Domain.Models.Messages
 
     public class ContainerInfo
     {
+        public ContainerInfo()
+        {
+            AgentContainerNetworks = new List<string>();
+            AgentContainerIps = new List<string>();
+            AgentContainerSubnets = new List<string>();
+            AgentContainerPorts = new AgentContainerPorts();
+        }
+
         public string AgentContainerId { get; set; }
         public string AgentContainerName { get; set; }
         public IEnumerable<string> AgentContainerNetworks { get; set; }
@@ -44,6 +52,12 @@ namespace SyntropyNet.WindowsApp.Application.Domain.Models.Messages
 
     public class AgentContainerPorts
     {
+        public AgentContainerPorts()
+        {
+            Udp = new List<int>();
+            Tcp = new List<int>();
+        }
+
         public IEnumerable<int> Udp { get; set; }
         public IEnumerable<int> Tcp { get; set; }
     }

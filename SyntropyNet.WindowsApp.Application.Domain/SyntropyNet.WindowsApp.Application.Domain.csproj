@@ -42,6 +42,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Enums\WSConnectionState.cs" />
+    <Compile Include="Models\DockerApi\DataFromInspectCommand.cs" />
     <Compile Include="Models\Messages\AutoPingRequest.cs" />
     <Compile Include="Models\Messages\AutoPingResponse.cs" />
     <Compile Include="Models\Messages\BaseMessage.cs" />

@@ -6,6 +6,7 @@ using SyntropyNet.WindowsApp.Application.Contracts;
 using SyntropyNet.WindowsApp.Application.Domain.Models.WireGuard;
 using SyntropyNet.WindowsApp.Application.Services;
 using SyntropyNet.WindowsApp.Application.Services.ApiWrapper;
+using SyntropyNet.WindowsApp.Application.Services.DockerApi;
 using SyntropyNet.WindowsApp.Application.Services.HttpRequest;
 using SyntropyNet.WindowsApp.Application.Services.WireGuard;
 using SyntropyNet.WindowsApp.Application.ViewModels;
@@ -104,6 +105,7 @@ namespace SyntropyNet.WindowsApp
             containerRegistry.RegisterSingleton<IUserConfig, UserConfig>();
             containerRegistry.RegisterSingleton<IApiWrapperService, ApiWrapperService>();
             containerRegistry.RegisterSingleton<IHttpRequestService, HttpRequestService>();
+            containerRegistry.RegisterSingleton<IDockerApiService, DockerApiService>();
             containerRegistry.RegisterInstance(new TunnelSettings(
                 WireGuardConstants.CONFIG_FILE_LOCATION, WireGuardConstants.INTERFACE_NAME));
             containerRegistry.RegisterSingleton<IWGConfigService, WGConfigService>();
