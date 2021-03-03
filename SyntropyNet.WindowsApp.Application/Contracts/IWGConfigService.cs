@@ -11,7 +11,9 @@ namespace SyntropyNet.WindowsApp.Application.Contracts
     {
         string InterfaceName { get; }
         string PublicKey { get; }
-
+        bool ActivityState { get; }
+        void RunWG();
+        void StopWG();
         Interface GetInterface();
         IEnumerable<Peer> GetPeers();
         void SetInterface(Interface @interface);

@@ -30,6 +30,51 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
 
         public string PublicKey { get; private set; }
         public string InterfaceName { get; }
+        public bool ActivityState { 
+            get
+            {
+                var tunnelName = Path.GetFileNameWithoutExtension(_tunnelSettings.FileLocation);
+                var shortName = String.Format("WireGuardTunnel${0}", tunnelName);
+
+                var scm = Win32.OpenSCManager(null, null, Win32.ScmAccessRights.QueryLockStatus);
+                if (scm == IntPtr.Zero)
+                {
+                    Win32.CloseServiceHandle(scm);
+                    return false;
+                }
+
+                var service = Win32.OpenService(scm, shortName, Win32.ServiceAccessRights.QueryStatus);
+                if (service == IntPtr.Zero)
+                {
+                    Win32.CloseServiceHandle(service);
+                    return false;
+                }
+
+                var serviceStatus = new Win32.ServiceStatus();
+                Win32.QueryServiceStatus(service, serviceStatus);
+
+                if (serviceStatus.dwCurrentState == Win32.ServiceState.Running)
+                {
+                    Win32.CloseServiceHandle(service);
+                    return true;
+                }
+                else
+                {
+                    Win32.CloseServiceHandle(service);
+                    return false;
+                }
+            }
+        }
+
+        public void RunWG()
+        {
+            Add(_tunnelSettings.FileLocation, true);
+        }
+
+        public void StopWG()
+        {
+            Remove(_tunnelSettings.FileLocation, true);
+        } 
 
         public void SetInterface(Interface @interface)
         {
