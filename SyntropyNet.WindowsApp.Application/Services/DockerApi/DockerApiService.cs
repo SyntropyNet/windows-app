@@ -36,6 +36,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.DockerApi
             startinfo.RedirectStandardOutput = true;
             startinfo.UseShellExecute = false;
             startinfo.CreateNoWindow = true;
+            startinfo.RedirectStandardError = true;
 
             process.StartInfo = startinfo;
             process.OutputDataReceived += (s, e) =>
@@ -68,6 +69,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.DockerApi
                 startinfo.RedirectStandardOutput = true;
                 startinfo.UseShellExecute = false;
                 startinfo.CreateNoWindow = true;
+                startinfo.RedirectStandardError = true;
 
                 process.StartInfo = startinfo;
                 process.OutputDataReceived += (s, e) =>
@@ -120,6 +122,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.DockerApi
                 startinfo.RedirectStandardOutput = true;
                 startinfo.UseShellExecute = false;
                 startinfo.CreateNoWindow = true;
+                startinfo.RedirectStandardError = true;
 
                 process.StartInfo = startinfo;
                 process.OutputDataReceived += (s, e) =>
