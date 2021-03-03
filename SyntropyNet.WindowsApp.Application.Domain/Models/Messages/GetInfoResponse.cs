@@ -30,7 +30,7 @@ namespace SyntropyNet.WindowsApp.Application.Domain.Models.Messages
         public IEnumerable<ContainerInfo> ContainerInfo { get; set; }
     }
 
-    public class ContainerInfo
+    public class ContainerInfo : IEquatable<ContainerInfo>
     {
         public ContainerInfo()
         {
@@ -48,6 +48,30 @@ namespace SyntropyNet.WindowsApp.Application.Domain.Models.Messages
         public AgentContainerPorts AgentContainerPorts { get; set; }
         public string AgentContainerState { get; set; }
         public string AgentContainerUptime { get; set; }
+
+        public bool Equals(ContainerInfo containerInfo)
+        {
+            if (containerInfo.AgentContainerId != AgentContainerId)
+                return false;
+            if (containerInfo.AgentContainerName != AgentContainerName)
+                return false;
+            if (!containerInfo.AgentContainerNetworks.SequenceEqual(AgentContainerNetworks))
+                return false;
+            if (!containerInfo.AgentContainerIps.SequenceEqual(AgentContainerIps))
+                return false;
+            if (!containerInfo.AgentContainerSubnets.SequenceEqual(AgentContainerSubnets))
+                return false;
+
+            if (!containerInfo.AgentContainerPorts.Equals(AgentContainerPorts))
+                return false;
+
+            if (containerInfo.AgentContainerState != AgentContainerState)
+                return false;
+            if (containerInfo.AgentContainerUptime != AgentContainerUptime)
+                return false;
+
+            return true;
+        }
     }
 
     public class AgentContainerPorts
@@ -60,5 +84,15 @@ namespace SyntropyNet.WindowsApp.Application.Domain.Models.Messages
 
         public IEnumerable<int> Udp { get; set; }
         public IEnumerable<int> Tcp { get; set; }
+
+        public bool Equals(AgentContainerPorts agentContainerPorts)
+        {
+            if (!agentContainerPorts.Udp.SequenceEqual(Udp))
+                return false;
+            if (!agentContainerPorts.Udp.SequenceEqual(Udp))
+                return false;
+
+            return true;
+        }
     }
 }

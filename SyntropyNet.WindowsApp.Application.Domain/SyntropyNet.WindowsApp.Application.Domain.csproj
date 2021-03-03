@@ -47,6 +47,7 @@
     <Compile Include="Models\Messages\AutoPingResponse.cs" />
     <Compile Include="Models\Messages\BaseMessage.cs" />
     <Compile Include="Models\Messages\ConfigInfoRequest.cs" />
+    <Compile Include="Models\Messages\ContainerInfoRequest.cs" />
     <Compile Include="Models\Messages\GetConfigInfoRequest.cs" />
     <Compile Include="Models\Messages\GetInfoRequest.cs" />
     <Compile Include="Models\Messages\GetInfoResponse.cs" />

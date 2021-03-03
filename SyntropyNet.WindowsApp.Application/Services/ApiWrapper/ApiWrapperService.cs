@@ -35,6 +35,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
         private GetInfoHandler getInfoHandler;
         private ConfigInfoHandler configInfoHandler;
         private WGConfHandler WGConfHandler;
+        private ContainerInfoHandler containerInfoHandler;
 
         public ApiWrapperService(
             IAppSettings appSettings, 
@@ -222,6 +223,16 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                         State = Domain.Enums.WSConnectionState.Connected
                     });
                     Debug.WriteLine($"WebSocket connection started");
+
+                    if (containerInfoHandler != null)
+                    {
+                        containerInfoHandler.Interrupt();
+                        containerInfoHandler = null;
+                    }
+
+                    containerInfoHandler = new ContainerInfoHandler(client, _dockerApiService);
+                    containerInfoHandler.Start();
+
                     exitEvent.WaitOne();
                     Debug.WriteLine($"Connection finished");
 
