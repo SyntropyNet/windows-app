@@ -14,6 +14,7 @@ using SyntropyNet.WindowsApp.Application.Domain.Models;
 using System.Windows.Controls;
 using SyntropyNet.WindowsApp.Application.Helpers;
 using SyntropyNet.WindowsApp.Application.Models;
+using System.Web.Configuration;
 
 namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
 {
@@ -27,6 +28,9 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
 
         public delegate void ServicesUpdated(IEnumerable<ServiceModel> services);
         public event ServicesUpdated ServicesUpdatedEvent;
+
+        public delegate void Disconnected(DisconnectionType type, string error);
+        public event Disconnected DisconnectedEvent;
 
         private ManualResetEvent exitEvent { get; set;}
         private bool Running { get; set; }
@@ -56,6 +60,10 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
             if (Running)
             {
                 // Already started
+                callback?.Invoke(new WSConnectionResponse
+                {
+                    State = Domain.Enums.WSConnectionState.Connected
+                });
                 return;
             }
             if(!_userConfig.IsAuthenticated || String.IsNullOrEmpty(_userConfig.AgentToken))
@@ -80,7 +88,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                     };
                     wsCLient.Options.SetRequestHeader("Authorization", _userConfig.AgentToken);
                     wsCLient.Options.SetRequestHeader("X-DeviceId", _appSettings.DeviceId);
-                    wsCLient.Options.SetRequestHeader("X-DeviceName", _userConfig.DeviceName);
+                    wsCLient.Options.SetRequestHeader("X-DeviceName", _appSettings.DeviceName);
                     wsCLient.Options.SetRequestHeader("X-AgentVersion", _appSettings.AgentVersion);
 
                     return wsCLient;
@@ -192,9 +200,11 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                                 return;
                         }
                     });
+
                     client.DisconnectionHappened.Subscribe(x =>
                     {
                         Debug.WriteLine($"Disconnect: {x.Type}");
+                        DisconnectedEvent?.Invoke(x.Type, x.Exception?.Message);
                         exitEvent.Set();
                     });
 
@@ -234,6 +244,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                     containerInfoHandler.Start();
 
                     exitEvent.WaitOne();
+                    //await client.Stop(WebSocketCloseStatus.NormalClosure,string.Empty);
                     Debug.WriteLine($"Connection finished");
 
                 }
@@ -253,6 +264,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                 autoPingHandler.Interrupt();
                 autoPingHandler = null;
             }
+            _WGConfigService.StopWG();
             Running = false;
         }
     }

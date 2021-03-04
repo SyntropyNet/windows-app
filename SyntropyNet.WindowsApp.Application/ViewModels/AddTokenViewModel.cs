@@ -145,6 +145,26 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
             }
         }
 
+        private bool _isEnabled1 = false;
+        public bool IsEnabled1
+        {
+            get { return _isEnabled1; }
+            set
+            {
+                SetProperty(ref _isEnabled1, value);
+            }
+        }
+
+        private bool _isChecked = true;
+        public bool IsChecked
+        {
+            get { return _isChecked; }
+            set
+            {
+                SetProperty(ref _isChecked, value);
+            }
+        }
+
         public event Action<IDialogResult> RequestClose;
 
         private DelegateCommand<string> _closeDialogCommand;

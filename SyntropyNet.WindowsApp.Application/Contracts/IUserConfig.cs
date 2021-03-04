@@ -9,7 +9,7 @@ namespace SyntropyNet.WindowsApp.Application.Contracts
     public interface IUserConfig
     {
         bool IsAuthenticated { get; set; }
-        string DeviceName { get; set; }
+        string TokenName { get; set; }
         string AgentToken { get; set; }
 
         void Authenticate(string deviceName, string agentToken);

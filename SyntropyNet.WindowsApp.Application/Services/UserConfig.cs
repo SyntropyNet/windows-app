@@ -10,20 +10,20 @@ namespace SyntropyNet.WindowsApp.Application.Services
     public class UserConfig: IUserConfig
     {
         public bool IsAuthenticated { get; set; }
-        public string DeviceName { get; set; }
+        public string TokenName { get; set; }
         public string AgentToken { get; set; }
 
         public void Authenticate(string deviceName, string agentToken)
         {
             IsAuthenticated = true;
-            DeviceName = deviceName;
+            TokenName = deviceName;
             AgentToken = agentToken;
         }
 
         public void Quit()
         {
             IsAuthenticated = false;
-            DeviceName = string.Empty;
+            TokenName = string.Empty;
             AgentToken = string.Empty;
         }
     }

@@ -11,7 +11,7 @@ namespace SyntropyNet.WindowsApp.Application.Contracts
         string ControllerUrl { get; }
         string AgentVersion { get; }
         string DeviceId { get; }
-
+        string DeviceName { get; }
         bool ModalWindowActivated { get; set; }
     }
 }

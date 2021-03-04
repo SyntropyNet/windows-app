@@ -1,4 +1,5 @@
-﻿using Prism.Ioc;
+﻿using log4net;
+using Prism.Ioc;
 using Prism.Mvvm;
 using Prism.Unity;
 using SyntropyNet.WindowsApp.Application.Constants.WireGuard;
@@ -33,6 +34,8 @@ namespace SyntropyNet.WindowsApp
     /// </summary>
     public partial class App: PrismApplication
     {
+        private static readonly ILog log = LogManager.GetLogger(typeof(App));
+
         const uint LOAD_LIBRARY_SEARCH_DEFAULT_DIRS = 0x00001000;
 
         [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
@@ -43,6 +46,7 @@ namespace SyntropyNet.WindowsApp
 
         protected override void OnStartup(StartupEventArgs e)
         {
+            log4net.Config.XmlConfigurator.Configure();
             // Setup correct references to tunnel.dll
             if (Environment.Is64BitProcess)
             {
@@ -61,6 +65,7 @@ namespace SyntropyNet.WindowsApp
 
             if (e.Args.Any() && e.Args.Contains("/service"))
             {
+                log.Info("Started as Service");
                 var t = new Thread(() =>
                 {
                     try
@@ -79,7 +84,7 @@ namespace SyntropyNet.WindowsApp
                 t.Interrupt();
                 return;
             }
-
+            log.Info("Started as Desktop App");
             base.OnStartup(e);
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
             this.Dispatcher.UnhandledException += App_DispatcherUnhandledException;
@@ -91,10 +96,12 @@ namespace SyntropyNet.WindowsApp
             // Process unhandled exception
             // Prevent default unhandled exception processing
             e.Handled = true;
+            log.Error($"Unhandled Exception. {e.Exception.Message}",e.Exception);
         }
 
         private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
+            log.Error($"Unhandled Exception. {(e.ExceptionObject as Exception).Message}", e.ExceptionObject as Exception);
         }
 
         protected override void RegisterTypes(IContainerRegistry containerRegistry)

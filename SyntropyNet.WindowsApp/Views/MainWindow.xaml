@@ -337,7 +337,19 @@
             <!-- Status & Errors-->
             <StackPanel Margin="15 0 15 0" DockPanel.Dock="Top" Orientation="Vertical" HorizontalAlignment="Left">
                 <Label>Status</Label>
-                <ToggleButton Width="40" Height="20"></ToggleButton>
+                <StackPanel Orientation="Horizontal" Visibility="{Binding StatusVisible, Converter={StaticResource BoolToVisConverter} }" IsEnabled="{Binding OnoffEnabled}">
+                    <ToggleButton Width="40" Height="20" IsChecked="{Binding Started}"></ToggleButton>
+                    <fa:ImageAwesome Icon="CircleOutlineNotch" Spin="True"
+                             SpinDuration="2" Width="18" Height="18"
+                             Visibility="{Binding Path=Loading, Converter={StaticResource BoolToVisConverter} }" 
+                             Margin="5 0 5 0" Foreground="LightSkyBlue" />
+                    <Label Content="{Binding Status}"></Label>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Visibility="{Binding ErrorVisible, Converter={StaticResource BoolToVisConverter} }">
+                    <fa:ImageAwesome Icon="ExclamationTriangle" Foreground="DarkRed" Width="14" Height="14" Margin="10 0 0 0" >
+                    </fa:ImageAwesome>
+                    <Label Content="{Binding Error}"></Label>
+                </StackPanel>
             </StackPanel>
             <Separator Margin="15 15 15 10" DockPanel.Dock="Top" Background="LightGray"></Separator>
             <!-- Host-->

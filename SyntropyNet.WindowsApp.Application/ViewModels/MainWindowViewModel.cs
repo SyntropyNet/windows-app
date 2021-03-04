@@ -1,6 +1,7 @@
 ﻿using Prism.Commands;
 using Prism.Mvvm;
 using SyntropyNet.WindowsApp.Application.Contracts;
+using SyntropyNet.WindowsApp.Application.Domain.Models;
 using SyntropyNet.WindowsApp.Application.Models;
 using SyntropyNet.WindowsApp.Application.Services.ApiWrapper;
 using System;
@@ -9,6 +10,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Websocket.Client;
 
 namespace SyntropyNet.WindowsApp.Application.ViewModels
 {
@@ -19,6 +21,9 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
         private readonly IUserConfig _userConfig;
         private readonly IContext _appContext;
         private readonly Prism.Services.Dialogs.IDialogService _prismDialogs;
+
+        private bool _autoDisconnection = false;
+
         public MainWindowViewModel(IApiWrapperService apiService,
                                    Prism.Services.Dialogs.IDialogService prismDialogs,
                                    IUserConfig userConfig,
@@ -32,15 +37,69 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
             _appContext = appContext;
 
             _apiService.ServicesUpdatedEvent += UpdateServices;
-            //for(var i = 0;i < 20; i++)
-            //{
-            //    Services.Add(new ServiceModel
-            //    {
-            //        Name = $"test {i}",
-            //        Ip = $"{i}.1.1.1"
-            //    });
-            //}
-            
+            _apiService.DisconnectedEvent += Disconnected;
+
+            Host = _appSettings.DeviceName;
+        }
+
+        public void Disconnected(DisconnectionType type, string error)
+        {
+            if (!_appContext.IsSynchronized)
+            {
+                ApiWrapperService.Disconnected methodDelegate = Disconnected;
+                _appContext.BeginInvoke(methodDelegate, type, error);
+                return;
+            }
+            _autoDisconnection = true;
+            Started = false;
+            if(type == DisconnectionType.Error)
+            {
+                ShowError(error);
+            }
+        }
+
+        private void ShowError(string error)
+        {
+            if (!_appContext.IsSynchronized)
+            {
+                _appContext.BeginInvoke(ShowError,  error);
+                return;
+            }
+            Error = error;
+            ErrorVisible = true;
+        }
+
+        private void StopLoading()
+        {
+            if (!_appContext.IsSynchronized)
+            {
+                _appContext.BeginInvoke(StopLoading);
+                return;
+            }
+            Loading = false;
+            OnoffEnabled = true;
+        }
+
+        private void SetDisconnected()
+        {
+            if (!_appContext.IsSynchronized)
+            {
+                _appContext.BeginInvoke(SetDisconnected);
+                return;
+            }
+            _autoDisconnection = true;
+            Started = false;
+        }
+
+        private void SetConnected()
+        {
+            if (!_appContext.IsSynchronized)
+            {
+                _appContext.BeginInvoke(SetConnected);
+                return;
+            }
+            Status = "Connected";
+            Started = true;
         }
 
         public void UpdateServices(IEnumerable<ServiceModel> services)
@@ -71,6 +130,60 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
             }
         }
 
+        private bool _started = true;
+        public bool Started
+        {
+            get { return _started; }
+            set
+            {
+                if(SetProperty(ref _started, value))
+                {
+                    if (value)
+                    {
+                        OnoffEnabled = false;
+                        Status = string.Empty;
+                        Loading = true;
+                        Connect();
+                    }
+                    else
+                    {
+                        Status = "Disconnected";
+                        if (!_autoDisconnection)
+                        {
+                            Task.Run(() => {
+                                _apiService.Stop();
+                            });
+                        }
+                        _autoDisconnection = false;
+                    }
+                }
+            }
+        }
+
+        private bool _errorVisible = false;
+        public bool ErrorVisible
+        {
+            get { return _errorVisible; }
+            set
+            {
+                if(SetProperty(ref _errorVisible, value))
+                {
+                    StatusVisible = !value;
+                }
+            }
+        }
+
+        private bool _statusVisible = true;
+        public bool StatusVisible
+        {
+            get { return _statusVisible; }
+            set
+            {
+                SetProperty(ref _statusVisible, value);
+            }
+        }
+
+
         private bool _addTokenVisible = true;
         public bool AddTokenVisible
         {
@@ -91,7 +204,27 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
             }
         }
 
-        private string _host = "Test";
+        private string _error = string.Empty;
+        public string Error
+        {
+            get { return _error; }
+            set
+            {
+                SetProperty(ref _error, value);
+            }
+        }
+
+        private string _status = "Connected";
+        public string Status
+        {
+            get { return _status; }
+            set
+            {
+                SetProperty(ref _status, value);
+            }
+        }
+
+        private string _host = string.Empty;
         public string Host
         {
             get { return _host; }
@@ -99,6 +232,49 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
             {
                 SetProperty(ref _host, value);
             }
+        }
+
+        private bool _loading = false;
+        public bool Loading
+        {
+            get { return _loading; }
+            set
+            {
+                if (SetProperty(ref _loading, value))
+                {
+                }
+            }
+        }
+
+        private bool _onoffEnabled= true;
+        public bool OnoffEnabled
+        {
+            get { return _onoffEnabled; }
+            set
+            {
+                if (SetProperty(ref _onoffEnabled, value))
+                {
+                }
+            }
+        }
+
+        private void Connect()
+        {
+            Task.Run(() => {
+                _apiService.Run((WSConnectionResponse response) =>
+                {
+                    StopLoading();
+                    if (response.State == Domain.Enums.WSConnectionState.Failed)
+                    {
+                        SetDisconnected();
+                        ShowError(response.Error);
+                    }
+                    else
+                    {
+                        SetConnected();
+                    }
+                });
+            });
         }
 
         private DelegateCommand _commandLogout = null;

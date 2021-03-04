@@ -11,6 +11,7 @@ namespace SyntropyNet.WindowsApp.Application.Contracts
     public interface IApiWrapperService
     {
         event ServicesUpdated ServicesUpdatedEvent;
+        event Disconnected DisconnectedEvent;
         void Run(Action<WSConnectionResponse> callback);
         void Stop();
     }

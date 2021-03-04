@@ -30,6 +30,7 @@ namespace SyntropyNet.WindowsApp.Services
                 // ToDo :: log exception if internet is not available
             }
             _deviceId = productId ?? $"{System.Environment.MachineName}-{extIp}";
+            _deviceName = System.Environment.MachineName;
         }
 
         public string ControllerUrl => ConfigurationManager.AppSettings["ControllerUrl"];
@@ -42,6 +43,15 @@ namespace SyntropyNet.WindowsApp.Services
             get
             {
                 return _deviceId;
+            }
+        }
+
+        private string _deviceName = string.Empty;
+        public string DeviceName
+        {
+            get
+            {
+                return _deviceName;
             }
         }
 
