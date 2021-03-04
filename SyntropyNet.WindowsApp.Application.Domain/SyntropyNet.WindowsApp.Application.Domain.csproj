@@ -51,6 +51,7 @@
     <Compile Include="Models\Messages\GetConfigInfoRequest.cs" />
     <Compile Include="Models\Messages\GetInfoRequest.cs" />
     <Compile Include="Models\Messages\GetInfoResponse.cs" />
+    <Compile Include="Models\Messages\IfaceBWDataRequest.cs" />
     <Compile Include="Models\Messages\UpdateAgentConfigRequest.cs" />
     <Compile Include="Models\Messages\WGConfRequest.cs" />
     <Compile Include="Models\Messages\WGConfResponse.cs" />

@@ -9,6 +9,7 @@ using SyntropyNet.WindowsApp.Application.Services;
 using SyntropyNet.WindowsApp.Application.Services.ApiWrapper;
 using SyntropyNet.WindowsApp.Application.Services.DockerApi;
 using SyntropyNet.WindowsApp.Application.Services.HttpRequest;
+using SyntropyNet.WindowsApp.Application.Services.NetworkInformation;
 using SyntropyNet.WindowsApp.Application.Services.WireGuard;
 using SyntropyNet.WindowsApp.Application.ViewModels;
 using SyntropyNet.WindowsApp.Services;
@@ -116,6 +117,7 @@ namespace SyntropyNet.WindowsApp
             containerRegistry.RegisterInstance(new TunnelSettings(
                 WireGuardConstants.CONFIG_FILE_LOCATION, WireGuardConstants.INTERFACE_NAME));
             containerRegistry.RegisterSingleton<IWGConfigService, WGConfigService>();
+            containerRegistry.RegisterSingleton<INetworkInformationService, NetworkInformationService>();
             containerRegistry.RegisterDialog<AddToken, AddTokenViewModel>();
         }
 

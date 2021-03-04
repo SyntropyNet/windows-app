@@ -99,6 +99,7 @@
     <Compile Include="Contracts\IContext.cs" />
     <Compile Include="Contracts\IDockerApiService.cs" />
     <Compile Include="Contracts\IHttpRequestService.cs" />
+    <Compile Include="Contracts\INetworkInformationService.cs" />
     <Compile Include="Contracts\IUserConfig.cs" />
     <Compile Include="Contracts\IWGConfigService.cs" />
     <Compile Include="Models\ServiceModel.cs" />
@@ -110,9 +111,11 @@
     <Compile Include="Services\ApiWrapper\Handlers\ConfigInfoHandler.cs" />
     <Compile Include="Services\ApiWrapper\Handlers\ContainerInfoHandler.cs" />
     <Compile Include="Services\ApiWrapper\Handlers\GetInfoHandler.cs" />
+    <Compile Include="Services\ApiWrapper\Handlers\IfaceBWDataHandler.cs" />
     <Compile Include="Services\ApiWrapper\Handlers\WGConfHandler.cs" />
     <Compile Include="Services\DockerApi\DockerApiService.cs" />
     <Compile Include="Services\HttpRequest\HttpRequestService.cs" />
+    <Compile Include="Services\NetworkInformation\NetworkInformationService.cs" />
     <Compile Include="Services\UserConfig.cs" />
     <Compile Include="Services\WireGuard\WGConfigService.cs" />
     <Compile Include="Services\WireGuard\Win32.cs" />

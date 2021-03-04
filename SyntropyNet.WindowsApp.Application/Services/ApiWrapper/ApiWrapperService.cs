@@ -28,6 +28,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
         private readonly IHttpRequestService _httpRequestService;
         private readonly IWGConfigService _WGConfigService;
         private readonly IDockerApiService _dockerApiService;
+        private readonly INetworkInformationService _networkInformationService;
 
         public delegate void ServicesUpdated(IEnumerable<ServiceModel> services);
         public event ServicesUpdated ServicesUpdatedEvent;
@@ -46,19 +47,22 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
         private ConfigInfoHandler configInfoHandler;
         private WGConfHandler WGConfHandler;
         private ContainerInfoHandler containerInfoHandler;
+        private IfaceBWDataHandler ifaceBWDataHandler;
 
         public ApiWrapperService(
             IAppSettings appSettings, 
             IUserConfig userConfig,
             IHttpRequestService httpRequestService,
             IWGConfigService WGConfigService,
-            IDockerApiService dockerApiService)
+            IDockerApiService dockerApiService,
+            INetworkInformationService networkInformationService)
         {
             _appSettings = appSettings;
             _userConfig = userConfig;
             _httpRequestService = httpRequestService;
             _WGConfigService = WGConfigService;
             _dockerApiService = dockerApiService;
+            _networkInformationService = networkInformationService;
         }
 
         public void Run(Action<WSConnectionResponse> callback)
@@ -290,6 +294,15 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
 
                     containerInfoHandler = new ContainerInfoHandler(client, _dockerApiService);
                     containerInfoHandler.Start();
+
+                    if (ifaceBWDataHandler != null)
+                    {
+                        ifaceBWDataHandler.Interrupt();
+                        ifaceBWDataHandler = null;
+                    }
+
+                    ifaceBWDataHandler = new IfaceBWDataHandler(client, _networkInformationService);
+                    ifaceBWDataHandler.Start();
 
                     exitEvent.WaitOne();
                     //await client.Stop(WebSocketCloseStatus.NormalClosure,string.Empty);
