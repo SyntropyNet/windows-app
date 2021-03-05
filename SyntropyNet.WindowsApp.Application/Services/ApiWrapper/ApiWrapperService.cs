@@ -354,6 +354,11 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                 containerInfoHandler.Interrupt();
                 containerInfoHandler = null;
             }
+            if (ifacesPeersBWDataHandler != null)
+            {
+                ifacesPeersBWDataHandler.Interrupt();
+                ifacesPeersBWDataHandler = null;
+            }
             _WGConfigService.StopWG();
             Running = false;
         }
