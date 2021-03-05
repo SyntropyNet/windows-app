@@ -15,11 +15,14 @@ using System.Windows.Controls;
 using SyntropyNet.WindowsApp.Application.Helpers;
 using SyntropyNet.WindowsApp.Application.Models;
 using System.Web.Configuration;
+using log4net;
 
 namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
 {
     public class ApiWrapperService: IApiWrapperService
     {
+        private static readonly ILog log = LogManager.GetLogger(typeof(ApiWrapperService));
+
         private readonly IAppSettings _appSettings;
         private readonly IUserConfig _userConfig;
         private readonly IHttpRequestService _httpRequestService;
@@ -248,6 +251,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                     client.DisconnectionHappened.Subscribe(x =>
                     {
                         Debug.WriteLine($"Disconnect: {x.Type}");
+                        log.Info($"Disconnected: {x.Type}. {x.Exception?.Message ?? string.Empty}");
                         DisconnectedEvent?.Invoke(x.Type, x.Exception?.Message);
                         exitEvent.Set();
                     });
