@@ -348,7 +348,7 @@
                 <StackPanel Orientation="Horizontal" Visibility="{Binding ErrorVisible, Converter={StaticResource BoolToVisConverter} }">
                     <fa:ImageAwesome Icon="ExclamationTriangle" Foreground="DarkRed" Width="14" Height="14" Margin="10 0 0 0" >
                     </fa:ImageAwesome>
-                    <Label Content="{Binding Error}"></Label>
+                    <Label Content="{Binding Error}" Foreground="DarkRed"></Label>
                 </StackPanel>
             </StackPanel>
             <Separator Margin="15 15 15 10" DockPanel.Dock="Top" Background="LightGray"></Separator>

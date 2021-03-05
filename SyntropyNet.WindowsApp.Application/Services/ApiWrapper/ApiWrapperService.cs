@@ -29,6 +29,9 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
         public delegate void ServicesUpdated(IEnumerable<ServiceModel> services);
         public event ServicesUpdated ServicesUpdatedEvent;
 
+        public delegate void PeersServicesUpdated(IEnumerable<ServiceModel> addedServices, IEnumerable<string> removedPeers);
+        public event PeersServicesUpdated PeersServicesUpdatedEvent;
+
         public delegate void Disconnected(DisconnectionType type, string error);
         public event Disconnected DisconnectedEvent;
 
@@ -146,6 +149,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                                             foreach(var tcpPort in service.AgentServiceTcpPorts)
                                             {
                                                 newServices.Add(new ServiceModel{
+                                                    PeerUid = vpnData.Args.PublicKey,
                                                     Name = service.AgentServiceName,
                                                     Ip = service.AgentServiceSubnetIp,
                                                     Port = tcpPort.ToString()
@@ -156,6 +160,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                                             {
                                                 newServices.Add(new ServiceModel
                                                 {
+                                                    PeerUid = vpnData.Args.PublicKey,
                                                     Name = service.AgentServiceName,
                                                     Ip = service.AgentServiceSubnetIp,
                                                     Port = udpPort.ToString()
@@ -194,6 +199,45 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
 
                                 WGConfHandler = new WGConfHandler(client, _WGConfigService);
                                 WGConfHandler.Start(WGConfRequest);
+                                var addedServices = new List<ServiceModel>();
+                                var removedPeers = new List<string>();
+                                foreach (var item in WGConfRequest.Data)
+                                {
+                                    switch (item.Fn)
+                                    {
+                                        case "add_peer":
+                                            foreach (var service in item.Metadata.AllowedIpsInfo)
+                                            {
+                                                foreach (var tcpPort in service.AgentServiceTcpPorts)
+                                                {
+                                                    addedServices.Add(new ServiceModel
+                                                    {
+                                                        PeerUid = item.Args.PublicKey,
+                                                        Name = service.AgentServiceName,
+                                                        Ip = service.AgentServiceSubnetIp,
+                                                        Port = tcpPort.ToString()
+                                                    });
+                                                }
+
+                                                foreach (var udpPort in service.AgentServiceUdpPorts)
+                                                {
+                                                    addedServices.Add(new ServiceModel
+                                                    {
+                                                        PeerUid = item.Args.PublicKey,
+                                                        Name = service.AgentServiceName,
+                                                        Ip = service.AgentServiceSubnetIp,
+                                                        Port = udpPort.ToString()
+                                                    });
+                                                }
+                                            }
+                                            break;
+                                        case "remove_peer":
+                                            removedPeers.Add(item.Args.PublicKey);
+                                            break;
+                                    }
+                                }
+
+                                PeersServicesUpdatedEvent?.Invoke(addedServices,removedPeers);
 
                                 break;
                             default:
@@ -263,6 +307,26 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
             {
                 autoPingHandler.Interrupt();
                 autoPingHandler = null;
+            }
+            if (getInfoHandler != null)
+            {
+                getInfoHandler.Interrupt();
+                getInfoHandler = null;
+            }
+            if (configInfoHandler != null)
+            {
+                configInfoHandler.Interrupt();
+                configInfoHandler = null;
+            }
+            if (WGConfHandler != null)
+            {
+                WGConfHandler.Interrupt();
+                WGConfHandler = null;
+            }
+            if (containerInfoHandler != null)
+            {
+                containerInfoHandler.Interrupt();
+                containerInfoHandler = null;
             }
             _WGConfigService.StopWG();
             Running = false;

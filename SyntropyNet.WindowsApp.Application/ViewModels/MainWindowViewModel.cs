@@ -11,6 +11,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Websocket.Client;
+using static SyntropyNet.WindowsApp.Application.Services.ApiWrapper.ApiWrapperService;
 
 namespace SyntropyNet.WindowsApp.Application.ViewModels
 {
@@ -37,6 +38,7 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
             _appContext = appContext;
 
             _apiService.ServicesUpdatedEvent += UpdateServices;
+            _apiService.PeersServicesUpdatedEvent += UpdatePeersServices;
             _apiService.DisconnectedEvent += Disconnected;
 
             Host = _appSettings.DeviceName;
@@ -113,6 +115,22 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
             Services.Clear();
             Services.AddRange(services);
 
+        }
+
+        public void UpdatePeersServices(IEnumerable<ServiceModel> addedServices, IEnumerable<string> removedPeers)
+        {
+            if (!_appContext.IsSynchronized)
+            {
+                PeersServicesUpdated methodDelegate = UpdatePeersServices;
+                _appContext.BeginInvoke(methodDelegate, addedServices, removedPeers);
+                return;
+            }
+
+            Services.AddRange(addedServices);
+
+            var persistServices = Services.Where(x => removedPeers.All(uid => uid != x.PeerUid)).ToList();
+            Services.Clear();
+            Services.AddRange(persistServices);
         }
 
         public ObservableCollection<ServiceModel> Services{ get; private set; } = new ObservableCollection<ServiceModel>();

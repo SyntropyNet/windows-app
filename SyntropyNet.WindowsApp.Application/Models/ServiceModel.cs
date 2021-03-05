@@ -8,6 +8,7 @@ namespace SyntropyNet.WindowsApp.Application.Models
 {
     public class ServiceModel
     {
+        public string PeerUid { get; set; }
         public string Name { get; set; }
         public string Ip { get; set; }
         public string Port { get; set; }
