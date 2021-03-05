@@ -48,6 +48,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
         private WGConfHandler WGConfHandler;
         private ContainerInfoHandler containerInfoHandler;
         private IfaceBWDataHandler ifaceBWDataHandler;
+        private IfacesPeersBWDataHandler ifacesPeersBWDataHandler;
 
         public ApiWrapperService(
             IAppSettings appSettings, 
@@ -189,7 +190,6 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                                     getInfoHandler.Interrupt();
                                     getInfoHandler = null;
                                 }
-
                                 getInfoHandler = new GetInfoHandler(client, _httpRequestService, _dockerApiService);
                                 getInfoHandler.Start(getInfoRequest);
 
@@ -303,6 +303,15 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
 
                     ifaceBWDataHandler = new IfaceBWDataHandler(client, _networkInformationService);
                     ifaceBWDataHandler.Start();
+
+                    if (ifacesPeersBWDataHandler != null)
+                    {
+                        ifacesPeersBWDataHandler.Interrupt();
+                        ifacesPeersBWDataHandler = null;
+                    }
+
+                    ifacesPeersBWDataHandler = new IfacesPeersBWDataHandler(client, _WGConfigService);
+                    ifacesPeersBWDataHandler.Start();
 
                     exitEvent.WaitOne();
                     //await client.Stop(WebSocketCloseStatus.NormalClosure,string.Empty);

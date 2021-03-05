@@ -52,16 +52,22 @@
     <Compile Include="Models\Messages\GetInfoRequest.cs" />
     <Compile Include="Models\Messages\GetInfoResponse.cs" />
     <Compile Include="Models\Messages\IfaceBWDataRequest.cs" />
+    <Compile Include="Models\Messages\IfacesPeersBWDataRequest.cs" />
     <Compile Include="Models\Messages\UpdateAgentConfigRequest.cs" />
     <Compile Include="Models\Messages\WGConfRequest.cs" />
     <Compile Include="Models\Messages\WGConfResponse.cs" />
     <Compile Include="Models\Messages\WGRouteStatusRequest.cs" />
     <Compile Include="Models\WireGuard\Keypair.cs" />
+    <Compile Include="Models\WireGuard\PeerDataFromPipe.cs" />
     <Compile Include="Models\WireGuard\TunnelConfig.cs" />
     <Compile Include="Models\WireGuard\TunnelSettings.cs" />
     <Compile Include="Models\WSConnectionResponse.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json">
+      <Version>12.0.3</Version>
+    </PackageReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

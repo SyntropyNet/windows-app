@@ -110,6 +110,7 @@
     <Compile Include="Services\ApiWrapper\Handlers\BaseHandler.cs" />
     <Compile Include="Services\ApiWrapper\Handlers\ConfigInfoHandler.cs" />
     <Compile Include="Services\ApiWrapper\Handlers\ContainerInfoHandler.cs" />
+    <Compile Include="Services\ApiWrapper\Handlers\IfacesPeersBWDataHandler.cs" />
     <Compile Include="Services\ApiWrapper\Handlers\GetInfoHandler.cs" />
     <Compile Include="Services\ApiWrapper\Handlers\IfaceBWDataHandler.cs" />
     <Compile Include="Services\ApiWrapper\Handlers\WGConfHandler.cs" />

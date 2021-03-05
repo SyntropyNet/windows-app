@@ -361,6 +361,76 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
             SetTunnelConfig(tunnelConfig);
         }
 
+        public IEnumerable<PeerDataFromPipe> GetPeersDataFromPipe()
+        {
+            List<PeerDataFromPipe> peersDataFromPipe = new List<PeerDataFromPipe>();
+
+            StreamReader reader = null;
+            NamedPipeClientStream stream = null;
+            while (ActivityState)
+            {
+                try
+                {
+                    stream = GetPipe(_tunnelSettings.FileLocation);
+                    stream.Connect();
+                    reader = new StreamReader(stream);
+                    break;
+                }
+                catch { }
+                Thread.Sleep(100);
+            }
+
+            PeerDataFromPipe peerDataFromPipe = null;
+            try
+            {
+                var pipe = Encoding.UTF8.GetBytes("get=1\n\n");
+                stream.Write(pipe, 0, pipe.Length);
+
+                ulong rx = 0, tx = 0;
+                while (ActivityState)
+                {
+                    var line = reader.ReadLine();
+                    if (line == null)
+                        break;
+                    line = line.Trim();
+                    if (line.Length == 0)
+                        break;
+                    if (line.StartsWith("public_key="))
+                    {
+                        if(peerDataFromPipe == null)
+                        {
+                            peerDataFromPipe = new PeerDataFromPipe();
+                            continue;
+                        }
+
+                        peersDataFromPipe.Add(peerDataFromPipe);
+                        peerDataFromPipe = new PeerDataFromPipe();
+                    }
+                        
+                    if (line.StartsWith("rx_bytes="))
+                        peerDataFromPipe.RxBytes = long.Parse(line.Substring(9));
+                    else if (line.StartsWith("tx_bytes="))
+                        peerDataFromPipe.TxBytes = long.Parse(line.Substring(9));
+                    else if (line.StartsWith("last_handshake_time_sec="))
+                        peerDataFromPipe.LastHandshake = line.Substring(24);
+                    else if (line.StartsWith("persistent_keepalive_interval="))
+                        peerDataFromPipe.KeepAliveInterval = int.Parse(line.Substring(30));
+                    else if (line.StartsWith("endpoint="))
+                        peerDataFromPipe.Endpoint = line.Substring(9);
+                }
+                if (peerDataFromPipe != null)
+                    peersDataFromPipe.Add(peerDataFromPipe);
+            }
+            catch { }
+            finally
+            {
+                if (stream.IsConnected)
+                    stream.Close();
+            }
+
+            return peersDataFromPipe;
+        }
+
         public void Dispose()
         {
             Remove(File.ReadAllText(_tunnelSettings.FileLocation), false);

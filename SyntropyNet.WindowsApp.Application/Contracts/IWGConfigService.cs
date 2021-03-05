@@ -22,5 +22,6 @@ namespace SyntropyNet.WindowsApp.Application.Contracts
         void CreateConfig();
         void RemoveConfig();
         string PathToConfigFile();
+        IEnumerable<PeerDataFromPipe> GetPeersDataFromPipe();
     }
 }
