@@ -24,8 +24,6 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
         {
             _tunnelSettings = tunnelSettings;
             InterfaceName = _tunnelSettings.IntefaceName;
-            GenerateNewConfig();
-            Add(_tunnelSettings.FileLocation, true);
         }
 
         public string PublicKey { get; private set; }
@@ -68,7 +66,8 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
 
         public void RunWG()
         {
-            Add(_tunnelSettings.FileLocation, true);
+            GenerateNewConfig();
+            Add(_tunnelSettings.FileLocation, false);
         }
 
         public void StopWG()
@@ -101,14 +100,13 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
 
         public void ApplyChange()
         {
-            Remove(_tunnelSettings.FileLocation, true);
-            Add(_tunnelSettings.FileLocation, true);
+            Add(_tunnelSettings.FileLocation, false);
         }
 
         public void CreateConfig()
         {
             GenerateNewConfig();
-            Add(_tunnelSettings.FileLocation, true);
+            Add(_tunnelSettings.FileLocation, false);
         }
 
         public void RemoveConfig()
@@ -265,10 +263,12 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
             var pathAndArgs = String.Format("\"{0}\" /service \"{1}\" {2}", exeName, configFile, Process.GetCurrentProcess().Id); //TODO: This is not the proper way to escape file args.
 
             var scm = Win32.OpenSCManager(null, null, Win32.ScmAccessRights.AllAccess);
-            if (scm == IntPtr.Zero)
-                throw new Win32Exception(Marshal.GetLastWin32Error());
+
             try
             {
+                if (scm == IntPtr.Zero)
+                    throw new Win32Exception(Marshal.GetLastWin32Error());
+
                 var service = Win32.OpenService(scm, shortName, Win32.ServiceAccessRights.AllAccess);
                 if (service != IntPtr.Zero)
                 {
@@ -299,6 +299,11 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
                     Win32.CloseServiceHandle(service);
                 }
             }
+            catch (Exception ex)
+            {
+                Win32.CloseServiceHandle(scm);
+                return;
+            }
             finally
             {
                 Win32.CloseServiceHandle(scm);
@@ -311,10 +316,12 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
             var shortName = String.Format("WireGuardTunnel${0}", tunnelName);
 
             var scm = Win32.OpenSCManager(null, null, Win32.ScmAccessRights.AllAccess);
-            if (scm == IntPtr.Zero)
-                throw new Win32Exception(Marshal.GetLastWin32Error());
+
             try
             {
+                if (scm == IntPtr.Zero)
+                    throw new Win32Exception(Marshal.GetLastWin32Error());
+
                 var service = Win32.OpenService(scm, shortName, Win32.ServiceAccessRights.AllAccess);
                 if (service == IntPtr.Zero)
                 {
@@ -336,6 +343,11 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
                 {
                     Win32.CloseServiceHandle(service);
                 }
+            }
+            catch (Exception ex)
+            {
+                Win32.CloseServiceHandle(scm);
+                return;
             }
             finally
             {
@@ -384,6 +396,11 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
             try
             {
                 var pipe = Encoding.UTF8.GetBytes("get=1\n\n");
+                if(stream == null)
+                {
+                    return peersDataFromPipe;
+                }
+
                 stream.Write(pipe, 0, pipe.Length);
 
                 ulong rx = 0, tx = 0;
@@ -424,7 +441,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
             catch { }
             finally
             {
-                if (stream.IsConnected)
+                if (stream != null && stream.IsConnected)
                     stream.Close();
             }
 

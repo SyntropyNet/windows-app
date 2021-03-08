@@ -83,6 +83,8 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                 // ToDo:: add custom exception here;
                 return;
             }
+
+            _WGConfigService.RunWG();
             new Thread(async () =>
             {
                 exitEvent = new ManualResetEvent(false);
