@@ -2,6 +2,7 @@
 using SyntropyNet.WindowsApp.Application.Domain.Models.Messages;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Text;
@@ -19,12 +20,20 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
             if (!NetworkInterface.GetIsNetworkAvailable())
                 return ifaceBWDataRequestData;
 
-            NetworkInterface[] interfaces
-                = NetworkInterface.GetAllNetworkInterfaces();
-
-            foreach (NetworkInterface ni in interfaces)
+            try
             {
-                ifaceBWDataRequestData.Add(IfaceBWDataRequestData(ni));
+                NetworkInterface[] interfaces
+                    = NetworkInterface.GetAllNetworkInterfaces();
+
+                foreach (NetworkInterface ni in interfaces)
+                {
+                    ifaceBWDataRequestData.Add(IfaceBWDataRequestData(ni));
+                }
+            }
+            catch (NetworkInformationException ex)
+            {
+                //Todo: An error "Channel closing in progress" occurs with code 232, how to handle it correctly
+                Debug.WriteLine(ex.Message);
             }
 
             return ifaceBWDataRequestData;
