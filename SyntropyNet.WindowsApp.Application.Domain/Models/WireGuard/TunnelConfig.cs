@@ -8,6 +8,9 @@ namespace SyntropyNet.WindowsApp.Application.Domain.Models.WireGuard
 {
     public class TunnelConfig
     {
+        public string Name { get; set; }
+        public string PublicKey { get; set; }
+
         public Interface Interface { get; set; }
         public IEnumerable<Peer> Peers { get; set; }
     }

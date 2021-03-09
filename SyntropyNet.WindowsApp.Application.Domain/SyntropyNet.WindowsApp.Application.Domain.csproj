@@ -41,6 +41,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Enums\WireGuard\WGInterfaceName.cs" />
     <Compile Include="Enums\WSConnectionState.cs" />
     <Compile Include="Models\DockerApi\DataFromInspectCommand.cs" />
     <Compile Include="Models\Messages\AutoPingRequest.cs" />

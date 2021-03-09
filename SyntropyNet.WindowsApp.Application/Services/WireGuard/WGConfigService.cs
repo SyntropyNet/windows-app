@@ -1,5 +1,6 @@
 ﻿using SyntropyNet.WindowsApp.Application.Constants.WireGuard;
 using SyntropyNet.WindowsApp.Application.Contracts;
+using SyntropyNet.WindowsApp.Application.Domain.Enums.WireGuard;
 using SyntropyNet.WindowsApp.Application.Domain.Models.WireGuard;
 using System;
 using System.Collections.Generic;
@@ -15,142 +16,162 @@ using System.Threading.Tasks;
 
 namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
 {
-
     public class WGConfigService : IWGConfigService
     {
-        private readonly TunnelSettings _tunnelSettings;
+        //Services
         private readonly INetworkInformationService _networkService;
-        // default port. Will be replace by port checking routine
-        private int _listenPort = 61173;
+
+        //Interfaces
+        private TunnelConfig PublicInterface { get; set; }
+        private TunnelConfig SDN1Interface { get; set; }
+        private TunnelConfig SDN2Interface { get; set; }
+        private TunnelConfig SDN3Interface { get; set; }
 
         public WGConfigService(TunnelSettings tunnelSettings, INetworkInformationService networkService)
         {
             _networkService = networkService;
-            _tunnelSettings = tunnelSettings;
-            InterfaceName = _tunnelSettings.IntefaceName;
         }
 
-        public string PublicKey { get; private set; }
-        public string InterfaceName { get; }
-        public bool ActivityState { 
+        public bool ActivityState
+        {
             get
             {
-                var tunnelName = Path.GetFileNameWithoutExtension(_tunnelSettings.FileLocation);
-                var shortName = String.Format("WireGuardTunnel${0}", tunnelName);
-
-                var scm = Win32.OpenSCManager(null, null, Win32.ScmAccessRights.QueryLockStatus);
-                if (scm == IntPtr.Zero)
+                foreach (WGInterfaceName interfaceName in Enum.GetValues(typeof(WGInterfaceName)))
                 {
-                    Win32.CloseServiceHandle(scm);
-                    return false;
+                    var tunnelName = Path.GetFileNameWithoutExtension(GetPathToInterfaceConfig(interfaceName));
+                    var shortName = String.Format("WireGuardTunnel${0}", tunnelName);
+
+                    var scm = Win32.OpenSCManager(null, null, Win32.ScmAccessRights.QueryLockStatus);
+                    if (scm == IntPtr.Zero)
+                    {
+                        Win32.CloseServiceHandle(scm);
+                        return false;
+                    }
+
+                    var service = Win32.OpenService(scm, shortName, Win32.ServiceAccessRights.QueryStatus);
+                    if (service == IntPtr.Zero)
+                    {
+                        Win32.CloseServiceHandle(service);
+                        return false;
+                    }
+
+                    var serviceStatus = new Win32.ServiceStatus();
+                    Win32.QueryServiceStatus(service, serviceStatus);
+
+                    if (serviceStatus.dwCurrentState == Win32.ServiceState.Running)
+                    {
+                        Win32.CloseServiceHandle(service);
+                    }
+                    else
+                    {
+                        Win32.CloseServiceHandle(service);
+                        return false;
+                    }
                 }
 
-                var service = Win32.OpenService(scm, shortName, Win32.ServiceAccessRights.QueryStatus);
-                if (service == IntPtr.Zero)
-                {
-                    Win32.CloseServiceHandle(service);
-                    return false;
-                }
-
-                var serviceStatus = new Win32.ServiceStatus();
-                Win32.QueryServiceStatus(service, serviceStatus);
-
-                if (serviceStatus.dwCurrentState == Win32.ServiceState.Running)
-                {
-                    Win32.CloseServiceHandle(service);
-                    return true;
-                }
-                else
-                {
-                    Win32.CloseServiceHandle(service);
-                    return false;
-                }
+                return true;
             }
         }
 
         public void RunWG()
         {
-            _listenPort = _networkService.GetNextFreePort();
-            GenerateNewConfig();
-            Add(_tunnelSettings.FileLocation, false);
+            CreateInterface(WGInterfaceName.SYNTROPY_PUBLIC);
+            Add(GetPathToInterfaceConfig(WGInterfaceName.SYNTROPY_PUBLIC), false);
+
+            CreateInterface(WGInterfaceName.SYNTROPY_SDN1);
+            Add(GetPathToInterfaceConfig(WGInterfaceName.SYNTROPY_SDN1), false);
+
+            CreateInterface(WGInterfaceName.SYNTROPY_SDN2);
+            Add(GetPathToInterfaceConfig(WGInterfaceName.SYNTROPY_SDN2), false);
+
+            CreateInterface(WGInterfaceName.SYNTROPY_SDN3);
+            Add(GetPathToInterfaceConfig(WGInterfaceName.SYNTROPY_SDN3), false);
         }
 
         public void StopWG()
         {
-            Remove(_tunnelSettings.FileLocation, true);
-        } 
-
-        public void SetInterface(Interface @interface)
-        {
-            TunnelConfig config = GetTunnelConfig();
-            config.Interface = @interface;
-
-            SetTunnelConfig(config);
+            Remove(GetPathToInterfaceConfig(WGInterfaceName.SYNTROPY_PUBLIC), true);
+            Remove(GetPathToInterfaceConfig(WGInterfaceName.SYNTROPY_SDN1), true);
+            Remove(GetPathToInterfaceConfig(WGInterfaceName.SYNTROPY_SDN2), true);
+            Remove(GetPathToInterfaceConfig(WGInterfaceName.SYNTROPY_SDN3), true);
         }
 
-        public Interface GetInterface()
+        public void SetInterfaceSection(WGInterfaceName interfaceName, Interface interfaceSection)
         {
-            TunnelConfig config = GetTunnelConfig();
+            TunnelConfig interfaceConfig = GetHowName(interfaceName);
+            interfaceConfig.Interface = interfaceSection;
 
-            return config.Interface;
+            SetInterfaceConfig(interfaceName, interfaceConfig.Interface, interfaceConfig.Peers);
         }
 
-        public void SetPeers(IEnumerable<Peer> peers)
+        public Interface GetInterfaceSection(WGInterfaceName interfaceName)
         {
-            TunnelConfig config = GetTunnelConfig();
-            config.Peers = peers;
+            TunnelConfig interfaceConfig = GetHowName(interfaceName);
 
-            SetTunnelConfig(config);
+            return interfaceConfig.Interface;
         }
 
-        public void ApplyChange()
+        public void SetPeerSections(WGInterfaceName interfaceName, IEnumerable<Peer> peers)
         {
-            Add(_tunnelSettings.FileLocation, false);
+            TunnelConfig interfaceConfig = GetHowName(interfaceName);
+            interfaceConfig.Peers = peers;
+
+            SetInterfaceConfig(interfaceName, interfaceConfig.Interface, interfaceConfig.Peers);
         }
 
-        public void CreateConfig()
+        public IEnumerable<Peer> GetPeerSections(WGInterfaceName interfaceName)
         {
-            GenerateNewConfig();
-            Add(_tunnelSettings.FileLocation, false);
+            TunnelConfig interfaceConfig = GetHowName(interfaceName);
+
+            return interfaceConfig.Peers;
         }
 
-        public void RemoveConfig()
+        public void ApplyModifiedConfigs()
         {
-            Remove(_tunnelSettings.FileLocation, true);
-            File.Delete(_tunnelSettings.FileLocation);
+            Add(GetPathToInterfaceConfig(WGInterfaceName.SYNTROPY_PUBLIC), false);
+            Add(GetPathToInterfaceConfig(WGInterfaceName.SYNTROPY_SDN1), false);
+            Add(GetPathToInterfaceConfig(WGInterfaceName.SYNTROPY_SDN2), false);
+            Add(GetPathToInterfaceConfig(WGInterfaceName.SYNTROPY_SDN3), false);
         }
 
-        public string PathToConfigFile()
+        private void CreateInterface(WGInterfaceName interfaces)
         {
-            return _tunnelSettings.FileLocation;
+            Keypair keypair = Keypair.Generate();
+            int listenPort = _networkService.GetNextFreePort();
+
+            var tunnelConfig = new TunnelConfig
+            {
+                Name = interfaces.ToString(),
+                PublicKey = keypair.Public,
+                Interface = new Interface
+                {
+                    PrivateKey = keypair.Private,
+                    ListenPort = listenPort
+                }
+            };
+
+            SetInterfaceConfig(interfaces, tunnelConfig.Interface, null);
         }
 
-        public IEnumerable<Peer> GetPeers()
-        {
-            TunnelConfig config = GetTunnelConfig();
-
-            return config.Peers;
-        }
-
-        private void SetTunnelConfig(TunnelConfig config)
+        private void SetInterfaceConfig(WGInterfaceName interfaceName, Interface interfaceSection, IEnumerable<Peer> peerSection)
         {
             StringBuilder configString = new StringBuilder();
 
             configString.AppendLine("[Interface]");
-            if (config.Interface != null)
+            if (interfaceSection != null)
             {
                 configString.AppendLine(
-                    TunnelConfigConstants.PRIVATE_KEY + config.Interface.PrivateKey);
+                    TunnelConfigConstants.PRIVATE_KEY + interfaceSection.PrivateKey);
                 configString.AppendLine(
-                    TunnelConfigConstants.LISTEN_PORT + config.Interface.ListenPort);
-                if (config.Interface.Address != null && config.Interface.Address.Count() > 0)
+                    TunnelConfigConstants.LISTEN_PORT + interfaceSection.ListenPort);
+                if (interfaceSection.Address != null && interfaceSection.Address.Count() > 0)
                     configString.AppendLine(
-                        TunnelConfigConstants.ADDRESS + String.Join(",", config.Interface.Address));
+                        TunnelConfigConstants.ADDRESS + String.Join(",", interfaceSection.Address));
             }
 
-            if (config.Peers != null)
+            if (peerSection != null)
             {
-                foreach (var item in config.Peers)
+                foreach (var item in peerSection)
                 {
                     configString.AppendLine("[Peer]")
                         .AppendLine(
@@ -164,23 +185,25 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
                 }
             }
 
-            using (StreamWriter sw = new StreamWriter(_tunnelSettings.FileLocation, false, Encoding.Default))
+            using (StreamWriter sw = new StreamWriter(GetPathToInterfaceConfig(interfaceName), false, Encoding.Default))
             {
                 sw.Write(configString);
             }
 
         }
 
-        private TunnelConfig GetTunnelConfig()
+        private TunnelConfig GetInterfaceConfig(WGInterfaceName interfaceName)
         {
             bool interfaceSection = false;
             bool peerSection = false;
 
-            Interface @interface = new Interface();
-            List<Peer> peers = new List<Peer>();
+            Interface interfaceSectionData = new Interface();
+            List<Peer> peerSectionsData = new List<Peer>();
             Peer peer = null;
 
-            using (StreamReader sr = new StreamReader(_tunnelSettings.FileLocation, System.Text.Encoding.Default))
+            TunnelConfig interfaceConfig = GetHowName(interfaceName);
+
+            using (StreamReader sr = new StreamReader(GetPathToInterfaceConfig(interfaceName), System.Text.Encoding.Default))
             {
                 string line;
                 while ((line = sr.ReadLine()) != null)
@@ -200,7 +223,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
                             peer = new Peer();
                         else
                         {
-                            peers.Add(peer);
+                            peerSectionsData.Add(peer);
                             peer = new Peer();
                         }
                     }
@@ -209,15 +232,15 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
                     {
                         if (line.Contains(TunnelConfigConstants.PRIVATE_KEY))
                         {
-                            @interface.PrivateKey = line.Replace(TunnelConfigConstants.PRIVATE_KEY, "");
+                            interfaceSectionData.PrivateKey = line.Replace(TunnelConfigConstants.PRIVATE_KEY, "");
                         }
                         else if (line.Contains(TunnelConfigConstants.LISTEN_PORT))
                         {
-                            @interface.ListenPort = Convert.ToInt32(line.Replace(TunnelConfigConstants.LISTEN_PORT, ""));
+                            interfaceSectionData.ListenPort = Convert.ToInt32(line.Replace(TunnelConfigConstants.LISTEN_PORT, ""));
                         }
                         else if (line.Contains(TunnelConfigConstants.ADDRESS))
                         {
-                            @interface.Address =
+                            interfaceSectionData.Address =
                                 line.Replace(TunnelConfigConstants.ADDRESS, "").Split(',').ToList();
                         }
                     }
@@ -240,14 +263,31 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
                     }
                 }
                 if (peer != null)
-                    peers.Add(peer);
+                    peerSectionsData.Add(peer);
             }
 
-            return new TunnelConfig
-            {
-                Interface = @interface,
-                Peers = peers
-            };
+            interfaceConfig.Interface = interfaceSectionData;
+            interfaceConfig.Peers = peerSectionsData;
+            return interfaceConfig;
+        }
+
+        private TunnelConfig GetHowName(WGInterfaceName interfaceName)
+        {
+            if (interfaceName == WGInterfaceName.SYNTROPY_PUBLIC)
+                return PublicInterface;
+            else if (interfaceName == WGInterfaceName.SYNTROPY_SDN1)
+                return SDN1Interface;
+            else if (interfaceName == WGInterfaceName.SYNTROPY_SDN2)
+                return SDN2Interface;
+            else if (interfaceName == WGInterfaceName.SYNTROPY_SDN3)
+                return SDN3Interface;
+            else
+                throw new Exception();
+        }
+
+        private string GetPathToInterfaceConfig(WGInterfaceName nameInterface)
+        {
+            return $"{WireGuardConstants.CONFIG_FILE_LOCATION}/{nameInterface}.conf";
         }
 
         [DllImport("tunnel.dll", EntryPoint = "WireGuardTunnelService", CallingConvention = CallingConvention.Cdecl)]
@@ -360,24 +400,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
             }
         }
 
-        private void GenerateNewConfig()
-        {
-            Keypair keypair = Keypair.Generate();
-            PublicKey = keypair.Public;
-
-            Interface @interface = new Interface
-            {
-                PrivateKey = keypair.Private,
-                ListenPort = _listenPort
-            };
-            var tunnelConfig = new TunnelConfig
-            {
-                Interface = @interface,
-            };
-            SetTunnelConfig(tunnelConfig);
-        }
-
-        public IEnumerable<PeerDataFromPipe> GetPeersDataFromPipe()
+        public IEnumerable<PeerDataFromPipe> GetPeersDataFromPipe(WGInterfaceName interfaceName)
         {
             List<PeerDataFromPipe> peersDataFromPipe = new List<PeerDataFromPipe>();
 
@@ -387,7 +410,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
             {
                 try
                 {
-                    stream = GetPipe(_tunnelSettings.FileLocation);
+                    stream = GetPipe(GetPathToInterfaceConfig(interfaceName));
                     stream.Connect();
                     reader = new StreamReader(stream);
                     break;
@@ -400,7 +423,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
             try
             {
                 var pipe = Encoding.UTF8.GetBytes("get=1\n\n");
-                if(stream == null)
+                if (stream == null)
                 {
                     return peersDataFromPipe;
                 }
@@ -418,7 +441,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
                         break;
                     if (line.StartsWith("public_key="))
                     {
-                        if(peerDataFromPipe == null)
+                        if (peerDataFromPipe == null)
                         {
                             peerDataFromPipe = new PeerDataFromPipe();
                             continue;
@@ -427,7 +450,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
                         peersDataFromPipe.Add(peerDataFromPipe);
                         peerDataFromPipe = new PeerDataFromPipe();
                     }
-                        
+
                     if (line.StartsWith("rx_bytes="))
                         peerDataFromPipe.RxBytes = long.Parse(line.Substring(9));
                     else if (line.StartsWith("tx_bytes="))
@@ -454,7 +477,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
 
         public void Dispose()
         {
-            Remove(File.ReadAllText(_tunnelSettings.FileLocation), false);
+            StopWG();
         }
     }
 }
