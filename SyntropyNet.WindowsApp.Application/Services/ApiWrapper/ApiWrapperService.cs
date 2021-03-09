@@ -222,14 +222,37 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                                 var WGConfRequest = JsonConvert.DeserializeObject<WGConfRequest>(
                                     msg.Text, JsonSettings.GetSnakeCaseNamingStrategy());
 
-                                if (WGConfHandler != null)
+                                try
                                 {
-                                    WGConfHandler.Interrupt();
-                                    WGConfHandler = null;
-                                }
+                                    if (WGConfHandler != null)
+                                    {
+                                        WGConfHandler.Interrupt();
+                                        WGConfHandler = null;
+                                    }
 
-                                WGConfHandler = new WGConfHandler(client, _WGConfigService);
-                                WGConfHandler.Start(WGConfRequest);
+                                    WGConfHandler = new WGConfHandler(client, _WGConfigService);
+                                    WGConfHandler.Start(WGConfRequest);
+                                }
+                                catch (Exception ex)
+                                {
+                                    var errorMsg = new WGConfError
+                                    {
+                                        Id = WGConfRequest.Id,
+                                        Error = new WGConfErrorData
+                                        {
+                                            Message = ex.Message,
+                                            Stacktrace = ex.StackTrace
+                                        }
+                                    };
+
+                                    var message = JsonConvert.SerializeObject(errorMsg,
+                                        JsonSettings.GetSnakeCaseNamingStrategy());
+                                    Debug.WriteLine($"'WG_CONF' error: {message}");
+                                    client.Send(message);
+
+                                    break;
+                                }
+                                
                                 var addedServices = new List<ServiceModel>();
                                 var removedPeers = new List<string>();
                                 foreach (var item in WGConfRequest.Data)
