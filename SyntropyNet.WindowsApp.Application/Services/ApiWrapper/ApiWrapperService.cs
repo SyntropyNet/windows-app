@@ -147,7 +147,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                                     configInfoHandler = null;
                                 }
 
-                                configInfoHandler = new ConfigInfoHandler(client, _WGConfigService);
+                                configInfoHandler = new ConfigInfoHandler(client, _WGConfigService, _networkInformationService);
                                 configInfoHandler.Start(configInfoRequest);
 
                                 // prepare Services Liset

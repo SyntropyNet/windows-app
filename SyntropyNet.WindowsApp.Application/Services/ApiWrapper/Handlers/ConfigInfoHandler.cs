@@ -19,11 +19,15 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
     {
         private Thread mainTask;
         private readonly IWGConfigService _WGConfigService;
+        private readonly INetworkInformationService _networkInformationService;
 
-        public ConfigInfoHandler(WebsocketClient client, IWGConfigService WGConfigService) 
+        public ConfigInfoHandler(WebsocketClient client, 
+            IWGConfigService WGConfigService,
+             INetworkInformationService networkInformationService) 
             : base(client)
         {
             _WGConfigService = WGConfigService;
+            _networkInformationService = networkInformationService;
         }
 
         public void Start(ConfigInfoRequest request)
@@ -111,62 +115,104 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
             string interfaceName = _WGConfigService.InterfaceName;
             string publicKey = _WGConfigService.PublicKey;
             int listenPort = _WGConfigService.GetInterface().ListenPort;
+            var data = new List<CreateInterface>();
 
-            var createInterfacePublic = new CreateInterface
+            if (!_networkInformationService.CheckPing(request.Data.Network.Public.InternalIp))
             {
-                Data = new CreateInterfaceData
+                data.Add(new CreateInterface
                 {
-                    Ifname = interfaceName,
-                    InternalIp = request.Data.Network.Public.InternalIp,
-                    PublicKey = publicKey,
-                    ListenPort = listenPort,
-                }
-            };
+                    Data = new CreateInterfaceData
+                    {
+                        Ifname = interfaceName,
+                        InternalIp = request.Data.Network.Public.InternalIp,
+                        PublicKey = publicKey,
+                        ListenPort = listenPort,
+                    }
+                });
+            }
+            else
+            {
+                SendError(request.Id, request.Data.Network.Public.InternalIp);
+            }
 
-            var createInterfaceSdn1 = new CreateInterface
+            if (!_networkInformationService.CheckPing(request.Data.Network.Sdn1.InternalIp))
             {
-                Data = new CreateInterfaceData
+                data.Add(new CreateInterface
                 {
-                    Ifname = interfaceName,
-                    InternalIp = request.Data.Network.Sdn1.InternalIp,
-                    PublicKey = publicKey,
-                    ListenPort = listenPort,
-                }
-            };
+                    Data = new CreateInterfaceData
+                    {
+                        Ifname = interfaceName,
+                        InternalIp = request.Data.Network.Sdn1.InternalIp,
+                        PublicKey = publicKey,
+                        ListenPort = listenPort,
+                    }
+                });
+            }
+            else
+            {
+                SendError(request.Id, request.Data.Network.Sdn1.InternalIp);
+            }
 
-            var createInterfaceSdn2 = new CreateInterface
+            if (!_networkInformationService.CheckPing(request.Data.Network.Sdn2.InternalIp))
             {
-                Data = new CreateInterfaceData
+                data.Add(new CreateInterface
                 {
-                    Ifname = interfaceName,
-                    InternalIp = request.Data.Network.Sdn2.InternalIp,
-                    PublicKey = publicKey,
-                    ListenPort = listenPort,
-                }
-            };
-            var createInterfaceSdn3 = new CreateInterface
+                    Data = new CreateInterfaceData
+                    {
+                        Ifname = interfaceName,
+                        InternalIp = request.Data.Network.Sdn2.InternalIp,
+                        PublicKey = publicKey,
+                        ListenPort = listenPort,
+                    }
+                });
+            }
+            else
             {
-                Data = new CreateInterfaceData
+                SendError(request.Id, request.Data.Network.Sdn2.InternalIp);
+            }
+
+            if (!_networkInformationService.CheckPing(request.Data.Network.Sdn3.InternalIp))
+            {
+                data.Add(new CreateInterface
                 {
-                    Ifname = interfaceName,
-                    InternalIp = request.Data.Network.Sdn3.InternalIp,
-                    PublicKey = publicKey,
-                    ListenPort = listenPort,
-                }
-            };
+                    Data = new CreateInterfaceData
+                    {
+                        Ifname = interfaceName,
+                        InternalIp = request.Data.Network.Sdn3.InternalIp,
+                        PublicKey = publicKey,
+                        ListenPort = listenPort,
+                    }
+                });
+            }
+            else
+            {
+                SendError(request.Id, request.Data.Network.Sdn3.InternalIp);
+            }
 
             var updateRequest = new UpdateAgentConfigRequest<CreateInterface>
             {
                 Id = $"Id{DateTime.UtcNow.Ticks / TimeSpan.TicksPerMillisecond}",
-                Data = new List<CreateInterface> { 
-                    createInterfacePublic, 
-                    createInterfaceSdn1, 
-                    createInterfaceSdn2, 
-                    createInterfaceSdn3
-                }
+                Data = data
             };
 
             return updateRequest;
+        }
+
+        private void SendError(string idMsg, string intenalIp)
+        {
+            var error = new UpdateAgentConfigError()
+            {
+                Id = idMsg,
+                Error = new UpdateAgentConfigErrorData
+                {
+                    Message = $"IP {intenalIp} is already in use."
+                }
+            };
+
+            var message = JsonConvert.SerializeObject(error,
+                JsonSettings.GetSnakeCaseNamingStrategy());
+            Debug.WriteLine($"'UPDATE_AGENT_CONF' error: { message}");
+            Client.Send(message);
         }
     }
 }

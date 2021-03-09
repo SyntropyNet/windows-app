@@ -104,5 +104,17 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
                 throw new NoFreePortException($"No Free Port in range {START_PORT} - {MAX_PORT}");
             }
         }
+
+        public bool CheckPing(string ip, int timeout = 1000)
+        {
+            Ping pingSender = new Ping();
+            PingReply reply = pingSender.Send(ip, timeout);
+
+            var status = reply.Status;
+            if (status == IPStatus.Success)
+                return true;
+
+            return false;
+        }
     }
 }
