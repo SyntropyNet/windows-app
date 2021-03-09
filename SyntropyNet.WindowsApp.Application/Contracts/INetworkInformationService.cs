@@ -10,5 +10,6 @@ namespace SyntropyNet.WindowsApp.Application.Contracts
     public interface INetworkInformationService
     {
         IEnumerable<IfaceBWDataRequestData> GetInformNetworkInterface();
+        int GetNextFreePort();
     }
 }

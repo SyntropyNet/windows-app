@@ -102,6 +102,7 @@
     <Compile Include="Contracts\INetworkInformationService.cs" />
     <Compile Include="Contracts\IUserConfig.cs" />
     <Compile Include="Contracts\IWGConfigService.cs" />
+    <Compile Include="Exceptions\NoFreePortException.cs" />
     <Compile Include="Models\ServiceModel.cs" />
     <Compile Include="Helpers\JsonSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -133,8 +134,6 @@
       <Name>SyntropyNet.WindowsApp.Application.Domain</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Exceptions\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

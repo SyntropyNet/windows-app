@@ -26,10 +26,10 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
         {
             mainTask?.Abort();
 
-            if (!request.Data.Ips.Any())
-            {
-                return;
-            }
+            //if (!request.Data.Ips.Any())
+            //{
+            //    return;
+            //}
 
             mainTask = new Thread(async () =>
             {
@@ -52,7 +52,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                     Debug.WriteLine($"auto ping: {message}");
                     Client.Send(message);
 
-                    Thread.Sleep(request.Data.Interval);
+                    Thread.Sleep(TimeSpan.FromSeconds(request.Data.Interval));
                 }
 
             });

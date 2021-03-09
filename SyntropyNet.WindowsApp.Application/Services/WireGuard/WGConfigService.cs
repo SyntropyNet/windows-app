@@ -19,9 +19,13 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
     public class WGConfigService : IWGConfigService
     {
         private readonly TunnelSettings _tunnelSettings;
+        private readonly INetworkInformationService _networkService;
+        // default port. Will be replace by port checking routine
+        private int _listenPort = 61173;
 
-        public WGConfigService(TunnelSettings tunnelSettings)
+        public WGConfigService(TunnelSettings tunnelSettings, INetworkInformationService networkService)
         {
+            _networkService = networkService;
             _tunnelSettings = tunnelSettings;
             InterfaceName = _tunnelSettings.IntefaceName;
         }
@@ -66,6 +70,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
 
         public void RunWG()
         {
+            _listenPort = _networkService.GetNextFreePort();
             GenerateNewConfig();
             Add(_tunnelSettings.FileLocation, false);
         }
@@ -363,8 +368,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
             Interface @interface = new Interface
             {
                 PrivateKey = keypair.Private,
-                //ToDo: hardcode port
-                ListenPort = 61173
+                ListenPort = _listenPort
             };
             var tunnelConfig = new TunnelConfig
             {

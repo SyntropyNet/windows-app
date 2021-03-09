@@ -95,9 +95,10 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                     var wsCLient = new ClientWebSocket
                     {
                         Options =
-                    {
-                        KeepAliveInterval = TimeSpan.FromSeconds(30)
-                    }
+                        {
+                            KeepAliveInterval = TimeSpan.FromSeconds(30),
+                        
+                        }
                     };
                     wsCLient.Options.SetRequestHeader("Authorization", _userConfig.AgentToken);
                     wsCLient.Options.SetRequestHeader("X-DeviceId", _appSettings.DeviceId);
@@ -109,6 +110,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
 
                 using (var client = new WebsocketClient(url, factory))
                 {
+                    client.IsReconnectionEnabled = false;
                     client.ReconnectionHappened.Subscribe(info =>
                         Debug.WriteLine($"Reconnection happened, type: {info.Type}"));
 
@@ -361,6 +363,12 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                 ifacesPeersBWDataHandler.Interrupt();
                 ifacesPeersBWDataHandler = null;
             }
+            if (ifaceBWDataHandler != null)
+            {
+                ifaceBWDataHandler.Interrupt();
+                ifaceBWDataHandler = null;
+            }
+
             _WGConfigService.StopWG();
             Running = false;
         }

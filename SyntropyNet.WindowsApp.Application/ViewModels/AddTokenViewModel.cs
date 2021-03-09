@@ -3,6 +3,7 @@ using Prism.Mvvm;
 using Prism.Services.Dialogs;
 using SyntropyNet.WindowsApp.Application.Contracts;
 using SyntropyNet.WindowsApp.Application.Domain.Models;
+using SyntropyNet.WindowsApp.Application.Exceptions;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -195,18 +196,27 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
             // try to connect to WS controller
             Loading = true;
             _userConfig.Authenticate(Name, AgentToken);
-            _apiService.Run((WSConnectionResponse response) =>
+            try
             {
-                if(response.State == Domain.Enums.WSConnectionState.Failed)
+                _apiService.Run((WSConnectionResponse response) =>
                 {
-                    _userConfig.Quit();
-                    ShowConnectionError(response.Error);
-                }
-                else
-                {
-                    FinishDialog();
-                }
-            });
+                    if (response.State == Domain.Enums.WSConnectionState.Failed)
+                    {
+                        _userConfig.Quit();
+                        ShowConnectionError(response.Error);
+                    }
+                    else
+                    {
+                        FinishDialog();
+                    }
+                });
+            }
+            catch (NoFreePortException ex)
+            {
+                _userConfig.Quit();
+                ShowConnectionError(ex.Message);
+            }
+            
         }
 
         private void ShowConnectionError(string error)
