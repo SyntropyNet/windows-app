@@ -49,6 +49,7 @@
     <Compile Include="Models\Messages\ConfigInfoRequest.cs" />
     <Compile Include="Models\Messages\ContainerInfoRequest.cs" />
     <Compile Include="Models\Messages\GetConfigInfoRequest.cs" />
+    <Compile Include="Models\Messages\GetInfoError.cs" />
     <Compile Include="Models\Messages\GetInfoRequest.cs" />
     <Compile Include="Models\Messages\GetInfoResponse.cs" />
     <Compile Include="Models\Messages\IfaceBWDataRequest.cs" />

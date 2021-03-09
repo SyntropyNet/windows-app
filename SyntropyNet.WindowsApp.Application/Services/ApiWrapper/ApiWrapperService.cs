@@ -189,13 +189,33 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                                 var getInfoRequest = JsonConvert.DeserializeObject<GetInfoRequest>(
                                     msg.Text, JsonSettings.GetSnakeCaseNamingStrategy());
 
-                                if (getInfoHandler != null)
+                                try
                                 {
-                                    getInfoHandler.Interrupt();
-                                    getInfoHandler = null;
+                                    if (getInfoHandler != null)
+                                    {
+                                        getInfoHandler.Interrupt();
+                                        getInfoHandler = null;
+                                    }
+                                    getInfoHandler = new GetInfoHandler(client, _httpRequestService, _dockerApiService);
+                                    getInfoHandler.Start(getInfoRequest);
                                 }
-                                getInfoHandler = new GetInfoHandler(client, _httpRequestService, _dockerApiService);
-                                getInfoHandler.Start(getInfoRequest);
+                                catch (Exception ex)
+                                {
+                                    var errorMsg = new GetInfoError
+                                    {
+                                        Id = getInfoRequest.Id,
+                                        Error = new GetInfoErrorData
+                                        {
+                                            Messages = ex.Message,
+                                            Stacktrace = ex.StackTrace
+                                        }
+                                    };
+
+                                    var message = JsonConvert.SerializeObject(errorMsg,
+                                        JsonSettings.GetSnakeCaseNamingStrategy());
+                                    Debug.WriteLine($"'GET_INFO' error: {message}");
+                                    client.Send(message);
+                                }
 
                                 break;
                            case "WG_CONF":
