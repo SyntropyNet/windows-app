@@ -2,6 +2,7 @@
 using SyntropyNet.WindowsApp.Application.Contracts;
 using SyntropyNet.WindowsApp.Application.Domain.Enums.WireGuard;
 using SyntropyNet.WindowsApp.Application.Domain.Models.WireGuard;
+using SyntropyNet.WindowsApp.Application.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -171,6 +172,11 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
             SetInterfaceConfig(interfaces, tunnelConfig.Interface, null);
         }
 
+        public void RemoveInterface(WGInterfaceName interfaceName)
+        {
+            CreateInterface(interfaceName);
+        }
+
         private void SetInterfaceConfig(WGInterfaceName interfaceName, Interface interfaceSection, IEnumerable<Peer> peerSection)
         {
             StringBuilder configString = new StringBuilder();
@@ -300,7 +306,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
             else if (interfaceName == WGInterfaceName.SYNTROPY_SDN3)
                 return SDN3Interface;
             else
-                throw new Exception();
+                throw new NotFoundInterfaceException();
         }
 
         private string GetPathToInterfaceConfig(WGInterfaceName nameInterface)
@@ -491,6 +497,20 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
             }
 
             return peersDataFromPipe;
+        }
+
+        public WGInterfaceName GetWGInterfaceNameFromString(string name)
+        {
+            if (name == WGInterfaceName.SYNTROPY_PUBLIC.ToString())
+                return WGInterfaceName.SYNTROPY_PUBLIC;
+            else if (name == WGInterfaceName.SYNTROPY_SDN1.ToString())
+                return WGInterfaceName.SYNTROPY_SDN1;
+            else if (name == WGInterfaceName.SYNTROPY_SDN2.ToString())
+                return WGInterfaceName.SYNTROPY_SDN2;
+            else if (name == WGInterfaceName.SYNTROPY_SDN3.ToString())
+                return WGInterfaceName.SYNTROPY_SDN3;
+            else
+                throw new NotFoundInterfaceException();
         }
 
         public void Dispose()

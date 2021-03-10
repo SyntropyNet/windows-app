@@ -49,6 +49,8 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                                 break;
                         }
                     }
+
+                    _WGConfigService.ApplyModifiedConfigs();
                 }
             });
 
@@ -62,24 +64,17 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
 
         private void CreateInterface(string idRequest, WGConfRequestData data)
         {
-            Interface WGInterface;
-            if (File.Exists(_WGConfigService.PathToConfigFile()))
-                WGInterface = _WGConfigService.GetInterface();
-            else
-            {
-                _WGConfigService.CreateConfig();
-                WGInterface = _WGConfigService.GetInterface();
-            }
+            var nameInterfce = _WGConfigService.GetWGInterfaceNameFromString(data.Args.Ifname);
 
             var WGConfResponse = new WGConfResponse
             {
                 Id = idRequest,
                 Data = new WGConfResponseData
                 {
-                    Ifname = _WGConfigService.InterfaceName,
+                    Ifname = _WGConfigService.GetInterfaceName(nameInterfce),
                     InternalIp = data.Args.InternalIp,
-                    ListenPort = WGInterface.ListenPort,
-                    PublicKey = _WGConfigService.PublicKey
+                    ListenPort = _WGConfigService.GetListenPort(nameInterfce),
+                    PublicKey = _WGConfigService.GetPublicKey(nameInterfce)
                 }
             };
 
@@ -91,15 +86,15 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
 
         private void RemoveInterace(WGConfRequestData data)
         {
-            if(data.Args.Ifname == _WGConfigService.InterfaceName)
-            {
-                _WGConfigService.RemoveConfig();
-            }
+            var nameInterfce = _WGConfigService.GetWGInterfaceNameFromString(data.Args.Ifname);
+            _WGConfigService.RemoveInterface(nameInterfce);
         }
 
         private void AddPeer(WGConfRequestData data)
         {
-            List<Peer> WgPeers = _WGConfigService.GetPeers().ToList();
+            var nameInterfce = _WGConfigService.GetWGInterfaceNameFromString(data.Args.Ifname);
+            List<Peer> WgPeers = _WGConfigService.GetPeerSections(nameInterfce).ToList();
+            
             List<WGRouteStatus> wGRouteStatuses = new List<WGRouteStatus>();
 
             var requestPeer = new Peer
@@ -150,8 +145,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                     Client.Send(WGRouteStatusMessage);
 
                     WgPeer.AllowedIPs = allowedIps;
-                    _WGConfigService.SetPeers(WgPeers);
-                    _WGConfigService.ApplyChange();
+                    _WGConfigService.SetPeerSections(nameInterfce, WgPeers);
                     return;
                 }
             }
@@ -178,21 +172,20 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
             Client.Send(message);
 
             WgPeers.Add(requestPeer);
-            _WGConfigService.SetPeers(WgPeers);
-            _WGConfigService.ApplyChange();
+            _WGConfigService.SetPeerSections(nameInterfce, WgPeers);
         }
 
         private void RemovePeer(WGConfRequestData data)
         {
-            List<Peer> WgPeers = _WGConfigService.GetPeers().ToList();
+            var nameInterfce = _WGConfigService.GetWGInterfaceNameFromString(data.Args.Ifname);
+            List<Peer> WgPeers = _WGConfigService.GetPeerSections(nameInterfce).ToList();
 
             foreach (var WgPeer in WgPeers)
             {
                 if(WgPeer.PublicKey == data.Args.PublicKey)
                 {
                     WgPeers.Remove(WgPeer);
-                    _WGConfigService.SetPeers(WgPeers);
-                    _WGConfigService.ApplyChange();
+                    _WGConfigService.SetPeerSections(nameInterfce, WgPeers);
                     return;
                 }
             }
