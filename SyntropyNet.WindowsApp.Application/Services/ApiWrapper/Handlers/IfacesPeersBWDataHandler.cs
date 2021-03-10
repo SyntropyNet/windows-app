@@ -43,7 +43,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                         IEnumerable<Peer> peersInConfig = _WGConfigService.GetPeerSections(interfaceName);
                         List<IfacesPeersBWDataRequestPeer> peersForRequest = new List<IfacesPeersBWDataRequestPeer>();
                         
-                        if(peersInConfig.Count() > 0)
+                        if(peersInConfig != null && peersInConfig.Count() > 0)
                         {
                             foreach (var peer in peersInConfig)
                             {
