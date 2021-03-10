@@ -142,6 +142,9 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
         {
             TunnelConfig interfaceConfig = GetHowName(interfaceName);
 
+            if (interfaceConfig.Peers == null)
+                return new List<Peer>();
+
             return interfaceConfig.Peers;
         }
 
