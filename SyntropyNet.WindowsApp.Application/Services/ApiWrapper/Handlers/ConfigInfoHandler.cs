@@ -1,16 +1,15 @@
 ﻿using Newtonsoft.Json;
 using SyntropyNet.WindowsApp.Application.Contracts;
+using SyntropyNet.WindowsApp.Application.Domain.Enums.WireGuard;
 using SyntropyNet.WindowsApp.Application.Domain.Models.Messages;
 using SyntropyNet.WindowsApp.Application.Domain.Models.WireGuard;
+using SyntropyNet.WindowsApp.Application.Exceptions;
 using SyntropyNet.WindowsApp.Application.Helpers;
-using SyntropyNet.WindowsApp.Application.Services.WireGuard;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using Websocket.Client;
 
 namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
@@ -48,6 +47,8 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                 {
                     SetPeers(request);
                 }
+
+                _WGConfigService.ApplyModifiedConfigs();
             });
 
             mainTask.Start();
@@ -60,51 +61,78 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
 
         private void SetPeers(ConfigInfoRequest request)
         {
-            var @interface = _WGConfigService.GetInterface();
-            List<string> address = new List<string>();
-            if (@interface.Address != null)
-                address = @interface.Address.ToList<string>();
+            var publicPeerSection = _WGConfigService.GetPeerSections(WGInterfaceName.SYNTROPY_PUBLIC).ToList();
+            var sdn1PeerSection = _WGConfigService.GetPeerSections(WGInterfaceName.SYNTROPY_SDN1).ToList();
+            var sdn2PeerSection = _WGConfigService.GetPeerSections(WGInterfaceName.SYNTROPY_SDN2).ToList();
+            var sdn3PeerSection = _WGConfigService.GetPeerSections(WGInterfaceName.SYNTROPY_SDN3).ToList();
 
-            List<Peer> peers = new List<Peer>();
-
-            if(request.Data.Vpn.Count() > 0)
+            if (request.Data.Vpn.Count() > 0)
             {
                 foreach (var item in request.Data.Vpn)
                 {
-                    if (!address.Contains(item.Args.GwIpv4))
-                        address.Add(item.Args.GwIpv4);
-
-                    peers.Add(new Peer
+                    if(item.Args.Ifname == _WGConfigService.GetInterfaceName(WGInterfaceName.SYNTROPY_PUBLIC))
                     {
-                        PublicKey = item.Args.PublicKey,
-                        AllowedIPs = item.Args.AllowedIps,
-                        Endpoint = $"{item.Args.EndpointIpv4}:{item.Args.EndpointPort}"
-                    });
+                        publicPeerSection.Add(new Peer
+                        {
+                            PublicKey = item.Args.PublicKey,
+                            AllowedIPs = item.Args.AllowedIps,
+                            Endpoint = $"{item.Args.EndpointIpv4}:{item.Args.EndpointPort}"
+                        });
+                    }
+                    else if(item.Args.Ifname == _WGConfigService.GetInterfaceName(WGInterfaceName.SYNTROPY_SDN1))
+                    {
+                        sdn1PeerSection.Add(new Peer
+                        {
+                            PublicKey = item.Args.PublicKey,
+                            AllowedIPs = item.Args.AllowedIps,
+                            Endpoint = $"{item.Args.EndpointIpv4}:{item.Args.EndpointPort}"
+                        });
+                    }
+                    else if(item.Args.Ifname == _WGConfigService.GetInterfaceName(WGInterfaceName.SYNTROPY_SDN2))
+                    {
+                        sdn2PeerSection.Add(new Peer
+                        {
+                            PublicKey = item.Args.PublicKey,
+                            AllowedIPs = item.Args.AllowedIps,
+                            Endpoint = $"{item.Args.EndpointIpv4}:{item.Args.EndpointPort}"
+                        });
+                    }
+                    else if (item.Args.Ifname == _WGConfigService.GetInterfaceName(WGInterfaceName.SYNTROPY_SDN3))
+                    {
+                        sdn3PeerSection.Add(new Peer
+                        {
+                            PublicKey = item.Args.PublicKey,
+                            AllowedIPs = item.Args.AllowedIps,
+                            Endpoint = $"{item.Args.EndpointIpv4}:{item.Args.EndpointPort}"
+                        });
+                    }
+                    else
+                    {
+                        throw new NotFoundInterfaceException();
+                    }
                 }
 
-                @interface.Address = address;
-                _WGConfigService.SetInterface(@interface);
-                _WGConfigService.SetPeers(peers);
-                _WGConfigService.ApplyChange();
+                _WGConfigService.SetPeerSections(WGInterfaceName.SYNTROPY_PUBLIC, publicPeerSection);
+                _WGConfigService.SetPeerSections(WGInterfaceName.SYNTROPY_SDN1, sdn1PeerSection);
+                _WGConfigService.SetPeerSections(WGInterfaceName.SYNTROPY_SDN2, sdn2PeerSection);
+                _WGConfigService.SetPeerSections(WGInterfaceName.SYNTROPY_SDN3, sdn3PeerSection);
             }
         }
 
         private bool CheckPublicKeyAndPort(ConfigInfoRequest request)
         {
             bool check = true;
-            string publicKey = _WGConfigService.PublicKey;
-            int listenPort = _WGConfigService.GetInterface().ListenPort;
 
-            if (request.Data.Network.Public.PublicKey != publicKey ||
-                request.Data.Network.Sdn1.PublicKey != publicKey ||
-                request.Data.Network.Sdn2.PublicKey != publicKey ||
-                request.Data.Network.Sdn3.PublicKey != publicKey)
+            if (request.Data.Network.Public.PublicKey != _WGConfigService.GetPublicKey(WGInterfaceName.SYNTROPY_PUBLIC) ||
+                request.Data.Network.Sdn1.PublicKey != _WGConfigService.GetPublicKey(WGInterfaceName.SYNTROPY_SDN1) ||
+                request.Data.Network.Sdn2.PublicKey != _WGConfigService.GetPublicKey(WGInterfaceName.SYNTROPY_SDN2) ||
+                request.Data.Network.Sdn3.PublicKey != _WGConfigService.GetPublicKey(WGInterfaceName.SYNTROPY_SDN3))
                 check = false;
 
-            if (request.Data.Network.Public.ListenPort != listenPort ||
-                request.Data.Network.Sdn1.ListenPort != listenPort ||
-                request.Data.Network.Sdn2.ListenPort != listenPort ||
-                request.Data.Network.Sdn3.ListenPort != listenPort)
+            if (request.Data.Network.Public.ListenPort != _WGConfigService.GetListenPort(WGInterfaceName.SYNTROPY_PUBLIC) ||
+                request.Data.Network.Sdn1.ListenPort != _WGConfigService.GetListenPort(WGInterfaceName.SYNTROPY_SDN1) ||
+                request.Data.Network.Sdn2.ListenPort != _WGConfigService.GetListenPort(WGInterfaceName.SYNTROPY_SDN2) ||
+                request.Data.Network.Sdn3.ListenPort != _WGConfigService.GetListenPort(WGInterfaceName.SYNTROPY_SDN3))
                 check = false;
 
             return check;
@@ -112,9 +140,11 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
 
         private UpdateAgentConfigRequest<CreateInterface> SetPublicKeyAndPort(ConfigInfoRequest request)
         {
-            string interfaceName = _WGConfigService.InterfaceName;
-            string publicKey = _WGConfigService.PublicKey;
-            int listenPort = _WGConfigService.GetInterface().ListenPort;
+            var publicInterfaceSection = _WGConfigService.GetInterfaceSection(WGInterfaceName.SYNTROPY_PUBLIC);
+            var sdn1InterfaceSection = _WGConfigService.GetInterfaceSection(WGInterfaceName.SYNTROPY_SDN1);
+            var sdn2InterfaceSection = _WGConfigService.GetInterfaceSection(WGInterfaceName.SYNTROPY_SDN2);
+            var sdn3InterfaceSection = _WGConfigService.GetInterfaceSection(WGInterfaceName.SYNTROPY_SDN3);
+
             var data = new List<CreateInterface>();
 
             if (!_networkInformationService.CheckPing(request.Data.Network.Public.InternalIp))
@@ -123,12 +153,14 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                 {
                     Data = new CreateInterfaceData
                     {
-                        Ifname = interfaceName,
+                        Ifname = _WGConfigService.GetInterfaceName(WGInterfaceName.SYNTROPY_PUBLIC),
                         InternalIp = request.Data.Network.Public.InternalIp,
-                        PublicKey = publicKey,
-                        ListenPort = listenPort,
+                        PublicKey = _WGConfigService.GetPublicKey(WGInterfaceName.SYNTROPY_PUBLIC),
+                        ListenPort = _WGConfigService.GetListenPort(WGInterfaceName.SYNTROPY_PUBLIC),
                     }
                 });
+
+                publicInterfaceSection.Address = new List<string>() { request.Data.Network.Public.InternalIp };
             }
             else
             {
@@ -141,12 +173,14 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                 {
                     Data = new CreateInterfaceData
                     {
-                        Ifname = interfaceName,
+                        Ifname = _WGConfigService.GetInterfaceName(WGInterfaceName.SYNTROPY_SDN1),
                         InternalIp = request.Data.Network.Sdn1.InternalIp,
-                        PublicKey = publicKey,
-                        ListenPort = listenPort,
+                        PublicKey = _WGConfigService.GetPublicKey(WGInterfaceName.SYNTROPY_SDN1),
+                        ListenPort = _WGConfigService.GetListenPort(WGInterfaceName.SYNTROPY_SDN1),
                     }
                 });
+
+                sdn1InterfaceSection.Address = new List<string>() { request.Data.Network.Sdn1.InternalIp };
             }
             else
             {
@@ -159,12 +193,14 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                 {
                     Data = new CreateInterfaceData
                     {
-                        Ifname = interfaceName,
+                        Ifname = _WGConfigService.GetInterfaceName(WGInterfaceName.SYNTROPY_SDN2),
                         InternalIp = request.Data.Network.Sdn2.InternalIp,
-                        PublicKey = publicKey,
-                        ListenPort = listenPort,
+                        PublicKey = _WGConfigService.GetPublicKey(WGInterfaceName.SYNTROPY_SDN2),
+                        ListenPort = _WGConfigService.GetListenPort(WGInterfaceName.SYNTROPY_SDN2),
                     }
                 });
+
+                sdn2InterfaceSection.Address = new List<string>() { request.Data.Network.Sdn2.InternalIp };
             }
             else
             {
@@ -177,17 +213,24 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                 {
                     Data = new CreateInterfaceData
                     {
-                        Ifname = interfaceName,
+                        Ifname = _WGConfigService.GetInterfaceName(WGInterfaceName.SYNTROPY_SDN3),
                         InternalIp = request.Data.Network.Sdn3.InternalIp,
-                        PublicKey = publicKey,
-                        ListenPort = listenPort,
+                        PublicKey = _WGConfigService.GetPublicKey(WGInterfaceName.SYNTROPY_SDN3),
+                        ListenPort = _WGConfigService.GetListenPort(WGInterfaceName.SYNTROPY_SDN3),
                     }
                 });
+
+                sdn3InterfaceSection.Address = new List<string>() { request.Data.Network.Sdn3.InternalIp };
             }
             else
             {
                 SendError(request.Id, request.Data.Network.Sdn3.InternalIp);
             }
+
+            _WGConfigService.SetInterfaceSection(WGInterfaceName.SYNTROPY_PUBLIC, publicInterfaceSection);
+            _WGConfigService.SetInterfaceSection(WGInterfaceName.SYNTROPY_SDN1, sdn1InterfaceSection);
+            _WGConfigService.SetInterfaceSection(WGInterfaceName.SYNTROPY_SDN2, sdn2InterfaceSection);
+            _WGConfigService.SetInterfaceSection(WGInterfaceName.SYNTROPY_SDN3, sdn3InterfaceSection);
 
             var updateRequest = new UpdateAgentConfigRequest<CreateInterface>
             {

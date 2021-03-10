@@ -16,6 +16,10 @@ namespace SyntropyNet.WindowsApp.Application.Contracts
         void StopWG();
         void ApplyModifiedConfigs();
 
+        string GetPublicKey(WGInterfaceName interfaceName);
+        string GetInterfaceName(WGInterfaceName interfaceName);
+        int GetListenPort(WGInterfaceName interfaceName);
+
         Interface GetInterfaceSection(WGInterfaceName interfaceName);
         void SetInterfaceSection(WGInterfaceName interfaceName, Interface interfaceSection);
         

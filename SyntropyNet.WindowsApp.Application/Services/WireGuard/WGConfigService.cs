@@ -96,6 +96,24 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
             Remove(GetPathToInterfaceConfig(WGInterfaceName.SYNTROPY_SDN3), true);
         }
 
+        public string GetPublicKey(WGInterfaceName interfaceName)
+        {
+            TunnelConfig interfaceConfig = GetHowName(interfaceName);
+            return interfaceConfig.PublicKey;
+        }
+
+        public string GetInterfaceName(WGInterfaceName interfaceName)
+        {
+            TunnelConfig interfaceConfig = GetHowName(interfaceName);
+            return interfaceConfig.Name;
+        }
+
+        public int GetListenPort(WGInterfaceName interfaceName)
+        {
+            TunnelConfig interfaceConfig = GetHowName(interfaceName);
+            return interfaceConfig.Interface.ListenPort;
+        }
+
         public void SetInterfaceSection(WGInterfaceName interfaceName, Interface interfaceSection)
         {
             TunnelConfig interfaceConfig = GetHowName(interfaceName);

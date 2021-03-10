@@ -103,6 +103,7 @@
     <Compile Include="Contracts\IUserConfig.cs" />
     <Compile Include="Contracts\IWGConfigService.cs" />
     <Compile Include="Exceptions\NoFreePortException.cs" />
+    <Compile Include="Exceptions\NotFoundInterfaceException.cs" />
     <Compile Include="Models\ServiceModel.cs" />
     <Compile Include="Helpers\JsonSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
