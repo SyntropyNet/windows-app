@@ -22,10 +22,12 @@ namespace SyntropyNet.WindowsApp.Application.Domain.Models.Messages
         {
             AgentTags = new List<string>();
             ContainerInfo = new List<ContainerInfo>();
+            NetworkInfo = new List<string>();
         }
         public int? AgentProvider { get; set; }
         public bool ServiceStatus { get; set; }
         public IEnumerable<string> AgentTags { get; set; }
+        public IEnumerable<string> NetworkInfo { get; set; }
         public string ExternalIp { get; set; }
         public IEnumerable<ContainerInfo> ContainerInfo { get; set; }
     }

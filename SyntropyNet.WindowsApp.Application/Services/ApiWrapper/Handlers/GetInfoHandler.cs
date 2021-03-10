@@ -40,7 +40,6 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
 
                 responseData.AgentProvider = GetAgentProvider();
                 responseData.ServiceStatus = GetServiceStatus();
-                responseData.AgentTags = GetAgentTags();
                 responseData.ExternalIp = GetExternalIp();
                 responseData.ContainerInfo = GetContainerInfo();
 
@@ -72,12 +71,6 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
         private string GetExternalIp()
         {
             return _httpRequestService.GetResponse(AppConstants.EXTERNAL_IP_URL);
-        }
-
-        private IEnumerable<string> GetAgentTags()
-        {
-            //ToDo: Need to implement the GetAgentTags method
-            return null;
         }
 
         private bool GetServiceStatus()
