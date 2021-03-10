@@ -78,7 +78,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                     Debug.WriteLine($"IFACES_PEERS_BW_DATA: {message}");
                     Client.Send(message);
 
-                    Thread.Sleep(REFRESH_INFO);
+                    await Task.Delay(REFRESH_INFO);
                 }
 
             });

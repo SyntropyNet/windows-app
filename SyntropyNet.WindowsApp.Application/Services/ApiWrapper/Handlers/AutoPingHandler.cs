@@ -52,7 +52,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                     Debug.WriteLine($"auto ping: {message}");
                     Client.Send(message);
 
-                    Thread.Sleep(TimeSpan.FromSeconds(request.Data.Interval));
+                    await Task.Delay(TimeSpan.FromSeconds(request.Data.Interval));
                 }
 
             });

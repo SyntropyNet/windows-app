@@ -50,7 +50,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                         Client.Send(message);
                     }
 
-                    Thread.Sleep(REFRESH_INFO);
+                    await Task.Delay(REFRESH_INFO);
                 }
 
             });
