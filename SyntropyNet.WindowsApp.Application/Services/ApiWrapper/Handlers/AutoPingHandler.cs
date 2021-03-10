@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using SyntropyNet.WindowsApp.Application.Domain.Models.Messages;
+using SyntropyNet.WindowsApp.Application.Helpers;
 using Websocket.Client;
 
 namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
@@ -26,10 +27,10 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
         {
             mainTask?.Abort();
 
-            //if (!request.Data.Ips.Any())
-            //{
-            //    return;
-            //}
+            if (!request.Data.Ips.Any())
+            {
+                return;
+            }
 
             mainTask = new Thread(async () =>
             {
@@ -48,7 +49,8 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                         Data = new AutoPingResponseData {Pings = results}
                     };
 
-                    var message = JsonConvert.SerializeObject(response);
+                    var message = JsonConvert.SerializeObject(response,
+                        JsonSettings.GetSnakeCaseNamingStrategy());
                     Debug.WriteLine($"auto ping: {message}");
                     Client.Send(message);
 
