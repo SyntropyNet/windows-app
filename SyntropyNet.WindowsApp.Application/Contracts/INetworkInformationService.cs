@@ -10,7 +10,7 @@ namespace SyntropyNet.WindowsApp.Application.Contracts
     public interface INetworkInformationService
     {
         IEnumerable<IfaceBWDataRequestData> GetInformNetworkInterface();
-        int GetNextFreePort();
+        int GetNextFreePort(IEnumerable<int> exceptPort = null);
         bool CheckPing(string ip, int timeout = 1000);
     }
 }

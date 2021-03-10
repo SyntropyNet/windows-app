@@ -155,8 +155,9 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
 
         private void CreateInterface(WGInterfaceName interfaces)
         {
+            var expectPort = GetUsedPorts();
             Keypair keypair = Keypair.Generate();
-            int listenPort = _networkService.GetNextFreePort();
+            int listenPort = _networkService.GetNextFreePort(expectPort);
 
             var tunnelConfig = new TunnelConfig
             {
@@ -169,7 +170,38 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
                 }
             };
 
+            if (interfaces == WGInterfaceName.SYNTROPY_PUBLIC)
+                PublicInterface = tunnelConfig;
+            else if (interfaces == WGInterfaceName.SYNTROPY_SDN1)
+                SDN1Interface = tunnelConfig;
+            else if (interfaces == WGInterfaceName.SYNTROPY_SDN2)
+                SDN2Interface = tunnelConfig;
+            else if (interfaces == WGInterfaceName.SYNTROPY_SDN3)
+                SDN3Interface = tunnelConfig;
+            else
+                throw new NotFoundInterfaceException();
+
             SetInterfaceConfig(interfaces, tunnelConfig.Interface, null);
+        }
+
+        private List<int> GetUsedPorts()
+        {
+            var expectPort = new List<int>();
+            
+            if (PublicInterface?.Interface?.ListenPort != null
+                && PublicInterface.Interface.ListenPort > 0)
+                expectPort.Add(PublicInterface.Interface.ListenPort);
+            if (SDN1Interface?.Interface?.ListenPort != null
+                && SDN1Interface.Interface.ListenPort > 0)
+                expectPort.Add(SDN1Interface.Interface.ListenPort);
+            if (SDN2Interface?.Interface?.ListenPort != null
+                && SDN2Interface.Interface.ListenPort > 0)
+                expectPort.Add(SDN2Interface.Interface.ListenPort);
+            if (SDN3Interface?.Interface?.ListenPort != null
+                && SDN3Interface.Interface.ListenPort > 0)
+                expectPort.Add(SDN3Interface.Interface.ListenPort);
+
+            return expectPort;
         }
 
         public void RemoveInterface(WGInterfaceName interfaceName)

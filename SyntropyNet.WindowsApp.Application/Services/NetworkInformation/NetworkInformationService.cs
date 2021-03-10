@@ -83,7 +83,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
             };
         }
 
-        public int GetNextFreePort()
+        public int GetNextFreePort(IEnumerable<int> exceptPort = null)
         {
             var range = Enumerable.Range(START_PORT, MAX_PORT);
             var portsInUse =
@@ -91,6 +91,9 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
                     join used in System.Net.NetworkInformation.IPGlobalProperties.GetIPGlobalProperties().GetActiveUdpListeners()
                 on p equals used.Port
                     select p;
+
+            if (exceptPort != null)
+                portsInUse = portsInUse.Union(exceptPort);
 
             var FirstFreeUDPPortInRange = range.Except(portsInUse).FirstOrDefault();
 
