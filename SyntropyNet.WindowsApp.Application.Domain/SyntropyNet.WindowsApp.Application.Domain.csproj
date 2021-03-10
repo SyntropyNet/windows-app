@@ -64,7 +64,6 @@
     <Compile Include="Models\WireGuard\Keypair.cs" />
     <Compile Include="Models\WireGuard\PeerDataFromPipe.cs" />
     <Compile Include="Models\WireGuard\TunnelConfig.cs" />
-    <Compile Include="Models\WireGuard\TunnelSettings.cs" />
     <Compile Include="Models\WSConnectionResponse.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

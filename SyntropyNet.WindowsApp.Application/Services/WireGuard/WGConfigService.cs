@@ -28,7 +28,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
         private TunnelConfig SDN2Interface { get; set; }
         private TunnelConfig SDN3Interface { get; set; }
 
-        public WGConfigService(TunnelSettings tunnelSettings, INetworkInformationService networkService)
+        public WGConfigService(INetworkInformationService networkService)
         {
             _networkService = networkService;
         }

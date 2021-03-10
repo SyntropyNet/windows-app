@@ -114,8 +114,6 @@ namespace SyntropyNet.WindowsApp
             containerRegistry.RegisterSingleton<IApiWrapperService, ApiWrapperService>();
             containerRegistry.RegisterSingleton<IHttpRequestService, HttpRequestService>();
             containerRegistry.RegisterSingleton<IDockerApiService, DockerApiService>();
-            containerRegistry.RegisterInstance(new TunnelSettings(
-                WireGuardConstants.CONFIG_FILE_LOCATION, WireGuardConstants.INTERFACE_NAME));
             containerRegistry.RegisterSingleton<IWGConfigService, WGConfigService>();
             containerRegistry.RegisterSingleton<INetworkInformationService, NetworkInformationService>();
             containerRegistry.RegisterDialog<AddToken, AddTokenViewModel>();

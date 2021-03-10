@@ -28,7 +28,7 @@ namespace SyntropyNet.WindowsApp.Application.Contracts
 
         IEnumerable<PeerDataFromPipe> GetPeersDataFromPipe(WGInterfaceName interfaceName);
         WGInterfaceName GetWGInterfaceNameFromString(string name);
-        void RemoveInterface(WGInterfaceName interfaceName)
+        void RemoveInterface(WGInterfaceName interfaceName);
         void Dispose();
     }
 }
