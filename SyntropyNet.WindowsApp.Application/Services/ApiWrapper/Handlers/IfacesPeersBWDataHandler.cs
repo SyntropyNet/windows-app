@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using SyntropyNet.WindowsApp.Application.Contracts;
+using SyntropyNet.WindowsApp.Application.Domain.Enums.WireGuard;
 using SyntropyNet.WindowsApp.Application.Domain.Models.Messages;
 using SyntropyNet.WindowsApp.Application.Domain.Models.WireGuard;
 using SyntropyNet.WindowsApp.Application.Helpers;
@@ -35,32 +36,41 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
             {
                 while (true)
                 {
-                    IEnumerable<Peer> peersInConfig = _WGConfigService.GetPeers();
-                    List<IfacesPeersBWDataRequestPeer> peersForRequest = new List<IfacesPeersBWDataRequestPeer>();
-                    foreach (var peer in peersInConfig)
+                    var data = new List<IfacesPeersBWDataRequestData>();
+
+                    foreach (WGInterfaceName interfaceName in Enum.GetValues(typeof(WGInterfaceName)))
                     {
-                        peersForRequest.Add(new IfacesPeersBWDataRequestPeer 
-                        { 
-                            PublicKey = peer.PublicKey,
-                            AllowedIps = peer.AllowedIPs,
-                            Endpoint = peer.Endpoint,
-                            InternalIp = GetInternalIp(peer.AllowedIPs),
+                        IEnumerable<Peer> peersInConfig = _WGConfigService.GetPeerSections(interfaceName);
+                        List<IfacesPeersBWDataRequestPeer> peersForRequest = new List<IfacesPeersBWDataRequestPeer>();
+                        
+                        if(peersInConfig.Count() > 0)
+                        {
+                            foreach (var peer in peersInConfig)
+                            {
+                                peersForRequest.Add(new IfacesPeersBWDataRequestPeer
+                                {
+                                    PublicKey = peer.PublicKey,
+                                    AllowedIps = peer.AllowedIPs,
+                                    Endpoint = peer.Endpoint,
+                                    InternalIp = GetInternalIp(interfaceName, peer.AllowedIPs),
+                                });
+                            }
+
+                            peersForRequest = JuxtaposeData(peersForRequest, _WGConfigService.GetPeersDataFromPipe(interfaceName));
+                            peersForRequest = SetStatus(peersForRequest);
+                        }
+
+                        data.Add(new IfacesPeersBWDataRequestData
+                        {
+                            Iface = _WGConfigService.GetInterfaceName(interfaceName),
+                            IfacePublicKey = _WGConfigService.GetPublicKey(interfaceName),
+                            Peers = peersForRequest
                         });
                     }
 
-                    peersForRequest = JuxtaposeData(peersForRequest, _WGConfigService.GetPeersDataFromPipe());
-                    peersForRequest = SetStatus(peersForRequest);
-
-
-
                     var ifacesPeersBWDataRequest = new IfacesPeersBWDataRequest
                     {
-                        Data = new IfacesPeersBWDataRequestData
-                        {
-                            Iface = _WGConfigService.InterfaceName,
-                            IfacePublicKey = _WGConfigService.PublicKey,
-                            Peers = peersForRequest
-                        }
+                        Data = data
                     };
 
                     var message = JsonConvert.SerializeObject(ifacesPeersBWDataRequest,
@@ -123,10 +133,13 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
             return peersForRequest;
         }
 
-        private string GetInternalIp(IEnumerable<string> allowedIPs)
+        private string GetInternalIp(WGInterfaceName interfaceName, IEnumerable<string> allowedIPs)
         {
-            Interface @interface = _WGConfigService.GetInterface();
-            string address = @interface.Address.First();
+            Interface @interface = _WGConfigService.GetInterfaceSection(interfaceName);
+            string address = @interface.Address.FirstOrDefault();
+
+            if (string.IsNullOrEmpty(address))
+                return "";
 
             foreach (var item in allowedIPs)
             {

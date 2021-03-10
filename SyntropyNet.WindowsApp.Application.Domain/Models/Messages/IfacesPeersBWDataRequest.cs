@@ -23,7 +23,7 @@ namespace SyntropyNet.WindowsApp.Application.Domain.Models.Messages
             Type = "IFACES_PEERS_BW_DATA";
         }
 
-        public IfacesPeersBWDataRequestData Data { get; set; }
+        public IEnumerable<IfacesPeersBWDataRequestData> Data { get; set; }
     }
 
     public class IfacesPeersBWDataRequestData
