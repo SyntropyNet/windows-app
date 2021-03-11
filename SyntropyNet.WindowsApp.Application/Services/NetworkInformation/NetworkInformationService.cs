@@ -110,12 +110,18 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
 
         public bool CheckPing(string ip, int timeout = 1000)
         {
-            Ping pingSender = new Ping();
-            PingReply reply = pingSender.Send(ip, timeout);
+            try { 
+                Ping pingSender = new Ping();
+                PingReply reply = pingSender.Send(ip, timeout);
 
-            var status = reply.Status;
-            if (status == IPStatus.Success)
-                return true;
+                var status = reply.Status;
+                if (status == IPStatus.Success)
+                    return true;
+                }
+            catch
+            {
+                return false;
+            }
 
             return false;
         }

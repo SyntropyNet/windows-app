@@ -41,6 +41,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
 
         private ManualResetEvent exitEvent { get; set;}
         private bool Running { get; set; }
+        private bool Stopping { get; set; }
 
         private AutoPingHandler autoPingHandler;
         private GetInfoHandler getInfoHandler;
@@ -83,7 +84,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                 // ToDo:: add custom exception here;
                 return;
             }
-
+            Stopping = false;
             _WGConfigService.RunWG();
             new Thread(async () =>
             {
@@ -115,6 +116,10 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                         Debug.WriteLine($"Reconnection happened, type: {info.Type}"));
 
                     client.MessageReceived.Subscribe(msg => {
+                        if (Stopping)
+                        {
+                            return;
+                        }
                         Debug.WriteLine($"Message received: {msg}");
                         var obj = JsonConvert.DeserializeObject<BaseMessage>(msg.Text);
                         if (obj == null)
@@ -370,12 +375,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
 
         public void Stop()
         {
-            if(exitEvent != null)
-            {
-                // set ManualResetEvent to stop the Thread
-                // client will be disposed in using
-                exitEvent.Set();
-            }
+            Stopping = true;
             if (autoPingHandler != null)
             {
                 autoPingHandler.Interrupt();
@@ -410,6 +410,13 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
             {
                 ifaceBWDataHandler.Interrupt();
                 ifaceBWDataHandler = null;
+            }
+
+            if (exitEvent != null)
+            {
+                // set ManualResetEvent to stop the Thread
+                // client will be disposed in using
+                exitEvent.Set();
             }
 
             _WGConfigService.StopWG();

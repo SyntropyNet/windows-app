@@ -176,6 +176,10 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
                         _autoDisconnection = false;
                     }
                 }
+                else
+                {
+                    _autoDisconnection = false;
+                }
             }
         }
 
@@ -333,6 +337,7 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
                     var name = r.Parameters.GetValue<string>("Name");
                     var agentToken = r.Parameters.GetValue<string>("AgentToken");
                     SetUserAuthentication(true,name);
+                    SetConnected();
                 }
             });
         }
