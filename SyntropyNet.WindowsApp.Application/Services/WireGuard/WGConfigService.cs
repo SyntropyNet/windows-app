@@ -380,8 +380,21 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
                     Remove(configFile, true);
                 }
                 service = Win32.CreateService(scm, shortName, longName, Win32.ServiceAccessRights.AllAccess, Win32.ServiceType.Win32OwnProcess, Win32.ServiceStartType.Demand, Win32.ServiceError.Normal, pathAndArgs, null, IntPtr.Zero, "Nsi\0TcpIp", null, null);
+                for (int i = 1; i <= 10; i++)
+                {
+                    if (service == IntPtr.Zero)
+                    {
+                        Win32.CloseServiceHandle(service);
+                        Thread.Sleep(100);
+                        service = Win32.CreateService(scm, shortName, longName, Win32.ServiceAccessRights.AllAccess, Win32.ServiceType.Win32OwnProcess, Win32.ServiceStartType.Demand, Win32.ServiceError.Normal, pathAndArgs, null, IntPtr.Zero, "Nsi\0TcpIp", null, null);
+                        continue;
+                    }
+
+                    break;
+                }
                 if (service == IntPtr.Zero)
                     throw new Win32Exception(Marshal.GetLastWin32Error());
+
                 try
                 {
                     var sidType = Win32.ServiceSidType.Unrestricted;
