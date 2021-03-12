@@ -6,6 +6,7 @@ using SyntropyNet.WindowsApp.Application.Domain.Models.WireGuard;
 using SyntropyNet.WindowsApp.Application.Helpers;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
@@ -19,13 +20,22 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
 {
     public class IfacesPeersBWDataHandler : BaseHandler
     {
+        private readonly bool DebugLogger;
         private static int REFRESH_INFO = 10000;
         private readonly IWGConfigService _WGConfigService;
+        private readonly IAppSettings _appSettings;
 
         private Thread mainTask;
-        public IfacesPeersBWDataHandler(WebsocketClient client, IWGConfigService WGConfigService) : base(client)
+        public IfacesPeersBWDataHandler(
+            WebsocketClient client,
+            IWGConfigService WGConfigService,
+            IAppSettings appSettings) 
+            : base(client)
         {
+            DebugLogger = Convert.ToBoolean(ConfigurationManager.AppSettings.Get("DebugLogger"));
+
             _WGConfigService = WGConfigService;
+            _appSettings = appSettings;
         }
 
         public void Start()
@@ -77,6 +87,9 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                         JsonSettings.GetSnakeCaseNamingStrategy());
                     Debug.WriteLine($"IFACES_PEERS_BW_DATA: {message}");
                     Client.Send(message);
+
+                    if (DebugLogger)
+                        LoggerRequestHelper.Send(Client, _appSettings, message);
 
                     //await Task.Delay(REFRESH_INFO);
                     Thread.Sleep(REFRESH_INFO);

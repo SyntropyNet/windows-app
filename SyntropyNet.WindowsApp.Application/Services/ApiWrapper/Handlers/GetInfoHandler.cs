@@ -17,17 +17,23 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
 {
     class GetInfoHandler : BaseHandler
     {
+        private readonly bool DebugLogger;
         private readonly IHttpRequestService _httpRequestService;
         private readonly IDockerApiService _dockerApiService;
+        private readonly IAppSettings _appSettings;
         private Thread mainTask;
 
         public GetInfoHandler(WebsocketClient client, 
             IHttpRequestService httpRequestService,
-            IDockerApiService dockerApiService) 
+            IDockerApiService dockerApiService,
+            IAppSettings appSettings) 
             : base(client)
         {
+            DebugLogger = Convert.ToBoolean(ConfigurationManager.AppSettings.Get("DebugLogger"));
+
             _httpRequestService = httpRequestService;
             _dockerApiService = dockerApiService;
+            _appSettings = appSettings;
         }
 
         public void Start(GetInfoRequest request)
@@ -53,6 +59,9 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                     JsonSettings.GetSnakeCaseNamingStrategy());
                 Debug.WriteLine($"Get info: {message}");
                 Client.Send(message);
+
+                if (DebugLogger)
+                    LoggerRequestHelper.Send(Client, _appSettings, message);
             });
 
             mainTask.Start();

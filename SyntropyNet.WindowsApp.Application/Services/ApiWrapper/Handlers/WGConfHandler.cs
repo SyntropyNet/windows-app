@@ -3,7 +3,9 @@ using SyntropyNet.WindowsApp.Application.Contracts;
 using SyntropyNet.WindowsApp.Application.Domain.Models.Messages;
 using SyntropyNet.WindowsApp.Application.Domain.Models.WireGuard;
 using SyntropyNet.WindowsApp.Application.Helpers;
+using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -14,13 +16,21 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
 {
     public class WGConfHandler : BaseHandler
     {
+        private readonly bool DebugLogger;
         private Thread mainTask;
         private readonly IWGConfigService _WGConfigService;
+        private readonly IAppSettings _appSettings;
 
-        public WGConfHandler(WebsocketClient client, IWGConfigService WGConfigService)
+        public WGConfHandler(
+            WebsocketClient client,
+            IWGConfigService WGConfigService,
+            IAppSettings appSettings)
             : base(client)
         {
+            DebugLogger = Convert.ToBoolean(ConfigurationManager.AppSettings.Get("DebugLogger"));
+
             _WGConfigService = WGConfigService;
+            _appSettings = appSettings;
         }
 
         public void Start(WGConfRequest request)
@@ -82,6 +92,9 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                 JsonSettings.GetSnakeCaseNamingStrategy());
             Debug.WriteLine($"WG_CONF response: {message}");
             Client.Send(message);
+
+            if (DebugLogger)
+                LoggerRequestHelper.Send(Client, _appSettings, message);
         }
 
         private void RemoveInterace(WGConfRequestData data)
@@ -144,6 +157,9 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                     Debug.WriteLine($"WG_ROUTE_STATUS,: {WGRouteStatusMessage}");
                     Client.Send(WGRouteStatusMessage);
 
+                    if (DebugLogger)
+                        LoggerRequestHelper.Send(Client, _appSettings, WGRouteStatusMessage);
+
                     WgPeer.AllowedIPs = allowedIps;
                     _WGConfigService.SetPeerSections(nameInterfce, WgPeers);
                     return;
@@ -170,6 +186,9 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
             }, JsonSettings.GetSnakeCaseNamingStrategy());
             Debug.WriteLine($"WG_ROUTE_STATUS,: {message}");
             Client.Send(message);
+
+            if (DebugLogger)
+                LoggerRequestHelper.Send(Client, _appSettings, message);
 
             WgPeers.Add(requestPeer);
             _WGConfigService.SetPeerSections(nameInterfce, WgPeers);

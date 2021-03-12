@@ -4,6 +4,7 @@ using SyntropyNet.WindowsApp.Application.Domain.Models.Messages;
 using SyntropyNet.WindowsApp.Application.Helpers;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
@@ -15,15 +16,25 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
 {
     public class ContainerInfoHandler : BaseHandler
     {
+        private readonly bool DebugLogger;
         private static int REFRESH_INFO = 15000;
         private readonly IDockerApiService _dockerApiService;
+        private readonly IAppSettings _appSettings;
+
         private IEnumerable<ContainerInfo> ContainerInfoList { get; set; }
 
         private Thread mainTask;
-        public ContainerInfoHandler(WebsocketClient client, IDockerApiService dockerApiService) : base(client)
+        public ContainerInfoHandler(
+            WebsocketClient client, 
+            IDockerApiService dockerApiService,
+            IAppSettings appSettings) 
+            : base(client)
         {
+            DebugLogger = Convert.ToBoolean(ConfigurationManager.AppSettings.Get("DebugLogger"));
+
             _dockerApiService = dockerApiService;
             ContainerInfoList = new List<ContainerInfo>();
+            _appSettings = appSettings;
         }
 
         public void Start()
@@ -48,6 +59,9 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                             JsonSettings.GetSnakeCaseNamingStrategy());
                         Debug.WriteLine($"Updated info containers: {message}");
                         Client.Send(message);
+
+                        if (DebugLogger)
+                            LoggerRequestHelper.Send(Client, _appSettings, message);
                     }
 
                     //await Task.Delay(REFRESH_INFO);

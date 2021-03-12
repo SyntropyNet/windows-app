@@ -7,6 +7,7 @@ using System.Net.NetworkInformation;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using SyntropyNet.WindowsApp.Application.Contracts;
 using SyntropyNet.WindowsApp.Application.Domain.Models.Messages;
 using SyntropyNet.WindowsApp.Application.Helpers;
 using Websocket.Client;
@@ -16,11 +17,13 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
     public class AutoPingHandler: BaseHandler
     {
         private static int pingAmount = 5;
+        private readonly IAppSettings _appSettings;
+        private readonly bool DebugLogger;
 
         private Thread mainTask;
-        public AutoPingHandler(WebsocketClient client) : base(client)
+        public AutoPingHandler(WebsocketClient client, IAppSettings appSettings) : base(client)
         {
-            
+            _appSettings = appSettings;
         }
 
         public void Start(AutoPingRequest request)
@@ -53,6 +56,9 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                         JsonSettings.GetSnakeCaseNamingStrategy());
                     Debug.WriteLine($"auto ping: {message}");
                     Client.Send(message);
+
+                    if (DebugLogger)
+                        LoggerRequestHelper.Send(Client, _appSettings, message);
 
                     //await Task.Delay(TimeSpan.FromSeconds(request.Data.Interval));
                     Thread.Sleep(TimeSpan.FromSeconds(request.Data.Interval));

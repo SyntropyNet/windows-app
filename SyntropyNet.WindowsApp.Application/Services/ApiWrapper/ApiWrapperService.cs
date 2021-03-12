@@ -138,7 +138,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                                     autoPingHandler = null;
                                 }
 
-                                autoPingHandler = new AutoPingHandler(client);
+                                autoPingHandler = new AutoPingHandler(client, _appSettings);
                                 autoPingHandler.Start(autoPingRequest);
 
                                 break;
@@ -201,7 +201,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                                         getInfoHandler.Interrupt();
                                         getInfoHandler = null;
                                     }
-                                    getInfoHandler = new GetInfoHandler(client, _httpRequestService, _dockerApiService);
+                                    getInfoHandler = new GetInfoHandler(client, _httpRequestService, _dockerApiService, _appSettings);
                                     getInfoHandler.Start(getInfoRequest);
                                 }
                                 catch (Exception ex)
@@ -235,7 +235,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                                         WGConfHandler = null;
                                     }
 
-                                    WGConfHandler = new WGConfHandler(client, _WGConfigService);
+                                    WGConfHandler = new WGConfHandler(client, _WGConfigService, _appSettings);
                                     WGConfHandler.Start(WGConfRequest);
                                 }
                                 catch (Exception ex)
@@ -344,7 +344,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                         containerInfoHandler = null;
                     }
 
-                    containerInfoHandler = new ContainerInfoHandler(client, _dockerApiService);
+                    containerInfoHandler = new ContainerInfoHandler(client, _dockerApiService, _appSettings);
                     containerInfoHandler.Start();
 
                     if (ifaceBWDataHandler != null)
@@ -353,7 +353,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                         ifaceBWDataHandler = null;
                     }
 
-                    ifaceBWDataHandler = new IfaceBWDataHandler(client, _networkInformationService);
+                    ifaceBWDataHandler = new IfaceBWDataHandler(client, _networkInformationService, _appSettings);
                     ifaceBWDataHandler.Start();
 
                     if (ifacesPeersBWDataHandler != null)
@@ -362,7 +362,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                         ifacesPeersBWDataHandler = null;
                     }
 
-                    ifacesPeersBWDataHandler = new IfacesPeersBWDataHandler(client, _WGConfigService);
+                    ifacesPeersBWDataHandler = new IfacesPeersBWDataHandler(client, _WGConfigService, _appSettings);
                     ifacesPeersBWDataHandler.Start();
 
                     exitEvent.WaitOne();
