@@ -22,6 +22,10 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
     {
         private static readonly ILog log = LogManager.GetLogger(typeof(WGConfigService));
 
+        //event
+        public event Action<object, WGConfigServiceEventArgs> CreateInterfaceEvent;
+        public event Action<object, WGConfigServiceEventArgs> ErrorCreateInterfaceEvent;
+
         //Services
         private readonly INetworkInformationService _networkService;
 
@@ -414,6 +418,8 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
                     if (ephemeral && !Win32.DeleteService(service))
                         throw new Win32Exception(Marshal.GetLastWin32Error());
                     log.Info($"[WG_CONF] - Creating interface {tunnelName}");
+
+                    CreateInterfaceEvent?.Invoke(this, new WGConfigServiceEventArgs(GetHowName(GetWGInterfaceNameFromString(tunnelName))));
                 }
                 finally
                 {
@@ -424,6 +430,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
             {
                 Win32.CloseServiceHandle(scm);
                 log.Error($"[WG_CONF] - Error creating interface {tunnelName}");
+                ErrorCreateInterfaceEvent?.Invoke(this, new WGConfigServiceEventArgs(GetHowName(GetWGInterfaceNameFromString(tunnelName))));
                 return;
             }
             finally
@@ -572,6 +579,16 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
         public void Dispose()
         {
             StopWG();
+        }
+    }
+
+    public class WGConfigServiceEventArgs
+    {
+        public TunnelConfig Interface { get; }
+
+        public WGConfigServiceEventArgs(TunnelConfig Interface)
+        {
+            this.Interface = Interface;
         }
     }
 }

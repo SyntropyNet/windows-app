@@ -7,6 +7,7 @@ using SyntropyNet.WindowsApp.Application.Exceptions;
 using SyntropyNet.WindowsApp.Application.Helpers;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
@@ -16,17 +17,24 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
 {
     public class ConfigInfoHandler : BaseHandler
     {
+        private readonly bool DebugLogger;
+
         private Thread mainTask;
         private readonly IWGConfigService _WGConfigService;
         private readonly INetworkInformationService _networkInformationService;
+        private readonly IAppSettings _appSettings;
 
         public ConfigInfoHandler(WebsocketClient client, 
             IWGConfigService WGConfigService,
-             INetworkInformationService networkInformationService) 
+            INetworkInformationService networkInformationService,
+            IAppSettings appSettings) 
             : base(client)
         {
+            DebugLogger = Convert.ToBoolean(ConfigurationManager.AppSettings.Get("DebugLogger"));
+
             _WGConfigService = WGConfigService;
             _networkInformationService = networkInformationService;
+            _appSettings = appSettings;
         }
 
         public void Start(ConfigInfoRequest request)
@@ -48,6 +56,8 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                     SetPeers(request);
                 }
 
+                _WGConfigService.CreateInterfaceEvent += WGConfigServiceCreateInterfaceEvent;
+                _WGConfigService.ErrorCreateInterfaceEvent += WGConfigServiceErrorCreateInterfaceEvent;
                 _WGConfigService.ApplyModifiedConfigs();
             });
 
@@ -57,6 +67,59 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
         public void Interrupt()
         {
             mainTask?.Abort();
+        }
+
+        private void WGConfigServiceCreateInterfaceEvent(object sender, WireGuard.WGConfigServiceEventArgs args)
+        {
+            if (!DebugLogger)
+                return;
+
+            LoggerRequest loggerRequest = new LoggerRequest
+            {
+                Data = new LoggerRequestData
+                {
+                    Severity = log4net.Core.Level.Debug.ToString(),
+                    Message = $"[WG_CONF] Creating interface {args?.Interface?.Name}, {args?.Interface?.Interface?.Address?.FirstOrDefault()}",
+                    Metadata = new LoggerRequestMetadata
+                    {
+                        DeviceId = _appSettings.DeviceId,
+                        DeviceName = _appSettings.DeviceName,
+                        //ToDo: what should be in DevicePublicIpv4 and ConnectionId
+                        DevicePublicIpv4 = "",
+                        ConnectionId = 0
+                    }
+                }
+            };
+
+            var message = JsonConvert.SerializeObject(loggerRequest,
+                JsonSettings.GetSnakeCaseNamingStrategy());
+            Debug.WriteLine($"Logger: {message}");
+            Client.Send(message);
+        }
+
+        private void WGConfigServiceErrorCreateInterfaceEvent(object sender, WireGuard.WGConfigServiceEventArgs args)
+        {
+            LoggerRequest loggerRequest = new LoggerRequest
+            {
+                Data = new LoggerRequestData
+                {
+                    Severity = log4net.Core.Level.Debug.ToString(),
+                    Message = $"[WG_CONF] Error creating interface {args?.Interface?.Name}, {args?.Interface?.Interface.Address?.FirstOrDefault()}",
+                    Metadata = new LoggerRequestMetadata
+                    {
+                        DeviceId = _appSettings.DeviceId,
+                        DeviceName = _appSettings.DeviceName,
+                        //ToDo: what should be in DevicePublicIpv4 and ConnectionId
+                        DevicePublicIpv4 = "",
+                        ConnectionId = 0,
+                    }
+                }
+            };
+
+            var message = JsonConvert.SerializeObject(loggerRequest,
+                JsonSettings.GetSnakeCaseNamingStrategy());
+            Debug.WriteLine($"Logger: {message}");
+            Client.Send(message);
         }
 
         private void SetPeers(ConfigInfoRequest request)

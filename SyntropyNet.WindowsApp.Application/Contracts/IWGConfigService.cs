@@ -1,5 +1,6 @@
 ﻿using SyntropyNet.WindowsApp.Application.Domain.Enums.WireGuard;
 using SyntropyNet.WindowsApp.Application.Domain.Models.WireGuard;
+using SyntropyNet.WindowsApp.Application.Services.WireGuard;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +11,9 @@ namespace SyntropyNet.WindowsApp.Application.Contracts
 {
     public interface IWGConfigService : IDisposable
     {
+        //event
+        event Action<object, WGConfigServiceEventArgs> CreateInterfaceEvent;
+        event Action<object, WGConfigServiceEventArgs> ErrorCreateInterfaceEvent;
         bool ActivityState { get; }
 
         void RunWG();
