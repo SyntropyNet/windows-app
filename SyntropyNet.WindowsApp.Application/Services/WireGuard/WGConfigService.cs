@@ -1,4 +1,5 @@
-﻿using SyntropyNet.WindowsApp.Application.Constants.WireGuard;
+﻿using log4net;
+using SyntropyNet.WindowsApp.Application.Constants.WireGuard;
 using SyntropyNet.WindowsApp.Application.Contracts;
 using SyntropyNet.WindowsApp.Application.Domain.Enums.WireGuard;
 using SyntropyNet.WindowsApp.Application.Domain.Models.WireGuard;
@@ -19,6 +20,8 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
 {
     public class WGConfigService : IWGConfigService
     {
+        private static readonly ILog log = LogManager.GetLogger(typeof(WGConfigService));
+
         //Services
         private readonly INetworkInformationService _networkService;
 
@@ -410,6 +413,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
 
                     if (ephemeral && !Win32.DeleteService(service))
                         throw new Win32Exception(Marshal.GetLastWin32Error());
+                    log.Info($"[WG_CONF] - Creating interface {tunnelName}");
                 }
                 finally
                 {
@@ -419,6 +423,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
             catch (Exception ex)
             {
                 Win32.CloseServiceHandle(scm);
+                log.Error($"[WG_CONF] - Error creating interface {tunnelName}");
                 return;
             }
             finally
@@ -455,6 +460,8 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
 
                     if (!Win32.DeleteService(service) && Marshal.GetLastWin32Error() != 0x00000430)
                         throw new Win32Exception(Marshal.GetLastWin32Error());
+
+                    log.Info($"[WG_CONF] - Deleting interface {tunnelName}");
                 }
                 finally
                 {
@@ -464,6 +471,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
             catch (Exception ex)
             {
                 Win32.CloseServiceHandle(scm);
+                log.Info($"[WG_CONF] - Error deleting interface {tunnelName}");
                 return;
             }
             finally
