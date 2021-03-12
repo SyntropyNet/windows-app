@@ -132,28 +132,42 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                             case "AUTO_PING":
                                 var autoPingRequest = JsonConvert.DeserializeObject<AutoPingRequest>(msg.Text);
 
-                                if (autoPingHandler != null)
+                                try
                                 {
-                                    autoPingHandler.Interrupt();
-                                    autoPingHandler = null;
-                                }
+                                    if (autoPingHandler != null)
+                                    {
+                                        autoPingHandler.Interrupt();
+                                        autoPingHandler = null;
+                                    }
 
-                                autoPingHandler = new AutoPingHandler(client, _appSettings);
-                                autoPingHandler.Start(autoPingRequest);
+                                    autoPingHandler = new AutoPingHandler(client, _appSettings);
+                                    autoPingHandler.Start(autoPingRequest);
+                                }
+                                catch (Exception ex)
+                                {
+                                    LoggerRequestHelper.Send(client, _appSettings, log4net.Core.Level.Error,  $"[Message: {ex.Message}, stacktrace: {ex.StackTrace}]");
+                                }
 
                                 break;
                             case "CONFIG_INFO":
                                 var configInfoRequest = JsonConvert.DeserializeObject<ConfigInfoRequest>(
                                     msg.Text, JsonSettings.GetSnakeCaseNamingStrategy());
 
-                                if (configInfoHandler != null)
+                                try
                                 {
-                                    configInfoHandler.Interrupt();
-                                    configInfoHandler = null;
-                                }
+                                    if (configInfoHandler != null)
+                                    {
+                                        configInfoHandler.Interrupt();
+                                        configInfoHandler = null;
+                                    }
 
-                                configInfoHandler = new ConfigInfoHandler(client, _WGConfigService, _networkInformationService, _appSettings);
-                                configInfoHandler.Start(configInfoRequest);
+                                    configInfoHandler = new ConfigInfoHandler(client, _WGConfigService, _networkInformationService, _appSettings);
+                                    configInfoHandler.Start(configInfoRequest);
+                                }
+                                catch(Exception ex)
+                                {
+                                    LoggerRequestHelper.Send(client, _appSettings, log4net.Core.Level.Error, $"[Message: {ex.Message}, stacktrace: {ex.StackTrace}]");
+                                }
 
                                 // prepare Services Liset
                                 var newServices = new List<ServiceModel>();
@@ -220,6 +234,8 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                                         JsonSettings.GetSnakeCaseNamingStrategy());
                                     Debug.WriteLine($"'GET_INFO' error: {message}");
                                     client.Send(message);
+
+                                    LoggerRequestHelper.Send(client, _appSettings, log4net.Core.Level.Error, $"[Message: {ex.Message}, stacktrace: {ex.StackTrace}]");
                                 }
 
                                 break;
@@ -254,6 +270,8 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                                         JsonSettings.GetSnakeCaseNamingStrategy());
                                     Debug.WriteLine($"'WG_CONF' error: {message}");
                                     client.Send(message);
+
+                                    LoggerRequestHelper.Send(client, _appSettings, log4net.Core.Level.Error, $"[Message: {ex.Message}, stacktrace: {ex.StackTrace}]");
 
                                     break;
                                 }
@@ -338,32 +356,39 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                     });
                     Debug.WriteLine($"WebSocket connection started");
 
-                    if (containerInfoHandler != null)
+                    try
                     {
-                        containerInfoHandler.Interrupt();
-                        containerInfoHandler = null;
+                        if (containerInfoHandler != null)
+                        {
+                            containerInfoHandler.Interrupt();
+                            containerInfoHandler = null;
+                        }
+
+                        containerInfoHandler = new ContainerInfoHandler(client, _dockerApiService, _appSettings);
+                        containerInfoHandler.Start();
+
+                        if (ifaceBWDataHandler != null)
+                        {
+                            ifaceBWDataHandler.Interrupt();
+                            ifaceBWDataHandler = null;
+                        }
+
+                        ifaceBWDataHandler = new IfaceBWDataHandler(client, _networkInformationService, _appSettings);
+                        ifaceBWDataHandler.Start();
+
+                        if (ifacesPeersBWDataHandler != null)
+                        {
+                            ifacesPeersBWDataHandler.Interrupt();
+                            ifacesPeersBWDataHandler = null;
+                        }
+
+                        ifacesPeersBWDataHandler = new IfacesPeersBWDataHandler(client, _WGConfigService, _appSettings);
+                        ifacesPeersBWDataHandler.Start();
                     }
-
-                    containerInfoHandler = new ContainerInfoHandler(client, _dockerApiService, _appSettings);
-                    containerInfoHandler.Start();
-
-                    if (ifaceBWDataHandler != null)
+                    catch (Exception ex)
                     {
-                        ifaceBWDataHandler.Interrupt();
-                        ifaceBWDataHandler = null;
+                        LoggerRequestHelper.Send(client, _appSettings, log4net.Core.Level.Error, $"[Message: {ex.Message}, stacktrace: {ex.StackTrace}]");
                     }
-
-                    ifaceBWDataHandler = new IfaceBWDataHandler(client, _networkInformationService, _appSettings);
-                    ifaceBWDataHandler.Start();
-
-                    if (ifacesPeersBWDataHandler != null)
-                    {
-                        ifacesPeersBWDataHandler.Interrupt();
-                        ifacesPeersBWDataHandler = null;
-                    }
-
-                    ifacesPeersBWDataHandler = new IfacesPeersBWDataHandler(client, _WGConfigService, _appSettings);
-                    ifacesPeersBWDataHandler.Start();
 
                     exitEvent.WaitOne();
                     //await client.Stop(WebSocketCloseStatus.NormalClosure,string.Empty);

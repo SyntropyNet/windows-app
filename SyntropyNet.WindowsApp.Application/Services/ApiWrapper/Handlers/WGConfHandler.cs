@@ -94,7 +94,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
             Client.Send(message);
 
             if (DebugLogger)
-                LoggerRequestHelper.Send(Client, _appSettings, message);
+                LoggerRequestHelper.Send(Client, _appSettings, log4net.Core.Level.Debug, message);
         }
 
         private void RemoveInterace(WGConfRequestData data)
@@ -158,7 +158,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                     Client.Send(WGRouteStatusMessage);
 
                     if (DebugLogger)
-                        LoggerRequestHelper.Send(Client, _appSettings, WGRouteStatusMessage);
+                        LoggerRequestHelper.Send(Client, _appSettings, log4net.Core.Level.Debug, WGRouteStatusMessage);
 
                     WgPeer.AllowedIPs = allowedIps;
                     _WGConfigService.SetPeerSections(nameInterfce, WgPeers);
@@ -188,7 +188,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
             Client.Send(message);
 
             if (DebugLogger)
-                LoggerRequestHelper.Send(Client, _appSettings, message);
+                LoggerRequestHelper.Send(Client, _appSettings, log4net.Core.Level.Debug, message);
 
             WgPeers.Add(requestPeer);
             _WGConfigService.SetPeerSections(nameInterfce, WgPeers);

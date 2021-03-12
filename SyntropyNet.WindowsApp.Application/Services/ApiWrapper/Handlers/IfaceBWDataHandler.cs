@@ -53,7 +53,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                     Client.Send(message);
 
                     if (DebugLogger)
-                        LoggerRequestHelper.Send(Client, _appSettings, message);
+                        LoggerRequestHelper.Send(Client, _appSettings, log4net.Core.Level.Debug, message);
 
                     //await Task.Delay(REFRESH_INFO);
                     Thread.Sleep(REFRESH_INFO);

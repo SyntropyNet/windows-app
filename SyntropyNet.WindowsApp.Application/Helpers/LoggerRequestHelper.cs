@@ -13,13 +13,13 @@ namespace SyntropyNet.WindowsApp.Application.Helpers
 {
     public static class LoggerRequestHelper
     {
-        public static void Send(WebsocketClient client, IAppSettings appSettings, string message)
+        public static void Send(WebsocketClient client, IAppSettings appSettings, log4net.Core.Level level, string message)
         {
             LoggerRequest loggerRequest = new LoggerRequest
             {
                 Data = new LoggerRequestData
                 {
-                    Severity = log4net.Core.Level.Debug.ToString(),
+                    Severity = level.ToString(),
                     Message = message,
                     Metadata = new LoggerRequestMetadata
                     {
