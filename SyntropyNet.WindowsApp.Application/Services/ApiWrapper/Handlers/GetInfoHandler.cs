@@ -78,6 +78,21 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                 {
                     try
                     {
+                        var errorMsg = new GetInfoError
+                        {
+                            Id = request.Id,
+                            Error = new GetInfoErrorData
+                            {
+                                Messages = ex.Message,
+                                Stacktrace = ex.StackTrace
+                            }
+                        };
+
+                        var message = JsonConvert.SerializeObject(errorMsg,
+                            JsonSettings.GetSnakeCaseNamingStrategy());
+                        Debug.WriteLine($"'GET_INFO' error: {message}");
+                        Client.Send(message);
+
                         LoggerRequestHelper.Send(
                             Client,
                             log4net.Core.Level.Error,

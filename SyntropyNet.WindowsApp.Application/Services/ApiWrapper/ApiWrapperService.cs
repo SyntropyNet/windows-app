@@ -247,21 +247,6 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                                 }
                                 catch (Exception ex)
                                 {
-                                    var errorMsg = new GetInfoError
-                                    {
-                                        Id = getInfoRequest.Id,
-                                        Error = new GetInfoErrorData
-                                        {
-                                            Messages = ex.Message,
-                                            Stacktrace = ex.StackTrace
-                                        }
-                                    };
-
-                                    var message = JsonConvert.SerializeObject(errorMsg,
-                                        JsonSettings.GetSnakeCaseNamingStrategy());
-                                    Debug.WriteLine($"'GET_INFO' error: {message}");
-                                    client.Send(message);
-
                                     try
                                     {
                                         LoggerRequestHelper.Send(
@@ -296,21 +281,6 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                                 }
                                 catch (Exception ex)
                                 {
-                                    var errorMsg = new WGConfError
-                                    {
-                                        Id = WGConfRequest.Id,
-                                        Error = new WGConfErrorData
-                                        {
-                                            Message = ex.Message,
-                                            Stacktrace = ex.StackTrace
-                                        }
-                                    };
-
-                                    var message = JsonConvert.SerializeObject(errorMsg,
-                                        JsonSettings.GetSnakeCaseNamingStrategy());
-                                    Debug.WriteLine($"'WG_CONF' error: {message}");
-                                    client.Send(message);
-
                                     try
                                     {
                                         LoggerRequestHelper.Send(

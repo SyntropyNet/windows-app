@@ -76,6 +76,21 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                 {
                     try
                     {
+                        var errorMsg = new WGConfError
+                        {
+                            Id = request.Id,
+                            Error = new WGConfErrorData
+                            {
+                                Message = ex.Message,
+                                Stacktrace = ex.StackTrace
+                            }
+                        };
+
+                        var message = JsonConvert.SerializeObject(errorMsg,
+                            JsonSettings.GetSnakeCaseNamingStrategy());
+                        Debug.WriteLine($"'WG_CONF' error: {message}");
+                        Client.Send(message);
+
                         LoggerRequestHelper.Send(
                             Client,
                             log4net.Core.Level.Error,
