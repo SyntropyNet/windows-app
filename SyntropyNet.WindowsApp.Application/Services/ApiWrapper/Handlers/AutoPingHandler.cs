@@ -13,11 +13,14 @@ using SyntropyNet.WindowsApp.Application.Domain.Models.Messages;
 using SyntropyNet.WindowsApp.Application.Helpers;
 using Websocket.Client;
 using System.Configuration;
+using log4net;
 
 namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
 {
     public class AutoPingHandler: BaseHandler
     {
+        private static readonly ILog log = LogManager.GetLogger(typeof(AutoPingHandler));
+
         private static int pingAmount = 5;
         private readonly IAppSettings _appSettings;
         private readonly IHttpRequestService _httpRequestService;
@@ -47,39 +50,58 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
 
             mainTask = new Thread(async () =>
             {
-                while (true)
+                try
                 {
-                    var responseData = new AutoPingResponseData();
-                    var results = new List<AutoPingResponseItem>();
-                    foreach (var ip in request.Data.Ips)
+                    while (true)
                     {
-                        results.Add(Ping(ip));
+                        var responseData = new AutoPingResponseData();
+                        var results = new List<AutoPingResponseItem>();
+                        foreach (var ip in request.Data.Ips)
+                        {
+                            results.Add(Ping(ip));
+                        }
+
+                        var response = new AutoPingResponse
+                        {
+                            Id = $"ID:{DateTime.UtcNow.Ticks / TimeSpan.TicksPerMillisecond}",
+                            Data = new AutoPingResponseData { Pings = results }
+                        };
+
+                        var message = JsonConvert.SerializeObject(response,
+                            JsonSettings.GetSnakeCaseNamingStrategy());
+                        Debug.WriteLine($"auto ping: {message}");
+                        Client.Send(message);
+
+                        if (DebugLogger)
+                            LoggerRequestHelper.Send(
+                                Client,
+                                log4net.Core.Level.Debug,
+                                _appSettings.DeviceId,
+                                _appSettings.DeviceName,
+                                _httpRequestService.GetResponse(AppConstants.EXTERNAL_IP_URL),
+                                message);
+
+                        //await Task.Delay(TimeSpan.FromSeconds(request.Data.Interval));
+                        Thread.Sleep(TimeSpan.FromSeconds(request.Data.Interval));
                     }
-
-                    var response = new AutoPingResponse
+                } 
+                catch(Exception ex)
+                {
+                    try
                     {
-                        Id = $"ID:{DateTime.UtcNow.Ticks / TimeSpan.TicksPerMillisecond}", 
-                        Data = new AutoPingResponseData {Pings = results}
-                    };
-
-                    var message = JsonConvert.SerializeObject(response,
-                        JsonSettings.GetSnakeCaseNamingStrategy());
-                    Debug.WriteLine($"auto ping: {message}");
-                    Client.Send(message);
-
-                    if (DebugLogger)
                         LoggerRequestHelper.Send(
-                            Client, 
-                            log4net.Core.Level.Debug, 
-                            _appSettings.DeviceId, 
-                            _appSettings.DeviceName, 
-                            _httpRequestService.GetResponse(AppConstants.EXTERNAL_IP_URL), 
-                            message);
-
-                    //await Task.Delay(TimeSpan.FromSeconds(request.Data.Interval));
-                    Thread.Sleep(TimeSpan.FromSeconds(request.Data.Interval));
+                            Client,
+                            log4net.Core.Level.Error,
+                            _appSettings.DeviceId,
+                            _appSettings.DeviceName,
+                            _httpRequestService.GetResponse(AppConstants.EXTERNAL_IP_URL),
+                            $"[Message: {ex.Message}, stacktrace: {ex.StackTrace}]");
+                    }
+                    catch (Exception ex2)
+                    {
+                        log.Error($"[Message: {ex2.Message}, stacktrace: {ex2.StackTrace}]");
+                    }
                 }
-
             });
 
             mainTask.Start();

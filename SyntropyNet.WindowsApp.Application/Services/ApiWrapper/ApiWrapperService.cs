@@ -146,13 +146,20 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                                 }
                                 catch (Exception ex)
                                 {
-                                    LoggerRequestHelper.Send(
-                                        client,
-                                        log4net.Core.Level.Error,
-                                        _appSettings.DeviceId,
-                                        _appSettings.DeviceName,
-                                        _httpRequestService.GetResponse(AppConstants.EXTERNAL_IP_URL),
-                                        $"[Message: {ex.Message}, stacktrace: {ex.StackTrace}]");
+                                    try
+                                    {
+                                        LoggerRequestHelper.Send(
+                                            client,
+                                            log4net.Core.Level.Error,
+                                            _appSettings.DeviceId,
+                                            _appSettings.DeviceName,
+                                            _httpRequestService.GetResponse(AppConstants.EXTERNAL_IP_URL),
+                                            $"[Message: {ex.Message}, stacktrace: {ex.StackTrace}]");
+                                    }
+                                    catch (Exception ex2)
+                                    {
+                                        log.Error($"[Message: {ex2.Message}, stacktrace: {ex2.StackTrace}]");
+                                    }
                                 }
 
                                 break;
@@ -173,13 +180,20 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                                 }
                                 catch(Exception ex)
                                 {
-                                    LoggerRequestHelper.Send(
-                                        client,
-                                        log4net.Core.Level.Error,
-                                        _appSettings.DeviceId,
-                                        _appSettings.DeviceName,
-                                        _httpRequestService.GetResponse(AppConstants.EXTERNAL_IP_URL),
-                                        $"[Message: {ex.Message}, stacktrace: {ex.StackTrace}]");
+                                    try
+                                    {
+                                        LoggerRequestHelper.Send(
+                                            client,
+                                            log4net.Core.Level.Error,
+                                            _appSettings.DeviceId,
+                                            _appSettings.DeviceName,
+                                            _httpRequestService.GetResponse(AppConstants.EXTERNAL_IP_URL),
+                                            $"[Message: {ex.Message}, stacktrace: {ex.StackTrace}]");
+                                    }
+                                    catch (Exception ex2)
+                                    {
+                                        log.Error($"[Message: {ex2.Message}, stacktrace: {ex2.StackTrace}]");
+                                    }
                                 }
 
                                 // prepare Services Liset
@@ -248,13 +262,20 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                                     Debug.WriteLine($"'GET_INFO' error: {message}");
                                     client.Send(message);
 
-                                    LoggerRequestHelper.Send(
-                                        client,
-                                        log4net.Core.Level.Error,
-                                        _appSettings.DeviceId,
-                                        _appSettings.DeviceName,
-                                        _httpRequestService.GetResponse(AppConstants.EXTERNAL_IP_URL),
-                                        $"[Message: {ex.Message}, stacktrace: {ex.StackTrace}]");
+                                    try
+                                    {
+                                        LoggerRequestHelper.Send(
+                                            client,
+                                            log4net.Core.Level.Error,
+                                            _appSettings.DeviceId,
+                                            _appSettings.DeviceName,
+                                            _httpRequestService.GetResponse(AppConstants.EXTERNAL_IP_URL),
+                                            $"[Message: {ex.Message}, stacktrace: {ex.StackTrace}]");
+                                    }
+                                    catch (Exception ex2)
+                                    {
+                                        log.Error($"[Message: {ex2.Message}, stacktrace: {ex2.StackTrace}]");
+                                    }
                                 }
 
                                 break;
@@ -290,13 +311,20 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                                     Debug.WriteLine($"'WG_CONF' error: {message}");
                                     client.Send(message);
 
-                                    LoggerRequestHelper.Send(
-                                        client,
-                                        log4net.Core.Level.Error,
-                                        _appSettings.DeviceId,
-                                        _appSettings.DeviceName,
-                                        _httpRequestService.GetResponse(AppConstants.EXTERNAL_IP_URL),
-                                        $"[Message: {ex.Message}, stacktrace: {ex.StackTrace}]");
+                                    try
+                                    {
+                                        LoggerRequestHelper.Send(
+                                            client,
+                                            log4net.Core.Level.Error,
+                                            _appSettings.DeviceId,
+                                            _appSettings.DeviceName,
+                                            _httpRequestService.GetResponse(AppConstants.EXTERNAL_IP_URL),
+                                            $"[Message: {ex.Message}, stacktrace: {ex.StackTrace}]");
+                                    }
+                                    catch (Exception ex2)
+                                    {
+                                        log.Error($"[Message: {ex2.Message}, stacktrace: {ex2.StackTrace}]");
+                                    }
 
                                     break;
                                 }
@@ -412,13 +440,20 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                     }
                     catch (Exception ex)
                     {
-                        LoggerRequestHelper.Send(
-                            client,
-                            log4net.Core.Level.Error,
-                            _appSettings.DeviceId,
-                            _appSettings.DeviceName,
-                            _httpRequestService.GetResponse(AppConstants.EXTERNAL_IP_URL),
-                            $"[Message: {ex.Message}, stacktrace: {ex.StackTrace}]");
+                        try
+                        {
+                            LoggerRequestHelper.Send(
+                                client,
+                                log4net.Core.Level.Error,
+                                _appSettings.DeviceId,
+                                _appSettings.DeviceName,
+                                _httpRequestService.GetResponse(AppConstants.EXTERNAL_IP_URL),
+                                $"[Message: {ex.Message}, stacktrace: {ex.StackTrace}]");
+                        }
+                        catch (Exception ex2)
+                        {
+                            log.Error($"[Message: {ex2.Message}, stacktrace: {ex2.StackTrace}]");
+                        }
                     }
 
                     exitEvent.WaitOne();

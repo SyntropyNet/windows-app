@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using log4net;
+using Newtonsoft.Json;
 using SyntropyNet.WindowsApp.Application.Constants;
 using SyntropyNet.WindowsApp.Application.Contracts;
 using SyntropyNet.WindowsApp.Application.Domain.Models.Messages;
@@ -17,6 +18,8 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
 {
     class GetInfoHandler : BaseHandler
     {
+        private static readonly ILog log = LogManager.GetLogger(typeof(GetInfoHandler));
+
         private readonly bool DebugLogger;
         private readonly IHttpRequestService _httpRequestService;
         private readonly IDockerApiService _dockerApiService;
@@ -42,32 +45,52 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
 
             mainTask = new Thread(async () =>
             {
-                var responseData = new GetInfoResponseData();
-
-                responseData.AgentProvider = GetAgentProvider();
-                responseData.ServiceStatus = GetServiceStatus();
-                responseData.ExternalIp = GetExternalIp();
-                responseData.ContainerInfo = GetContainerInfo();
-
-                var response = new GetInfoResponse
+                try
                 {
-                    Id = request.Id,
-                    Data = responseData,
-                };
+                    var responseData = new GetInfoResponseData();
 
-                var message = JsonConvert.SerializeObject(response, 
-                    JsonSettings.GetSnakeCaseNamingStrategy());
-                Debug.WriteLine($"Get info: {message}");
-                Client.Send(message);
+                    responseData.AgentProvider = GetAgentProvider();
+                    responseData.ServiceStatus = GetServiceStatus();
+                    responseData.ExternalIp = GetExternalIp();
+                    responseData.ContainerInfo = GetContainerInfo();
 
-                if (DebugLogger)
-                    LoggerRequestHelper.Send(
-                        Client,
-                        log4net.Core.Level.Debug,
-                        _appSettings.DeviceId,
-                        _appSettings.DeviceName,
-                        _httpRequestService.GetResponse(AppConstants.EXTERNAL_IP_URL),
-                        message);
+                    var response = new GetInfoResponse
+                    {
+                        Id = request.Id,
+                        Data = responseData,
+                    };
+
+                    var message = JsonConvert.SerializeObject(response,
+                        JsonSettings.GetSnakeCaseNamingStrategy());
+                    Debug.WriteLine($"Get info: {message}");
+                    Client.Send(message);
+
+                    if (DebugLogger)
+                        LoggerRequestHelper.Send(
+                            Client,
+                            log4net.Core.Level.Debug,
+                            _appSettings.DeviceId,
+                            _appSettings.DeviceName,
+                            _httpRequestService.GetResponse(AppConstants.EXTERNAL_IP_URL),
+                            message);
+                }
+                catch(Exception ex)
+                {
+                    try
+                    {
+                        LoggerRequestHelper.Send(
+                            Client,
+                            log4net.Core.Level.Error,
+                            _appSettings.DeviceId,
+                            _appSettings.DeviceName,
+                            _httpRequestService.GetResponse(AppConstants.EXTERNAL_IP_URL),
+                            $"[Message: {ex.Message}, stacktrace: {ex.StackTrace}]");
+                    }
+                    catch (Exception ex2)
+                    {
+                        log.Error($"[Message: {ex2.Message}, stacktrace: {ex2.StackTrace}]");
+                    }
+                }
             });
 
             mainTask.Start();

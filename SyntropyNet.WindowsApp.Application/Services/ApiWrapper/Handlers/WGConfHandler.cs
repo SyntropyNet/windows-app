@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using log4net;
+using Newtonsoft.Json;
 using SyntropyNet.WindowsApp.Application.Constants;
 using SyntropyNet.WindowsApp.Application.Contracts;
 using SyntropyNet.WindowsApp.Application.Domain.Models.Messages;
@@ -17,6 +18,8 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
 {
     public class WGConfHandler : BaseHandler
     {
+        private static readonly ILog log = LogManager.GetLogger(typeof(WGConfHandler));
+
         private readonly bool DebugLogger;
         private Thread mainTask;
         private readonly IWGConfigService _WGConfigService;
@@ -43,28 +46,48 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
 
             mainTask = new Thread(async () =>
             {
-                if(request.Data.Count() > 0)
+                try
                 {
-                    foreach (var item in request.Data)
+                    if (request.Data.Count() > 0)
                     {
-                        switch (item.Fn)
+                        foreach (var item in request.Data)
                         {
-                            case "create_interface":
-                                CreateInterface(request.Id, item);
-                                break;
-                            case "remove_interface":
-                                RemoveInterace(item);
-                                break;
-                            case "add_peer":
-                                AddPeer(item);
-                                break;
-                            case "remove_peer":
-                                RemovePeer(item);
-                                break;
+                            switch (item.Fn)
+                            {
+                                case "create_interface":
+                                    CreateInterface(request.Id, item);
+                                    break;
+                                case "remove_interface":
+                                    RemoveInterace(item);
+                                    break;
+                                case "add_peer":
+                                    AddPeer(item);
+                                    break;
+                                case "remove_peer":
+                                    RemovePeer(item);
+                                    break;
+                            }
                         }
-                    }
 
-                    _WGConfigService.ApplyModifiedConfigs();
+                        _WGConfigService.ApplyModifiedConfigs();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    try
+                    {
+                        LoggerRequestHelper.Send(
+                            Client,
+                            log4net.Core.Level.Error,
+                            _appSettings.DeviceId,
+                            _appSettings.DeviceName,
+                            _httpRequestService.GetResponse(AppConstants.EXTERNAL_IP_URL),
+                            $"[Message: {ex.Message}, stacktrace: {ex.StackTrace}]");
+                    }
+                    catch (Exception ex2)
+                    {
+                        log.Error($"[Message: {ex2.Message}, stacktrace: {ex2.StackTrace}]");
+                    }
                 }
             });
 

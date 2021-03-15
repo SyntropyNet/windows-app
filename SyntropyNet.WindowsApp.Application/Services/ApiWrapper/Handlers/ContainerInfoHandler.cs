@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using log4net;
+using Newtonsoft.Json;
 using SyntropyNet.WindowsApp.Application.Constants;
 using SyntropyNet.WindowsApp.Application.Contracts;
 using SyntropyNet.WindowsApp.Application.Domain.Models.Messages;
@@ -17,6 +18,8 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
 {
     public class ContainerInfoHandler : BaseHandler
     {
+        private static readonly ILog log = LogManager.GetLogger(typeof(ContainerInfoHandler));
+
         private readonly bool DebugLogger;
         private static int REFRESH_INFO = 15000;
         private readonly IDockerApiService _dockerApiService;
@@ -47,37 +50,56 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
 
             mainTask = new Thread(async () =>
             {
-                while (true)
+                try
                 {
-                    var newContainerInfoList = _dockerApiService.GetContainers();
-                    if (!CompareContainers(newContainerInfoList))
+                    while (true)
                     {
-                        ContainerInfoList = newContainerInfoList;
-
-                        var containerInfoRequest = new ContainerInfoRequest
+                        var newContainerInfoList = _dockerApiService.GetContainers();
+                        if (!CompareContainers(newContainerInfoList))
                         {
-                            Data = ContainerInfoList
-                        };
+                            ContainerInfoList = newContainerInfoList;
 
-                        var message = JsonConvert.SerializeObject(containerInfoRequest,
-                            JsonSettings.GetSnakeCaseNamingStrategy());
-                        Debug.WriteLine($"Updated info containers: {message}");
-                        Client.Send(message);
+                            var containerInfoRequest = new ContainerInfoRequest
+                            {
+                                Data = ContainerInfoList
+                            };
 
-                        if (DebugLogger)
-                            LoggerRequestHelper.Send(
-                                Client,
-                                log4net.Core.Level.Debug,
-                                _appSettings.DeviceId,
-                                _appSettings.DeviceName,
-                                _httpRequestService.GetResponse(AppConstants.EXTERNAL_IP_URL),
-                                message);
+                            var message = JsonConvert.SerializeObject(containerInfoRequest,
+                                JsonSettings.GetSnakeCaseNamingStrategy());
+                            Debug.WriteLine($"Updated info containers: {message}");
+                            Client.Send(message);
+
+                            if (DebugLogger)
+                                LoggerRequestHelper.Send(
+                                    Client,
+                                    log4net.Core.Level.Debug,
+                                    _appSettings.DeviceId,
+                                    _appSettings.DeviceName,
+                                    _httpRequestService.GetResponse(AppConstants.EXTERNAL_IP_URL),
+                                    message);
+                        }
+
+                        //await Task.Delay(REFRESH_INFO);
+                        Thread.Sleep(REFRESH_INFO);
                     }
-
-                    //await Task.Delay(REFRESH_INFO);
-                    Thread.Sleep(REFRESH_INFO);
                 }
-
+                catch (Exception ex)
+                {
+                    try
+                    {
+                        LoggerRequestHelper.Send(
+                            Client,
+                            log4net.Core.Level.Error,
+                            _appSettings.DeviceId,
+                            _appSettings.DeviceName,
+                            _httpRequestService.GetResponse(AppConstants.EXTERNAL_IP_URL),
+                            $"[Message: {ex.Message}, stacktrace: {ex.StackTrace}]");
+                    }
+                    catch (Exception ex2)
+                    {
+                        log.Error($"[Message: {ex2.Message}, stacktrace: {ex2.StackTrace}]");
+                    }
+                }
             });
 
             mainTask.Start();

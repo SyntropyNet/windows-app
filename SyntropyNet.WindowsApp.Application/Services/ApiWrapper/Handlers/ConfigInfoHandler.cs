@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using log4net;
+using Newtonsoft.Json;
 using SyntropyNet.WindowsApp.Application.Constants;
 using SyntropyNet.WindowsApp.Application.Contracts;
 using SyntropyNet.WindowsApp.Application.Domain.Enums.WireGuard;
@@ -18,6 +19,8 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
 {
     public class ConfigInfoHandler : BaseHandler
     {
+        private static readonly ILog log = LogManager.GetLogger(typeof(ConfigInfoHandler));
+
         private readonly bool DebugLogger;
 
         private Thread mainTask;
@@ -47,31 +50,51 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
 
             mainTask = new Thread(async () =>
             {
-                if (!CheckPublicKeyAndPort(request))
+                try
                 {
-                    var message = JsonConvert.SerializeObject(SetPublicKeyAndPort(request), 
-                        JsonSettings.GetSnakeCaseNamingStrategy());
-                    Debug.WriteLine($"Update agent config: {message}");
-                    Client.Send(message);
+                    if (!CheckPublicKeyAndPort(request))
+                    {
+                        var message = JsonConvert.SerializeObject(SetPublicKeyAndPort(request),
+                            JsonSettings.GetSnakeCaseNamingStrategy());
+                        Debug.WriteLine($"Update agent config: {message}");
+                        Client.Send(message);
 
-                    if (DebugLogger)
+                        if (DebugLogger)
+                            LoggerRequestHelper.Send(
+                                Client,
+                                log4net.Core.Level.Debug,
+                                _appSettings.DeviceId,
+                                _appSettings.DeviceName,
+                                _httpRequestService.GetResponse(AppConstants.EXTERNAL_IP_URL),
+                                message);
+                    }
+
+                    if (request.Data.Vpn.Count() != 0)
+                    {
+                        SetPeers(request);
+                    }
+
+                    _WGConfigService.CreateInterfaceEvent += WGConfigServiceCreateInterfaceEvent;
+                    _WGConfigService.ErrorCreateInterfaceEvent += WGConfigServiceErrorCreateInterfaceEvent;
+                    _WGConfigService.ApplyModifiedConfigs();
+                }
+                catch(Exception ex)
+                {
+                    try
+                    {
                         LoggerRequestHelper.Send(
                             Client,
-                            log4net.Core.Level.Debug,
+                            log4net.Core.Level.Error,
                             _appSettings.DeviceId,
                             _appSettings.DeviceName,
                             _httpRequestService.GetResponse(AppConstants.EXTERNAL_IP_URL),
-                            message);
+                            $"[Message: {ex.Message}, stacktrace: {ex.StackTrace}]");
+                    }
+                    catch (Exception ex2)
+                    {
+                        log.Error($"[Message: {ex2.Message}, stacktrace: {ex2.StackTrace}]");
+                    }
                 }
-
-                if (request.Data.Vpn.Count() != 0)
-                {
-                    SetPeers(request);
-                }
-
-                _WGConfigService.CreateInterfaceEvent += WGConfigServiceCreateInterfaceEvent;
-                _WGConfigService.ErrorCreateInterfaceEvent += WGConfigServiceErrorCreateInterfaceEvent;
-                _WGConfigService.ApplyModifiedConfigs();
             });
 
             mainTask.Start();

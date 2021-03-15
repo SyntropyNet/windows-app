@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using log4net;
+using Newtonsoft.Json;
 using SyntropyNet.WindowsApp.Application.Constants;
 using SyntropyNet.WindowsApp.Application.Contracts;
 using SyntropyNet.WindowsApp.Application.Domain.Enums.WireGuard;
@@ -21,6 +22,8 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
 {
     public class IfacesPeersBWDataHandler : BaseHandler
     {
+        private static readonly ILog log = LogManager.GetLogger(typeof(IfacesPeersBWDataHandler));
+
         private readonly bool DebugLogger;
         private static int REFRESH_INFO = 10000;
         private readonly IWGConfigService _WGConfigService;
@@ -48,63 +51,82 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
 
             mainTask = new Thread(async () =>
             {
-                while (true)
+                try
                 {
-                    var data = new List<IfacesPeersBWDataRequestData>();
-
-                    foreach (WGInterfaceName interfaceName in Enum.GetValues(typeof(WGInterfaceName)))
+                    while (true)
                     {
-                        IEnumerable<Peer> peersInConfig = _WGConfigService.GetPeerSections(interfaceName);
-                        List<IfacesPeersBWDataRequestPeer> peersForRequest = new List<IfacesPeersBWDataRequestPeer>();
-                        
-                        if(peersInConfig != null && peersInConfig.Count() > 0)
+                        var data = new List<IfacesPeersBWDataRequestData>();
+
+                        foreach (WGInterfaceName interfaceName in Enum.GetValues(typeof(WGInterfaceName)))
                         {
-                            foreach (var peer in peersInConfig)
+                            IEnumerable<Peer> peersInConfig = _WGConfigService.GetPeerSections(interfaceName);
+                            List<IfacesPeersBWDataRequestPeer> peersForRequest = new List<IfacesPeersBWDataRequestPeer>();
+
+                            if (peersInConfig != null && peersInConfig.Count() > 0)
                             {
-                                peersForRequest.Add(new IfacesPeersBWDataRequestPeer
+                                foreach (var peer in peersInConfig)
                                 {
-                                    PublicKey = peer.PublicKey,
-                                    AllowedIps = peer.AllowedIPs,
-                                    Endpoint = peer.Endpoint,
-                                    InternalIp = GetInternalIp(interfaceName, peer.AllowedIPs),
-                                });
+                                    peersForRequest.Add(new IfacesPeersBWDataRequestPeer
+                                    {
+                                        PublicKey = peer.PublicKey,
+                                        AllowedIps = peer.AllowedIPs,
+                                        Endpoint = peer.Endpoint,
+                                        InternalIp = GetInternalIp(interfaceName, peer.AllowedIPs),
+                                    });
+                                }
+
+                                peersForRequest = JuxtaposeData(peersForRequest, _WGConfigService.GetPeersDataFromPipe(interfaceName));
+                                peersForRequest = SetStatus(peersForRequest);
                             }
 
-                            peersForRequest = JuxtaposeData(peersForRequest, _WGConfigService.GetPeersDataFromPipe(interfaceName));
-                            peersForRequest = SetStatus(peersForRequest);
+                            data.Add(new IfacesPeersBWDataRequestData
+                            {
+                                Iface = _WGConfigService.GetInterfaceName(interfaceName),
+                                IfacePublicKey = _WGConfigService.GetPublicKey(interfaceName),
+                                Peers = peersForRequest
+                            });
                         }
 
-                        data.Add(new IfacesPeersBWDataRequestData
+                        var ifacesPeersBWDataRequest = new IfacesPeersBWDataRequest
                         {
-                            Iface = _WGConfigService.GetInterfaceName(interfaceName),
-                            IfacePublicKey = _WGConfigService.GetPublicKey(interfaceName),
-                            Peers = peersForRequest
-                        });
+                            Data = data
+                        };
+
+                        var message = JsonConvert.SerializeObject(ifacesPeersBWDataRequest,
+                            JsonSettings.GetSnakeCaseNamingStrategy());
+                        Debug.WriteLine($"IFACES_PEERS_BW_DATA: {message}");
+                        Client.Send(message);
+
+                        if (DebugLogger)
+                            LoggerRequestHelper.Send(
+                                Client,
+                                log4net.Core.Level.Debug,
+                                _appSettings.DeviceId,
+                                _appSettings.DeviceName,
+                                _httpRequestService.GetResponse(AppConstants.EXTERNAL_IP_URL),
+                                message);
+
+                        //await Task.Delay(REFRESH_INFO);
+                        Thread.Sleep(REFRESH_INFO);
                     }
-
-                    var ifacesPeersBWDataRequest = new IfacesPeersBWDataRequest
+                }
+                catch(Exception ex)
+                {
+                    try
                     {
-                        Data = data
-                    };
-
-                    var message = JsonConvert.SerializeObject(ifacesPeersBWDataRequest,
-                        JsonSettings.GetSnakeCaseNamingStrategy());
-                    Debug.WriteLine($"IFACES_PEERS_BW_DATA: {message}");
-                    Client.Send(message);
-
-                    if (DebugLogger)
                         LoggerRequestHelper.Send(
                             Client,
-                            log4net.Core.Level.Debug,
+                            log4net.Core.Level.Error,
                             _appSettings.DeviceId,
                             _appSettings.DeviceName,
                             _httpRequestService.GetResponse(AppConstants.EXTERNAL_IP_URL),
-                            message);
-
-                    //await Task.Delay(REFRESH_INFO);
-                    Thread.Sleep(REFRESH_INFO);
+                            $"[Message: {ex.Message}, stacktrace: {ex.StackTrace}]");
+                    }
+                    catch (Exception ex2)
+                    {
+                        log.Error($"[Message: {ex2.Message}, stacktrace: {ex2.StackTrace}]");
+                    }
                 }
-
             });
 
             mainTask.Start();
