@@ -1,6 +1,8 @@
 ﻿using Newtonsoft.Json;
+using SyntropyNet.WindowsApp.Application.Constants;
 using SyntropyNet.WindowsApp.Application.Contracts;
 using SyntropyNet.WindowsApp.Application.Domain.Models.Messages;
+using SyntropyNet.WindowsApp.Application.Services.HttpRequest;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -13,7 +15,7 @@ namespace SyntropyNet.WindowsApp.Application.Helpers
 {
     public static class LoggerRequestHelper
     {
-        public static void Send(WebsocketClient client, IAppSettings appSettings, log4net.Core.Level level, string message)
+        public static void Send(WebsocketClient client, log4net.Core.Level level, string deviceId, string deviceName, string publicIp, string message)
         {
             LoggerRequest loggerRequest = new LoggerRequest
             {
@@ -23,10 +25,10 @@ namespace SyntropyNet.WindowsApp.Application.Helpers
                     Message = message,
                     Metadata = new LoggerRequestMetadata
                     {
-                        DeviceId = appSettings.DeviceId,
-                        DeviceName = appSettings.DeviceName,
-                        //ToDo: what should be in DevicePublicIpv4 and ConnectionId
-                        DevicePublicIpv4 = "",
+                        DeviceId = deviceId,
+                        DeviceName = deviceName,
+                        DevicePublicIpv4 = publicIp,
+                        //ToDo: what should be in ConnectionId
                         ConnectionId = 0
                     }
                 }

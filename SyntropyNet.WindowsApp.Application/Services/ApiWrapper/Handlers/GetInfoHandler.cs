@@ -61,7 +61,13 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                 Client.Send(message);
 
                 if (DebugLogger)
-                    LoggerRequestHelper.Send(Client, _appSettings, log4net.Core.Level.Debug, message);
+                    LoggerRequestHelper.Send(
+                        Client,
+                        log4net.Core.Level.Debug,
+                        _appSettings.DeviceId,
+                        _appSettings.DeviceName,
+                        _httpRequestService.GetResponse(AppConstants.EXTERNAL_IP_URL),
+                        message);
             });
 
             mainTask.Start();

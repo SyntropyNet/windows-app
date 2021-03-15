@@ -7,10 +7,12 @@ using System.Net.NetworkInformation;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using SyntropyNet.WindowsApp.Application.Constants;
 using SyntropyNet.WindowsApp.Application.Contracts;
 using SyntropyNet.WindowsApp.Application.Domain.Models.Messages;
 using SyntropyNet.WindowsApp.Application.Helpers;
 using Websocket.Client;
+using System.Configuration;
 
 namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
 {
@@ -18,12 +20,20 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
     {
         private static int pingAmount = 5;
         private readonly IAppSettings _appSettings;
+        private readonly IHttpRequestService _httpRequestService;
         private readonly bool DebugLogger;
 
         private Thread mainTask;
-        public AutoPingHandler(WebsocketClient client, IAppSettings appSettings) : base(client)
+        public AutoPingHandler(
+            WebsocketClient client, 
+            IAppSettings appSettings,
+            IHttpRequestService httpRequestService) 
+        : base(client)
         {
+            DebugLogger = Convert.ToBoolean(ConfigurationManager.AppSettings.Get("DebugLogger"));
+
             _appSettings = appSettings;
+            _httpRequestService = httpRequestService;
         }
 
         public void Start(AutoPingRequest request)
@@ -58,7 +68,13 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                     Client.Send(message);
 
                     if (DebugLogger)
-                        LoggerRequestHelper.Send(Client, _appSettings, log4net.Core.Level.Debug, message);
+                        LoggerRequestHelper.Send(
+                            Client, 
+                            log4net.Core.Level.Debug, 
+                            _appSettings.DeviceId, 
+                            _appSettings.DeviceName, 
+                            _httpRequestService.GetResponse(AppConstants.EXTERNAL_IP_URL), 
+                            message);
 
                     //await Task.Delay(TimeSpan.FromSeconds(request.Data.Interval));
                     Thread.Sleep(TimeSpan.FromSeconds(request.Data.Interval));

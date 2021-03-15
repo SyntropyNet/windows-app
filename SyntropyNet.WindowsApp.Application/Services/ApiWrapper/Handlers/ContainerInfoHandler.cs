@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using SyntropyNet.WindowsApp.Application.Constants;
 using SyntropyNet.WindowsApp.Application.Contracts;
 using SyntropyNet.WindowsApp.Application.Domain.Models.Messages;
 using SyntropyNet.WindowsApp.Application.Helpers;
@@ -20,6 +21,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
         private static int REFRESH_INFO = 15000;
         private readonly IDockerApiService _dockerApiService;
         private readonly IAppSettings _appSettings;
+        private readonly IHttpRequestService _httpRequestService;
 
         private IEnumerable<ContainerInfo> ContainerInfoList { get; set; }
 
@@ -27,7 +29,8 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
         public ContainerInfoHandler(
             WebsocketClient client, 
             IDockerApiService dockerApiService,
-            IAppSettings appSettings) 
+            IAppSettings appSettings,
+            IHttpRequestService httpRequestService) 
             : base(client)
         {
             DebugLogger = Convert.ToBoolean(ConfigurationManager.AppSettings.Get("DebugLogger"));
@@ -35,6 +38,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
             _dockerApiService = dockerApiService;
             ContainerInfoList = new List<ContainerInfo>();
             _appSettings = appSettings;
+            _httpRequestService = httpRequestService;
         }
 
         public void Start()
@@ -61,7 +65,13 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                         Client.Send(message);
 
                         if (DebugLogger)
-                            LoggerRequestHelper.Send(Client, _appSettings, log4net.Core.Level.Debug, message);
+                            LoggerRequestHelper.Send(
+                                Client,
+                                log4net.Core.Level.Debug,
+                                _appSettings.DeviceId,
+                                _appSettings.DeviceName,
+                                _httpRequestService.GetResponse(AppConstants.EXTERNAL_IP_URL),
+                                message);
                     }
 
                     //await Task.Delay(REFRESH_INFO);

@@ -16,6 +16,7 @@ using SyntropyNet.WindowsApp.Application.Helpers;
 using SyntropyNet.WindowsApp.Application.Models;
 using System.Web.Configuration;
 using log4net;
+using SyntropyNet.WindowsApp.Application.Constants;
 
 namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
 {
@@ -140,12 +141,18 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                                         autoPingHandler = null;
                                     }
 
-                                    autoPingHandler = new AutoPingHandler(client, _appSettings);
+                                    autoPingHandler = new AutoPingHandler(client, _appSettings, _httpRequestService);
                                     autoPingHandler.Start(autoPingRequest);
                                 }
                                 catch (Exception ex)
                                 {
-                                    LoggerRequestHelper.Send(client, _appSettings, log4net.Core.Level.Error,  $"[Message: {ex.Message}, stacktrace: {ex.StackTrace}]");
+                                    LoggerRequestHelper.Send(
+                                        client,
+                                        log4net.Core.Level.Error,
+                                        _appSettings.DeviceId,
+                                        _appSettings.DeviceName,
+                                        _httpRequestService.GetResponse(AppConstants.EXTERNAL_IP_URL),
+                                        $"[Message: {ex.Message}, stacktrace: {ex.StackTrace}]");
                                 }
 
                                 break;
@@ -161,12 +168,18 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                                         configInfoHandler = null;
                                     }
 
-                                    configInfoHandler = new ConfigInfoHandler(client, _WGConfigService, _networkInformationService, _appSettings);
+                                    configInfoHandler = new ConfigInfoHandler(client, _WGConfigService, _networkInformationService, _appSettings, _httpRequestService);
                                     configInfoHandler.Start(configInfoRequest);
                                 }
                                 catch(Exception ex)
                                 {
-                                    LoggerRequestHelper.Send(client, _appSettings, log4net.Core.Level.Error, $"[Message: {ex.Message}, stacktrace: {ex.StackTrace}]");
+                                    LoggerRequestHelper.Send(
+                                        client,
+                                        log4net.Core.Level.Error,
+                                        _appSettings.DeviceId,
+                                        _appSettings.DeviceName,
+                                        _httpRequestService.GetResponse(AppConstants.EXTERNAL_IP_URL),
+                                        $"[Message: {ex.Message}, stacktrace: {ex.StackTrace}]");
                                 }
 
                                 // prepare Services Liset
@@ -235,7 +248,13 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                                     Debug.WriteLine($"'GET_INFO' error: {message}");
                                     client.Send(message);
 
-                                    LoggerRequestHelper.Send(client, _appSettings, log4net.Core.Level.Error, $"[Message: {ex.Message}, stacktrace: {ex.StackTrace}]");
+                                    LoggerRequestHelper.Send(
+                                        client,
+                                        log4net.Core.Level.Error,
+                                        _appSettings.DeviceId,
+                                        _appSettings.DeviceName,
+                                        _httpRequestService.GetResponse(AppConstants.EXTERNAL_IP_URL),
+                                        $"[Message: {ex.Message}, stacktrace: {ex.StackTrace}]");
                                 }
 
                                 break;
@@ -251,7 +270,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                                         WGConfHandler = null;
                                     }
 
-                                    WGConfHandler = new WGConfHandler(client, _WGConfigService, _appSettings);
+                                    WGConfHandler = new WGConfHandler(client, _WGConfigService, _appSettings, _httpRequestService);
                                     WGConfHandler.Start(WGConfRequest);
                                 }
                                 catch (Exception ex)
@@ -271,7 +290,13 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                                     Debug.WriteLine($"'WG_CONF' error: {message}");
                                     client.Send(message);
 
-                                    LoggerRequestHelper.Send(client, _appSettings, log4net.Core.Level.Error, $"[Message: {ex.Message}, stacktrace: {ex.StackTrace}]");
+                                    LoggerRequestHelper.Send(
+                                        client,
+                                        log4net.Core.Level.Error,
+                                        _appSettings.DeviceId,
+                                        _appSettings.DeviceName,
+                                        _httpRequestService.GetResponse(AppConstants.EXTERNAL_IP_URL),
+                                        $"[Message: {ex.Message}, stacktrace: {ex.StackTrace}]");
 
                                     break;
                                 }
@@ -364,7 +389,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                             containerInfoHandler = null;
                         }
 
-                        containerInfoHandler = new ContainerInfoHandler(client, _dockerApiService, _appSettings);
+                        containerInfoHandler = new ContainerInfoHandler(client, _dockerApiService, _appSettings, _httpRequestService);
                         containerInfoHandler.Start();
 
                         if (ifaceBWDataHandler != null)
@@ -373,7 +398,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                             ifaceBWDataHandler = null;
                         }
 
-                        ifaceBWDataHandler = new IfaceBWDataHandler(client, _networkInformationService, _appSettings);
+                        ifaceBWDataHandler = new IfaceBWDataHandler(client, _networkInformationService, _appSettings, _httpRequestService);
                         ifaceBWDataHandler.Start();
 
                         if (ifacesPeersBWDataHandler != null)
@@ -382,12 +407,18 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                             ifacesPeersBWDataHandler = null;
                         }
 
-                        ifacesPeersBWDataHandler = new IfacesPeersBWDataHandler(client, _WGConfigService, _appSettings);
+                        ifacesPeersBWDataHandler = new IfacesPeersBWDataHandler(client, _WGConfigService, _appSettings, _httpRequestService);
                         ifacesPeersBWDataHandler.Start();
                     }
                     catch (Exception ex)
                     {
-                        LoggerRequestHelper.Send(client, _appSettings, log4net.Core.Level.Error, $"[Message: {ex.Message}, stacktrace: {ex.StackTrace}]");
+                        LoggerRequestHelper.Send(
+                            client,
+                            log4net.Core.Level.Error,
+                            _appSettings.DeviceId,
+                            _appSettings.DeviceName,
+                            _httpRequestService.GetResponse(AppConstants.EXTERNAL_IP_URL),
+                            $"[Message: {ex.Message}, stacktrace: {ex.StackTrace}]");
                     }
 
                     exitEvent.WaitOne();

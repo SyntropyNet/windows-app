@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using SyntropyNet.WindowsApp.Application.Constants;
 using SyntropyNet.WindowsApp.Application.Contracts;
 using SyntropyNet.WindowsApp.Application.Domain.Enums.WireGuard;
 using SyntropyNet.WindowsApp.Application.Domain.Models.Messages;
@@ -23,11 +24,13 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
         private readonly IWGConfigService _WGConfigService;
         private readonly INetworkInformationService _networkInformationService;
         private readonly IAppSettings _appSettings;
+        private readonly IHttpRequestService _httpRequestService;
 
         public ConfigInfoHandler(WebsocketClient client, 
             IWGConfigService WGConfigService,
             INetworkInformationService networkInformationService,
-            IAppSettings appSettings) 
+            IAppSettings appSettings,
+            IHttpRequestService httpRequestService) 
             : base(client)
         {
             DebugLogger = Convert.ToBoolean(ConfigurationManager.AppSettings.Get("DebugLogger"));
@@ -35,6 +38,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
             _WGConfigService = WGConfigService;
             _networkInformationService = networkInformationService;
             _appSettings = appSettings;
+            _httpRequestService = httpRequestService;
         }
 
         public void Start(ConfigInfoRequest request)
@@ -49,6 +53,15 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                         JsonSettings.GetSnakeCaseNamingStrategy());
                     Debug.WriteLine($"Update agent config: {message}");
                     Client.Send(message);
+
+                    if (DebugLogger)
+                        LoggerRequestHelper.Send(
+                            Client,
+                            log4net.Core.Level.Debug,
+                            _appSettings.DeviceId,
+                            _appSettings.DeviceName,
+                            _httpRequestService.GetResponse(AppConstants.EXTERNAL_IP_URL),
+                            message);
                 }
 
                 if (request.Data.Vpn.Count() != 0)
@@ -74,52 +87,28 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
             if (!DebugLogger)
                 return;
 
-            LoggerRequest loggerRequest = new LoggerRequest
-            {
-                Data = new LoggerRequestData
-                {
-                    Severity = log4net.Core.Level.Debug.ToString(),
-                    Message = $"[WG_CONF] Creating interface {args?.Interface?.Name}, {args?.Interface?.Interface?.Address?.FirstOrDefault()}",
-                    Metadata = new LoggerRequestMetadata
-                    {
-                        DeviceId = _appSettings.DeviceId,
-                        DeviceName = _appSettings.DeviceName,
-                        //ToDo: what should be in DevicePublicIpv4 and ConnectionId
-                        DevicePublicIpv4 = "",
-                        ConnectionId = 0
-                    }
-                }
-            };
-
-            var message = JsonConvert.SerializeObject(loggerRequest,
-                JsonSettings.GetSnakeCaseNamingStrategy());
-            Debug.WriteLine($"Logger: {message}");
-            Client.Send(message);
+            var message = $"[WG_CONF] Creating interface {args?.Interface?.Name}, {args?.Interface?.Interface?.Address?.FirstOrDefault()}";
+            if (DebugLogger)
+                LoggerRequestHelper.Send(
+                    Client,
+                    log4net.Core.Level.Debug,
+                    _appSettings.DeviceId,
+                    _appSettings.DeviceName,
+                    _httpRequestService.GetResponse(AppConstants.EXTERNAL_IP_URL),
+                    message);
         }
 
         private void WGConfigServiceErrorCreateInterfaceEvent(object sender, WireGuard.WGConfigServiceEventArgs args)
         {
-            LoggerRequest loggerRequest = new LoggerRequest
-            {
-                Data = new LoggerRequestData
-                {
-                    Severity = log4net.Core.Level.Debug.ToString(),
-                    Message = $"[WG_CONF] Error creating interface {args?.Interface?.Name}, {args?.Interface?.Interface.Address?.FirstOrDefault()}",
-                    Metadata = new LoggerRequestMetadata
-                    {
-                        DeviceId = _appSettings.DeviceId,
-                        DeviceName = _appSettings.DeviceName,
-                        //ToDo: what should be in DevicePublicIpv4 and ConnectionId
-                        DevicePublicIpv4 = "",
-                        ConnectionId = 0,
-                    }
-                }
-            };
-
-            var message = JsonConvert.SerializeObject(loggerRequest,
-                JsonSettings.GetSnakeCaseNamingStrategy());
-            Debug.WriteLine($"Logger: {message}");
-            Client.Send(message);
+            var message = $"[WG_CONF] Error creating interface {args?.Interface?.Name}, {args?.Interface?.Interface.Address?.FirstOrDefault()}";
+            if (DebugLogger)
+                LoggerRequestHelper.Send(
+                    Client,
+                    log4net.Core.Level.Error,
+                    _appSettings.DeviceId,
+                    _appSettings.DeviceName,
+                    _httpRequestService.GetResponse(AppConstants.EXTERNAL_IP_URL),
+                    message);
         }
 
         private void SetPeers(ConfigInfoRequest request)
@@ -319,6 +308,15 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                 JsonSettings.GetSnakeCaseNamingStrategy());
             Debug.WriteLine($"'UPDATE_AGENT_CONF' error: { message}");
             Client.Send(message);
+
+            if (DebugLogger)
+                LoggerRequestHelper.Send(
+                    Client,
+                    log4net.Core.Level.Debug,
+                    _appSettings.DeviceId,
+                    _appSettings.DeviceName,
+                    _httpRequestService.GetResponse(AppConstants.EXTERNAL_IP_URL),
+                    message);
         }
     }
 }

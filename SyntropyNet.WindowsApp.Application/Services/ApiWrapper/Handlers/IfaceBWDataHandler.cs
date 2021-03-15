@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using SyntropyNet.WindowsApp.Application.Constants;
 using SyntropyNet.WindowsApp.Application.Contracts;
 using SyntropyNet.WindowsApp.Application.Domain.Models.Messages;
 using SyntropyNet.WindowsApp.Application.Helpers;
@@ -20,18 +21,21 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
         private static int REFRESH_INFO = 10000;
         private readonly INetworkInformationService _networkInformationService;
         private readonly IAppSettings _appSettings;
+        private readonly IHttpRequestService _httpRequestService;
 
         private Thread mainTask;
         public IfaceBWDataHandler(
             WebsocketClient client,
             INetworkInformationService networkInformationService,
-            IAppSettings appSettings) 
+            IAppSettings appSettings,
+            IHttpRequestService httpRequestService) 
             : base(client)
         {
             DebugLogger = Convert.ToBoolean(ConfigurationManager.AppSettings.Get("DebugLogger"));
 
             _networkInformationService = networkInformationService;
             _appSettings = appSettings;
+            _httpRequestService = httpRequestService;
         }
 
         public void Start()
@@ -53,7 +57,13 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                     Client.Send(message);
 
                     if (DebugLogger)
-                        LoggerRequestHelper.Send(Client, _appSettings, log4net.Core.Level.Debug, message);
+                        LoggerRequestHelper.Send(
+                            Client,
+                            log4net.Core.Level.Debug,
+                            _appSettings.DeviceId,
+                            _appSettings.DeviceName,
+                            _httpRequestService.GetResponse(AppConstants.EXTERNAL_IP_URL),
+                            message);
 
                     //await Task.Delay(REFRESH_INFO);
                     Thread.Sleep(REFRESH_INFO);
