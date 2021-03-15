@@ -49,7 +49,8 @@ namespace SyntropyNet.WindowsApp.Application.Services.DockerApi
 
                 ContainerInfo containerInfo =
                     JsonConvert.DeserializeObject<ContainerInfo>(e.Data.Trim('\''), JsonSettings.GetSnakeCaseNamingStrategy());
-                containers.Add(containerInfo);
+                if(containerInfo.AgentContainerState == "running")
+                    containers.Add(containerInfo);
 
             };
             process.Start();
