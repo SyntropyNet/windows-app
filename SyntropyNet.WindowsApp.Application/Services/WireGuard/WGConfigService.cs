@@ -399,7 +399,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
 
                     break;
                 }
-                if (service == IntPtr.Zero)
+                if (service == IntPtr.Zero)                    
                     throw new Win32Exception(Marshal.GetLastWin32Error());
 
                 try
@@ -573,7 +573,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
             else if (name == WGInterfaceName.SYNTROPY_SDN3.ToString())
                 return WGInterfaceName.SYNTROPY_SDN3;
             else
-                throw new NotFoundInterfaceException();
+                throw new NotFoundInterfaceException($"Interface with name '{name}' - not found.");
         }
 
         public void Dispose()

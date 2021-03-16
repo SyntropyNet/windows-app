@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using SyntropyNet.WindowsApp.Application.Constants;
 using SyntropyNet.WindowsApp.Application.Contracts;
+using SyntropyNet.WindowsApp.Application.Domain.Enums.WireGuard;
 using SyntropyNet.WindowsApp.Application.Domain.Models.Messages;
 using SyntropyNet.WindowsApp.Application.Domain.Models.WireGuard;
 using SyntropyNet.WindowsApp.Application.Helpers;
@@ -256,16 +257,18 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
 
         private void RemovePeer(WGConfRequestData data)
         {
-            var nameInterfce = _WGConfigService.GetWGInterfaceNameFromString(data.Args.Ifname);
-            List<Peer> WgPeers = _WGConfigService.GetPeerSections(nameInterfce).ToList();
-
-            foreach (var WgPeer in WgPeers)
+            foreach (WGInterfaceName interfaceName in Enum.GetValues(typeof(WGInterfaceName)))
             {
-                if(WgPeer.PublicKey == data.Args.PublicKey)
+                List<Peer> WgPeers = _WGConfigService.GetPeerSections(interfaceName).ToList();
+
+                foreach (var WgPeer in WgPeers)
                 {
-                    WgPeers.Remove(WgPeer);
-                    _WGConfigService.SetPeerSections(nameInterfce, WgPeers);
-                    return;
+                    if (WgPeer.PublicKey == data.Args.PublicKey)
+                    {
+                        WgPeers.Remove(WgPeer);
+                        _WGConfigService.SetPeerSections(interfaceName, WgPeers);
+                        return;
+                    }
                 }
             }
         }
