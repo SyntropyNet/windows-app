@@ -85,16 +85,16 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
         public void RunWG()
         {
             CreateInterface(WGInterfaceName.SYNTROPY_PUBLIC);
-            Add(GetPathToInterfaceConfig(WGInterfaceName.SYNTROPY_PUBLIC), false);
+            Add(GetPathToInterfaceConfig(WGInterfaceName.SYNTROPY_PUBLIC), true);
 
             CreateInterface(WGInterfaceName.SYNTROPY_SDN1);
-            Add(GetPathToInterfaceConfig(WGInterfaceName.SYNTROPY_SDN1), false);
+            Add(GetPathToInterfaceConfig(WGInterfaceName.SYNTROPY_SDN1), true);
 
             CreateInterface(WGInterfaceName.SYNTROPY_SDN2);
-            Add(GetPathToInterfaceConfig(WGInterfaceName.SYNTROPY_SDN2), false);
+            Add(GetPathToInterfaceConfig(WGInterfaceName.SYNTROPY_SDN2), true);
 
             CreateInterface(WGInterfaceName.SYNTROPY_SDN3);
-            Add(GetPathToInterfaceConfig(WGInterfaceName.SYNTROPY_SDN3), false);
+            Add(GetPathToInterfaceConfig(WGInterfaceName.SYNTROPY_SDN3), true);
         }
 
         public void StopWG()
@@ -158,10 +158,10 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
 
         public void ApplyModifiedConfigs()
         {
-            Add(GetPathToInterfaceConfig(WGInterfaceName.SYNTROPY_PUBLIC), false);
-            Add(GetPathToInterfaceConfig(WGInterfaceName.SYNTROPY_SDN1), false);
-            Add(GetPathToInterfaceConfig(WGInterfaceName.SYNTROPY_SDN2), false);
-            Add(GetPathToInterfaceConfig(WGInterfaceName.SYNTROPY_SDN3), false);
+            Add(GetPathToInterfaceConfig(WGInterfaceName.SYNTROPY_PUBLIC), true);
+            Add(GetPathToInterfaceConfig(WGInterfaceName.SYNTROPY_SDN1), true);
+            Add(GetPathToInterfaceConfig(WGInterfaceName.SYNTROPY_SDN2), true);
+            Add(GetPathToInterfaceConfig(WGInterfaceName.SYNTROPY_SDN3), true);
         }
 
         private void CreateInterface(WGInterfaceName interfaces)
