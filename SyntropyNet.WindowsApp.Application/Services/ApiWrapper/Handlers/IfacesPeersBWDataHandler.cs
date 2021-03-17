@@ -210,7 +210,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                     if(peerForRequest.Endpoint == peerDataFromPipe.Endpoint)
                     {
                         peerForRequest.KeepAliveInterval = peerDataFromPipe.KeepAliveInterval;
-                        peerForRequest.LastHandshake = peerDataFromPipe.LastHandshake;
+                        peerForRequest.LastHandshake = DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt32(peerDataFromPipe.LastHandshake)).DateTime.ToString("yyyy-MM-ddTHH:mm:ss");
                         peerForRequest.RxBytes = peerDataFromPipe.RxBytes;
                         peerForRequest.TxBytes = peerDataFromPipe.TxBytes;
                         break;
