@@ -104,6 +104,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                     };
                     wsCLient.Options.SetRequestHeader("Authorization", _userConfig.AgentToken);
                     wsCLient.Options.SetRequestHeader("X-DeviceId", _appSettings.DeviceId);
+                    wsCLient.Options.SetRequestHeader("X-DeviceIp", _httpRequestService.GetResponse(AppConstants.EXTERNAL_IP_URL));
                     wsCLient.Options.SetRequestHeader("X-DeviceName", _appSettings.DeviceName);
                     wsCLient.Options.SetRequestHeader("X-AgentVersion", _appSettings.AgentVersion);
 
