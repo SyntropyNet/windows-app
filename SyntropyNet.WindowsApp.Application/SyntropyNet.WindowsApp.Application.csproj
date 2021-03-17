@@ -102,6 +102,7 @@
     <Compile Include="Contracts\INetworkInformationService.cs" />
     <Compile Include="Contracts\IUserConfig.cs" />
     <Compile Include="Contracts\IWGConfigService.cs" />
+    <Compile Include="Exceptions\InvalidIpFormatException.cs" />
     <Compile Include="Exceptions\NoFreePortException.cs" />
     <Compile Include="Exceptions\NotFoundInterfaceException.cs" />
     <Compile Include="Helpers\LoggerRequestHelper.cs" />

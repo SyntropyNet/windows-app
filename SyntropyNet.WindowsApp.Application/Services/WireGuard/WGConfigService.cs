@@ -11,6 +11,7 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Pipes;
 using System.Linq;
+using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
@@ -239,13 +240,17 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
             {
                 foreach (var item in peerSection)
                 {
+                    string address = item.Endpoint.Remove(item.Endpoint.LastIndexOf(@":"));
+                    string port = item.Endpoint.Substring(item.Endpoint.LastIndexOf(@":") + 1);
+                    string endpoint = $"{GetIpInRequiredFormatRecord(address)}:{port}";
+
                     configString.AppendLine("[Peer]")
                         .AppendLine(
                             TunnelConfigConstants.PUBLIC_KEY + item.PublicKey)
                         .AppendLine(
                             TunnelConfigConstants.ALLOWED_IPs + String.Join(",", item.AllowedIPs))
                         .AppendLine(
-                            TunnelConfigConstants.ENDPOINT + item.Endpoint)
+                            TunnelConfigConstants.ENDPOINT + endpoint)
                         .AppendLine(
                             TunnelConfigConstants.PERSISTEN_KEEPALIVE);
                 }
@@ -255,7 +260,23 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
             {
                 sw.Write(configString);
             }
+        }
 
+        private string GetIpInRequiredFormatRecord(string input)
+        {
+            IPAddress address;
+            if (IPAddress.TryParse(input, out address))
+            {
+                switch (address.AddressFamily)
+                {
+                    case System.Net.Sockets.AddressFamily.InterNetwork:
+                        return input;
+                    case System.Net.Sockets.AddressFamily.InterNetworkV6:
+                        return $"[{input}]";
+                }
+            }
+
+            throw new InvalidIpFormatException($"Ip {input} is invalid");
         }
 
         private TunnelConfig GetInterfaceConfig(WGInterfaceName interfaceName)
