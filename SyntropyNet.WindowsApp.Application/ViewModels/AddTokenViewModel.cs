@@ -196,27 +196,28 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
             // try to connect to WS controller
             Loading = true;
             _userConfig.Authenticate(Name, AgentToken);
-            try
-            {
-                _apiService.Run((WSConnectionResponse response) =>
+            Task.Run(() => {
+                try
                 {
-                    if (response.State == Domain.Enums.WSConnectionState.Failed)
+                    _apiService.Run((WSConnectionResponse response) =>
                     {
-                        _userConfig.Quit();
-                        ShowConnectionError(response.Error);
-                    }
-                    else
-                    {
-                        FinishDialog();
-                    }
-                });
-            }
-            catch (NoFreePortException ex)
-            {
-                _userConfig.Quit();
-                ShowConnectionError(ex.Message);
-            }
-            
+                        if (response.State == Domain.Enums.WSConnectionState.Failed)
+                        {
+                            _userConfig.Quit();
+                            ShowConnectionError(response.Error);
+                        }
+                        else
+                        {
+                            FinishDialog();
+                        }
+                    });
+                }
+                catch (NoFreePortException ex)
+                {
+                    _userConfig.Quit();
+                    ShowConnectionError(ex.Message);
+                }
+            });
         }
 
         private void ShowConnectionError(string error)
