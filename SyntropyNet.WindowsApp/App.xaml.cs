@@ -52,16 +52,16 @@ namespace SyntropyNet.WindowsApp
             if (Environment.Is64BitProcess)
             {
                 SetDefaultDllDirectories(LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
-
+                
                 // Add the directory of the native dll
-                AddDllDirectory("x64");
+                AddDllDirectory(Path.Combine(Directory.GetCurrentDirectory(), "x64"));
             }
             else
             {
                 SetDefaultDllDirectories(LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
 
                 // Add the directory of the native dll
-                AddDllDirectory("x86");
+                AddDllDirectory(Path.Combine(Directory.GetCurrentDirectory(), "x86"));
             }
 
             if (e.Args.Any() && e.Args.Contains("/service"))
