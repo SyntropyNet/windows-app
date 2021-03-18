@@ -71,7 +71,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                             log4net.Core.Level.Debug,
                             _appSettings.DeviceId,
                             _appSettings.DeviceName,
-                            _httpRequestService.GetResponse(AppConstants.EXTERNAL_IP_URL),
+                            _appSettings.DeviceIp,
                             message);
                 }
                 catch(Exception ex)
@@ -98,7 +98,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                             log4net.Core.Level.Error,
                             _appSettings.DeviceId,
                             _appSettings.DeviceName,
-                            _httpRequestService.GetResponse(AppConstants.EXTERNAL_IP_URL),
+                            _appSettings.DeviceIp,
                             $"[Message: {ex.Message}, stacktrace: {ex.StackTrace}]");
                     }
                     catch (Exception ex2)
@@ -123,7 +123,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
 
         private string GetExternalIp()
         {
-            return _httpRequestService.GetResponse(AppConstants.EXTERNAL_IP_URL);
+            return _appSettings.DeviceIp;
         }
 
         private bool GetServiceStatus()

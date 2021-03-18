@@ -104,7 +104,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                     };
                     wsCLient.Options.SetRequestHeader("Authorization", _userConfig.AgentToken);
                     wsCLient.Options.SetRequestHeader("X-DeviceId", _appSettings.DeviceId);
-                    wsCLient.Options.SetRequestHeader("X-DeviceIp", _httpRequestService.GetResponse(AppConstants.EXTERNAL_IP_URL));
+                    wsCLient.Options.SetRequestHeader("X-DeviceIp", _appSettings.DeviceIp);
                     wsCLient.Options.SetRequestHeader("X-DeviceName", _appSettings.DeviceName);
                     wsCLient.Options.SetRequestHeader("X-AgentVersion", _appSettings.AgentVersion);
 
@@ -154,7 +154,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                                             log4net.Core.Level.Error,
                                             _appSettings.DeviceId,
                                             _appSettings.DeviceName,
-                                            _httpRequestService.GetResponse(AppConstants.EXTERNAL_IP_URL),
+                                            _appSettings.DeviceId,
                                             $"[Message: {ex.Message}, stacktrace: {ex.StackTrace}]");
                                     }
                                     catch (Exception ex2)
@@ -188,7 +188,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                                             log4net.Core.Level.Error,
                                             _appSettings.DeviceId,
                                             _appSettings.DeviceName,
-                                            _httpRequestService.GetResponse(AppConstants.EXTERNAL_IP_URL),
+                                            _appSettings.DeviceIp,
                                             $"[Message: {ex.Message}, stacktrace: {ex.StackTrace}]");
                                     }
                                     catch (Exception ex2)
@@ -255,7 +255,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                                             log4net.Core.Level.Error,
                                             _appSettings.DeviceId,
                                             _appSettings.DeviceName,
-                                            _httpRequestService.GetResponse(AppConstants.EXTERNAL_IP_URL),
+                                            _appSettings.DeviceIp,
                                             $"[Message: {ex.Message}, stacktrace: {ex.StackTrace}]");
                                     }
                                     catch (Exception ex2)
@@ -289,7 +289,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                                             log4net.Core.Level.Error,
                                             _appSettings.DeviceId,
                                             _appSettings.DeviceName,
-                                            _httpRequestService.GetResponse(AppConstants.EXTERNAL_IP_URL),
+                                            _appSettings.DeviceIp,
                                             $"[Message: {ex.Message}, stacktrace: {ex.StackTrace}]");
                                     }
                                     catch (Exception ex2)
@@ -418,7 +418,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                                 log4net.Core.Level.Error,
                                 _appSettings.DeviceId,
                                 _appSettings.DeviceName,
-                                _httpRequestService.GetResponse(AppConstants.EXTERNAL_IP_URL),
+                                _appSettings.DeviceIp,
                                 $"[Message: {ex.Message}, stacktrace: {ex.StackTrace}]");
                         }
                         catch (Exception ex2)

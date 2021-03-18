@@ -78,7 +78,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                                 log4net.Core.Level.Debug,
                                 _appSettings.DeviceId,
                                 _appSettings.DeviceName,
-                                _httpRequestService.GetResponse(AppConstants.EXTERNAL_IP_URL),
+                                _appSettings.DeviceIp,
                                 message);
 
                         //await Task.Delay(TimeSpan.FromSeconds(request.Data.Interval));
@@ -94,7 +94,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                             log4net.Core.Level.Error,
                             _appSettings.DeviceId,
                             _appSettings.DeviceName,
-                            _httpRequestService.GetResponse(AppConstants.EXTERNAL_IP_URL),
+                            _appSettings.DeviceIp,
                             $"[Message: {ex.Message}, stacktrace: {ex.StackTrace}]");
                     }
                     catch (Exception ex2)

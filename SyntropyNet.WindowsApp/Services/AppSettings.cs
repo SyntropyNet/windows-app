@@ -24,6 +24,7 @@ namespace SyntropyNet.WindowsApp.Services
             try
             {
                 extIp = httpRequestService.GetResponse(AppConstants.EXTERNAL_IP_URL);
+                DeviceIp = extIp;
             }
             catch(Exception ex)
             {
@@ -35,7 +36,7 @@ namespace SyntropyNet.WindowsApp.Services
 
         public string ControllerUrl => ConfigurationManager.AppSettings["ControllerUrl"];
         public string AgentVersion => ConfigurationManager.AppSettings["AgentVersion"];
-
+        public string DeviceIp { get; set; }
 
         private string _deviceId = string.Empty;
         public string DeviceId 
