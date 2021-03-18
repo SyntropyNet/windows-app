@@ -67,10 +67,10 @@ namespace SyntropyNet.WindowsApp.Application.Domain.Models.Messages
             if (!containerInfo.AgentContainerPorts.Equals(AgentContainerPorts))
                 return false;
 
-            if (containerInfo.AgentContainerState != AgentContainerState)
-                return false;
-            if (containerInfo.AgentContainerUptime != AgentContainerUptime)
-                return false;
+            //if (containerInfo.AgentContainerState != AgentContainerState)
+                //return false;
+            //if (containerInfo.AgentContainerUptime != AgentContainerUptime)
+                //return false;
 
             return true;
         }
