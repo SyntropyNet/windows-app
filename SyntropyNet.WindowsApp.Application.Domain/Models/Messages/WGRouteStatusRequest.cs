@@ -12,9 +12,10 @@ namespace SyntropyNet.WindowsApp.Application.Domain.Models.Messages
         {
             Id = $"Id{DateTime.UtcNow.Ticks / TimeSpan.TicksPerMillisecond}";
             Type = "WG_ROUTE_STATUS";
+            Data = new List<WGRouteStatusData>();
         }
 
-        public WGRouteStatusData Data { get; set; }
+        public List<WGRouteStatusData> Data { get; set; }
     }
 
     public class WGRouteStatusData

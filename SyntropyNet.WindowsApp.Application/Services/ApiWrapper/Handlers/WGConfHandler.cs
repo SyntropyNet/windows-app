@@ -51,6 +51,8 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                 {
                     if (request.Data.Count() > 0)
                     {
+                        List<WGRouteStatusData> WGRouteStatusDataResponse = new List<WGRouteStatusData>();
+
                         foreach (var item in request.Data)
                         {
                             switch (item.Fn)
@@ -62,12 +64,31 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                                     RemoveInterace(item);
                                     break;
                                 case "add_peer":
-                                    AddPeer(item);
+                                    WGRouteStatusDataResponse.Add(AddPeer(item));
                                     break;
                                 case "remove_peer":
                                     RemovePeer(item);
                                     break;
                             }
+                        }
+
+                        if(WGRouteStatusDataResponse.Count > 0)
+                        {
+                            var message = JsonConvert.SerializeObject(new WGRouteStatusRequest
+                            {
+                                Data = WGRouteStatusDataResponse
+                            }, JsonSettings.GetSnakeCaseNamingStrategy());
+                            Debug.WriteLine($"WG_ROUTE_STATUS,: {message}");
+                            Client.Send(message);
+
+                            if (DebugLogger)
+                                LoggerRequestHelper.Send(
+                                Client,
+                                log4net.Core.Level.Debug,
+                                _appSettings.DeviceId,
+                                _appSettings.DeviceName,
+                                _httpRequestService.GetResponse(AppConstants.EXTERNAL_IP_URL),
+                                message);
                         }
 
                         _WGConfigService.ApplyModifiedConfigs();
@@ -152,7 +173,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
             _WGConfigService.RemoveInterface(nameInterfce);
         }
 
-        private void AddPeer(WGConfRequestData data)
+        private WGRouteStatusData AddPeer(WGConfRequestData data)
         {
             var nameInterfce = _WGConfigService.GetWGInterfaceNameFromString(data.Args.Ifname);
             List<Peer> WgPeers = _WGConfigService.GetPeerSections(nameInterfce).ToList();
@@ -194,30 +215,14 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                         allowedIps.Add(allowedIpFromRequest);
                     }
 
-                    var WGRouteStatusMessage = JsonConvert.SerializeObject(new WGRouteStatusRequest
-                    {
-                        Data = new WGRouteStatusData
-                        {
-                            ConnectionId = data.Metadata.ConnectionId,
-                            PublicKey = data.Args.PublicKey,
-                            Statuses = wGRouteStatuses
-                        }
-                    }, JsonSettings.GetSnakeCaseNamingStrategy());
-                    Debug.WriteLine($"WG_ROUTE_STATUS,: {WGRouteStatusMessage}");
-                    Client.Send(WGRouteStatusMessage);
-
-                    if (DebugLogger)
-                        LoggerRequestHelper.Send(
-                            Client,
-                            log4net.Core.Level.Debug,
-                            _appSettings.DeviceId,
-                            _appSettings.DeviceName,
-                            _httpRequestService.GetResponse(AppConstants.EXTERNAL_IP_URL),
-                            WGRouteStatusMessage);
-
                     WgPeer.AllowedIPs = allowedIps;
                     _WGConfigService.SetPeerSections(nameInterfce, WgPeers);
-                    return;
+                    return new WGRouteStatusData
+                    {
+                        ConnectionId = data.Metadata.ConnectionId,
+                        PublicKey = data.Args.PublicKey,
+                        Statuses = wGRouteStatuses
+                    };
                 }
             }
 
@@ -226,33 +231,19 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                 wGRouteStatuses.Add(new WGRouteStatus
                 {
                     Ip = allowedIpFromRequest,
-                    Status = "OK"
+                    Status = "OK",
+                    Msg = ""
                 });
             }
 
-            var message = JsonConvert.SerializeObject(new WGRouteStatusRequest
-            {
-                Data = new WGRouteStatusData
-                {
-                    ConnectionId = data.Metadata.ConnectionId,
-                    PublicKey = data.Args.PublicKey,
-                    Statuses = wGRouteStatuses
-                }
-            }, JsonSettings.GetSnakeCaseNamingStrategy());
-            Debug.WriteLine($"WG_ROUTE_STATUS,: {message}");
-            Client.Send(message);
-
-            if (DebugLogger)
-                LoggerRequestHelper.Send(
-                    Client,
-                    log4net.Core.Level.Debug,
-                    _appSettings.DeviceId,
-                    _appSettings.DeviceName,
-                    _httpRequestService.GetResponse(AppConstants.EXTERNAL_IP_URL),
-                    message);
-
             WgPeers.Add(requestPeer);
             _WGConfigService.SetPeerSections(nameInterfce, WgPeers);
+            return new WGRouteStatusData
+            {
+                ConnectionId = data.Metadata.ConnectionId,
+                PublicKey = data.Args.PublicKey,
+                Statuses = wGRouteStatuses
+            };
         }
 
         private void RemovePeer(WGConfRequestData data)
