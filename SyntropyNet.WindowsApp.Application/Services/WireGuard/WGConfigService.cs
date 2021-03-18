@@ -441,7 +441,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
 
                     var serviceStatus = new Win32.ServiceStatus();
                     bool createdInterface = false;
-                    for (int i = 0; i < 10; i++)
+                    for (int i = 0; i < 60; i++)
                     {
                         Win32.QueryServiceStatus(service, serviceStatus);
 
