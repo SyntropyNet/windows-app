@@ -92,6 +92,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                         }
 
                         _WGConfigService.ApplyModifiedConfigs();
+                        Debug.WriteLine("+++ WG_CONF emd");
                     }
                 }
                 catch (Exception ex)
@@ -129,6 +130,11 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
             });
 
             mainTask.Start();
+        }
+
+        public bool IsAlive()
+        {
+            return mainTask?.IsAlive ?? false;
         }
 
         public void Interrupt()

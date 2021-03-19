@@ -98,7 +98,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                     {
                         Options =
                         {
-                            KeepAliveInterval = TimeSpan.FromSeconds(30),
+                            KeepAliveInterval = TimeSpan.FromSeconds(90),
                         
                         }
                     };
@@ -273,9 +273,26 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                                 {
                                     if (WGConfHandler != null)
                                     {
-                                        WGConfHandler.Interrupt();
-                                        WGConfHandler = null;
+                                        Debug.WriteLine("+++ WG_CONF time start");
+                                        for (int i = 1; i <= 60; i++)
+                                        {
+                                            if(i == 60)
+                                            {
+                                                Debug.WriteLine($"+++ WG_CONF time end with error");
+                                                throw new Exception("Runtime exceeded");
+                                            }
+                                            if (!WGConfHandler.IsAlive())
+                                            {
+                                                WGConfHandler.Interrupt();
+                                                WGConfHandler = null;
+                                                Debug.WriteLine($"+++ WG_CONF time end with {i}");
+                                                break;
+                                            }
+
+                                            Thread.Sleep(1000);
+                                        }
                                     }
+                                    Debug.WriteLine("+++ WG_CONF start");
 
                                     WGConfHandler = new WGConfHandler(client, _WGConfigService, _appSettings, _httpRequestService);
                                     WGConfHandler.Start(WGConfRequest);
