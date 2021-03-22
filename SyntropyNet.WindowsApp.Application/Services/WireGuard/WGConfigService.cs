@@ -85,24 +85,34 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
         public void RunWG()
         {
             CreateInterface(WGInterfaceName.SYNTROPY_PUBLIC);
-            Add(GetPathToInterfaceConfig(WGInterfaceName.SYNTROPY_PUBLIC), true);
-
             CreateInterface(WGInterfaceName.SYNTROPY_SDN1);
-            Add(GetPathToInterfaceConfig(WGInterfaceName.SYNTROPY_SDN1), true);
-
             CreateInterface(WGInterfaceName.SYNTROPY_SDN2);
-            Add(GetPathToInterfaceConfig(WGInterfaceName.SYNTROPY_SDN2), true);
-
             CreateInterface(WGInterfaceName.SYNTROPY_SDN3);
-            Add(GetPathToInterfaceConfig(WGInterfaceName.SYNTROPY_SDN3), true);
+
+            ApplyModifiedConfigs();
         }
 
         public void StopWG()
         {
-            Remove(GetPathToInterfaceConfig(WGInterfaceName.SYNTROPY_PUBLIC), true);
-            Remove(GetPathToInterfaceConfig(WGInterfaceName.SYNTROPY_SDN1), true);
-            Remove(GetPathToInterfaceConfig(WGInterfaceName.SYNTROPY_SDN2), true);
-            Remove(GetPathToInterfaceConfig(WGInterfaceName.SYNTROPY_SDN3), true);
+            var t1 = new Task(() =>
+                Remove(GetPathToInterfaceConfig(WGInterfaceName.SYNTROPY_PUBLIC), true)
+            );
+            var t2 = new Task(() =>
+                Remove(GetPathToInterfaceConfig(WGInterfaceName.SYNTROPY_SDN1), true)
+            );
+            var t3 = new Task(() =>
+                Remove(GetPathToInterfaceConfig(WGInterfaceName.SYNTROPY_SDN2), true)
+            );
+            var t4 = new Task(() =>
+                Remove(GetPathToInterfaceConfig(WGInterfaceName.SYNTROPY_SDN3), true)
+            );
+
+            t1.Start();
+            t2.Start();
+            t3.Start();
+            t4.Start();
+
+            Task.WaitAll(t1, t2, t3, t4);
         }
 
         public string GetPublicKey(WGInterfaceName interfaceName)
@@ -158,10 +168,25 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
 
         public void ApplyModifiedConfigs()
         {
-            Add(GetPathToInterfaceConfig(WGInterfaceName.SYNTROPY_PUBLIC), true);
-            Add(GetPathToInterfaceConfig(WGInterfaceName.SYNTROPY_SDN1), true);
-            Add(GetPathToInterfaceConfig(WGInterfaceName.SYNTROPY_SDN2), true);
-            Add(GetPathToInterfaceConfig(WGInterfaceName.SYNTROPY_SDN3), true);
+            var t1 = new Task(() =>
+                Add(GetPathToInterfaceConfig(WGInterfaceName.SYNTROPY_PUBLIC), true)
+            );
+            var t2 = new Task(() =>
+                Add(GetPathToInterfaceConfig(WGInterfaceName.SYNTROPY_SDN1), true)
+            );
+            var t3 = new Task(() =>
+                Add(GetPathToInterfaceConfig(WGInterfaceName.SYNTROPY_SDN2), true)
+            );
+            var t4 = new Task(() =>
+                Add(GetPathToInterfaceConfig(WGInterfaceName.SYNTROPY_SDN3), true)
+            );
+
+            t1.Start();
+            t2.Start();
+            t3.Start();
+            t4.Start();
+
+            Task.WaitAll(t1, t2, t3, t4);
         }
 
         private void CreateInterface(WGInterfaceName interfaces)
