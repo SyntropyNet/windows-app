@@ -43,6 +43,11 @@ namespace SyntropyNet.WindowsApp.Application.Domain.Models.Messages
 
     public class WGConfRequestMetadata
     {
+        public WGConfRequestMetadata()
+        {
+            AllowedIpsInfo = new List<AllowedIpsInfo>();
+        }
+
         public string NetworkId { get; set; }
         public string DeviceId { get; set; }
         public string DeviceName { get; set; }
