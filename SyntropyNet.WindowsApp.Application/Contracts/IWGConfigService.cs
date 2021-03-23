@@ -16,7 +16,7 @@ namespace SyntropyNet.WindowsApp.Application.Contracts
         event Action<object, WGConfigServiceEventArgs> ErrorCreateInterfaceEvent;
         bool ActivityState { get; }
 
-        void RunWG();
+        void CreateInterfaces();
         void StopWG();
         void ApplyModifiedConfigs();
         void SetPeersThroughPipe(WGInterfaceName interfaceName);

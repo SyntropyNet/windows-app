@@ -19,16 +19,19 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
         private readonly IApiWrapperService _apiService;
         private readonly IUserConfig _userConfig;
         private readonly IContext _appContext;
+        private readonly IWGConfigService _WGConfigService;
         private readonly Dictionary<string, List<string>> _errorsByPropertyName = new Dictionary<string, List<string>>();
         public string Title => "Add Agent Token";
         public bool HasErrors => _errorsByPropertyName.Any();
         public event EventHandler<DataErrorsChangedEventArgs> ErrorsChanged;
+        private int _countCreatedInterface = 0;
 
-        public AddTokenViewModel(IApiWrapperService apiService, IContext appContext, IUserConfig userConfig)
+        public AddTokenViewModel(IApiWrapperService apiService, IContext appContext, IUserConfig userConfig, IWGConfigService WGConfigService)
         {
             _apiService = apiService;
             _appContext = appContext;
             _userConfig = userConfig;
+            _WGConfigService = WGConfigService;
         }
 
         public IEnumerable GetErrors(string propertyName)
@@ -208,7 +211,8 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
                         }
                         else
                         {
-                            FinishDialog();
+                            _WGConfigService.CreateInterfaceEvent += _WGConfigService_CreateInterfaceEvent;
+                            _WGConfigService.ErrorCreateInterfaceEvent += _WGConfigService_ErrorCreateInterfaceEvent;
                         }
                     });
                 }
@@ -218,6 +222,24 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
                     ShowConnectionError(ex.Message);
                 }
             });
+        }
+
+        private void _WGConfigService_ErrorCreateInterfaceEvent(object arg1, Services.WireGuard.WGConfigServiceEventArgs arg2)
+        {
+            _countCreatedInterface = 0;
+            ShowConnectionError($"Error creating {arg2.Interface.Name} interface");
+        }
+
+        private void _WGConfigService_CreateInterfaceEvent(object arg1, Services.WireGuard.WGConfigServiceEventArgs arg2)
+        {
+            _countCreatedInterface++;
+
+            if(_countCreatedInterface == 4)
+            {
+                _countCreatedInterface = 0;
+                FinishDialog();
+            }
+                
         }
 
         private void ShowConnectionError(string error)

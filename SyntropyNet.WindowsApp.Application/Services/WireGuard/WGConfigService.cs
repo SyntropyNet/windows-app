@@ -82,14 +82,14 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
             }
         }
 
-        public void RunWG()
+        public void CreateInterfaces()
         {
             CreateInterface(WGInterfaceName.SYNTROPY_PUBLIC);
             CreateInterface(WGInterfaceName.SYNTROPY_SDN1);
             CreateInterface(WGInterfaceName.SYNTROPY_SDN2);
             CreateInterface(WGInterfaceName.SYNTROPY_SDN3);
 
-            ApplyModifiedConfigs();
+            //ApplyModifiedConfigs();
         }
 
         public void StopWG()

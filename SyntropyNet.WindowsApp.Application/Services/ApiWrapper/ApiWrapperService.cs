@@ -86,7 +86,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                 return;
             }
             Stopping = false;
-            _WGConfigService.RunWG();
+            _WGConfigService.CreateInterfaces();
             new Thread(async () =>
             {
                 exitEvent = new ManualResetEvent(false);
