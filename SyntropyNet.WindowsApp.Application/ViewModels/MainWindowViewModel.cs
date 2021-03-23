@@ -1,6 +1,7 @@
 ﻿using Prism.Commands;
 using Prism.Mvvm;
 using SyntropyNet.WindowsApp.Application.Contracts;
+using SyntropyNet.WindowsApp.Application.Domain.Enums.WireGuard;
 using SyntropyNet.WindowsApp.Application.Domain.Models;
 using SyntropyNet.WindowsApp.Application.Exceptions;
 using SyntropyNet.WindowsApp.Application.Models;
@@ -22,7 +23,10 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
         private readonly IAppSettings _appSettings;
         private readonly IUserConfig _userConfig;
         private readonly IContext _appContext;
+        private readonly IWGConfigService _WGConfigService;
         private readonly Prism.Services.Dialogs.IDialogService _prismDialogs;
+        private int _countCreatedInterface = 0;
+        private int _totalInterfaces = Enum.GetNames(typeof(WGInterfaceName)).Length;
 
         private bool _autoDisconnection = false;
 
@@ -30,17 +34,21 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
                                    Prism.Services.Dialogs.IDialogService prismDialogs,
                                    IUserConfig userConfig,
                                    IContext appContext,
-                                   IAppSettings appSettings)
+                                   IAppSettings appSettings,
+                                   IWGConfigService WGConfigService)
         {
             _appSettings = appSettings;
             _prismDialogs = prismDialogs;
             _apiService = apiService;
             _userConfig = userConfig;
             _appContext = appContext;
+            _WGConfigService = WGConfigService;
 
             _apiService.ServicesUpdatedEvent += UpdateServices;
             _apiService.PeersServicesUpdatedEvent += UpdatePeersServices;
             _apiService.DisconnectedEvent += Disconnected;
+            _WGConfigService.CreateInterfaceEvent += _WGConfigService_CreateInterfaceEvent;
+            _WGConfigService.ErrorCreateInterfaceEvent += _WGConfigService_ErrorCreateInterfaceEvent;
 
             Host = _appSettings.DeviceName;
         }
@@ -288,15 +296,11 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
                 {
                     _apiService.Run((WSConnectionResponse response) =>
                     {
-                        StopLoading();
                         if (response.State == Domain.Enums.WSConnectionState.Failed)
                         {
                             SetDisconnected();
                             ShowError(response.Error);
-                        }
-                        else
-                        {
-                            SetConnected();
+                            StopLoading();
                         }
                     });
                 }
@@ -304,9 +308,31 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
                 {
                     SetDisconnected();
                     ShowError(ex.Message);
+                    StopLoading();
                 }
                 
             });
+        }
+
+        private void _WGConfigService_ErrorCreateInterfaceEvent(object arg1, Services.WireGuard.WGConfigServiceEventArgs arg2)
+        {
+            _countCreatedInterface = 0;
+            SetDisconnected();
+            StopLoading();
+            ShowError($"Error creating {arg2.Interface.Name} interface");
+        }
+
+        private void _WGConfigService_CreateInterfaceEvent(object arg1, Services.WireGuard.WGConfigServiceEventArgs arg2)
+        {
+            _countCreatedInterface++;
+
+            if (_countCreatedInterface == _totalInterfaces)
+            {
+                _countCreatedInterface = 0;
+                SetConnected();
+                StopLoading();
+            }
+
         }
 
         private DelegateCommand _commandLogout = null;

@@ -2,6 +2,7 @@
 using Prism.Mvvm;
 using Prism.Services.Dialogs;
 using SyntropyNet.WindowsApp.Application.Contracts;
+using SyntropyNet.WindowsApp.Application.Domain.Enums.WireGuard;
 using SyntropyNet.WindowsApp.Application.Domain.Models;
 using SyntropyNet.WindowsApp.Application.Exceptions;
 using System;
@@ -25,6 +26,7 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
         public bool HasErrors => _errorsByPropertyName.Any();
         public event EventHandler<DataErrorsChangedEventArgs> ErrorsChanged;
         private int _countCreatedInterface = 0;
+        private int _totalInterfaces =  Enum.GetNames(typeof(WGInterfaceName)).Length;
 
         public AddTokenViewModel(IApiWrapperService apiService, IContext appContext, IUserConfig userConfig, IWGConfigService WGConfigService)
         {
@@ -32,6 +34,9 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
             _appContext = appContext;
             _userConfig = userConfig;
             _WGConfigService = WGConfigService;
+
+            _WGConfigService.CreateInterfaceEvent += _WGConfigService_CreateInterfaceEvent;
+            _WGConfigService.ErrorCreateInterfaceEvent += _WGConfigService_ErrorCreateInterfaceEvent;
         }
 
         public IEnumerable GetErrors(string propertyName)
@@ -209,11 +214,7 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
                             _userConfig.Quit();
                             ShowConnectionError(response.Error);
                         }
-                        else
-                        {
-                            _WGConfigService.CreateInterfaceEvent += _WGConfigService_CreateInterfaceEvent;
-                            _WGConfigService.ErrorCreateInterfaceEvent += _WGConfigService_ErrorCreateInterfaceEvent;
-                        }
+
                     });
                 }
                 catch (NoFreePortException ex)
@@ -234,7 +235,7 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
         {
             _countCreatedInterface++;
 
-            if(_countCreatedInterface == 4)
+            if(_countCreatedInterface == _totalInterfaces)
             {
                 _countCreatedInterface = 0;
                 FinishDialog();
