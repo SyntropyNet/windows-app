@@ -12,6 +12,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SyntropyNet.WindowsApp.Application.Properties;
 
 namespace SyntropyNet.WindowsApp.Application.ViewModels
 {
@@ -88,18 +89,18 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
             }
         }
 
-        private string _name = string.Empty;
+        private string _name = Properties.Settings.Default.UserName;
         public string Name
         {
             get { return _name; }
             set 
             { 
                 ValidateName(value);
-                SetProperty(ref _name, value); 
+                SetProperty(ref _name, value);
             }
         }
 
-        private string _agentToken = string.Empty;
+        private string _agentToken = Properties.Settings.Default.UserToken;
         public string AgentToken
         {
             get { return _agentToken; }
@@ -216,6 +217,10 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
                         }
 
                     });
+
+                    Properties.Settings.Default.UserName = _name;
+                    Properties.Settings.Default.UserToken = _agentToken;
+                    Properties.Settings.Default.Save();
                 }
                 catch (NoFreePortException ex)
                 {
