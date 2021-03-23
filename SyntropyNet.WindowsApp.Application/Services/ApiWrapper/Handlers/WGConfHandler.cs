@@ -91,7 +91,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                                 message);
                         }
 
-                        _WGConfigService.ApplyModifiedConfigs();
+                        //_WGConfigService.ApplyModifiedConfigs();
                         Debug.WriteLine("+++ WG_CONF emd");
                     }
                 }
@@ -177,6 +177,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
         {
             var nameInterfce = _WGConfigService.GetWGInterfaceNameFromString(data.Args.Ifname);
             _WGConfigService.RemoveInterface(nameInterfce);
+            _WGConfigService.ApplyModifiedConfigs();
         }
 
         private WGRouteStatusData AddPeer(WGConfRequestData data)
@@ -223,6 +224,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
 
                     WgPeer.AllowedIPs = allowedIps;
                     _WGConfigService.SetPeerSections(nameInterfce, WgPeers);
+                    _WGConfigService.SetPeersThroughPipe(nameInterfce);
                     return new WGRouteStatusData
                     {
                         ConnectionId = data.Metadata.ConnectionId,
@@ -244,6 +246,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
 
             WgPeers.Add(requestPeer);
             _WGConfigService.SetPeerSections(nameInterfce, WgPeers);
+            _WGConfigService.SetPeersThroughPipe(nameInterfce);
             return new WGRouteStatusData
             {
                 ConnectionId = data.Metadata.ConnectionId,
@@ -264,6 +267,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                     {
                         WgPeers.Remove(WgPeer);
                         _WGConfigService.SetPeerSections(interfaceName, WgPeers);
+                        _WGConfigService.SetPeersThroughPipe(interfaceName);
                         return;
                     }
                 }

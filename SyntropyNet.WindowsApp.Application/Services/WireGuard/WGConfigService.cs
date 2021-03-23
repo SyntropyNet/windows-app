@@ -189,6 +189,78 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
             Task.WaitAll(t1, t2, t3, t4);
         }
 
+        private string Base64ToHex(string str)
+        {
+            byte[] bytes = Convert.FromBase64String(str);
+            return BitConverter.ToString(bytes).Replace("-", "").ToLower();
+        }
+
+        public void SetPeersThroughPipe(WGInterfaceName interfaceName)
+        {
+            TunnelConfig interfaceConfig = GetHowName(interfaceName);
+            StringBuilder set = new StringBuilder("set=1\n");
+            set.Append("replace_peers=true\n");
+
+            if (interfaceConfig.Peers != null && interfaceConfig.Peers.Count() > 0)
+            {
+                foreach (var peer in interfaceConfig.Peers)
+                {
+                    set.Append($"public_key={Base64ToHex(peer.PublicKey)}\n");
+                    set.Append("replace_allowed_ips=true\n");
+                    foreach (var allowedIp in peer.AllowedIPs)
+                    {
+                        set.Append($"allowed_ip={allowedIp}\n");
+                    }
+                    set.Append($"persistent_keepalive_interval=15\n");
+
+                    string address = peer.Endpoint.Remove(peer.Endpoint.LastIndexOf(@":"));
+                    string port = peer.Endpoint.Substring(peer.Endpoint.LastIndexOf(@":") + 1);
+                    string endpoint = $"{GetIpInRequiredFormatRecord(address)}:{port}";
+                    set.Append($"endpoint={endpoint}\n");
+                }
+            }
+            set.Append("\n");
+
+            StreamReader reader = null;
+            NamedPipeClientStream stream = null;
+
+            try
+            {
+                stream = GetPipe(GetPathToInterfaceConfig(interfaceName));
+                stream.Connect();
+                reader = new StreamReader(stream);
+            }
+            catch { }
+
+            try
+            {
+                var pipe = Encoding.UTF8.GetBytes(set.ToString());
+                stream.Write(pipe, 0, pipe.Length);
+
+                while (true)
+                {
+                    var line = reader.ReadLine();
+                    if (line == "")
+                        break;
+
+                    if (line.StartsWith("errno="))
+                    {
+                        var error = line.Substring(6);
+                        if (error == "0")
+                            break;
+                        else
+                            new Exception("Update error wg interface");
+                    }
+                }
+            }
+            catch { }
+            finally
+            {
+                if (stream != null && stream.IsConnected)
+                    stream.Close();
+            }
+        }
+
         private void CreateInterface(WGInterfaceName interfaces)
         {
             var expectPort = GetUsedPorts();
