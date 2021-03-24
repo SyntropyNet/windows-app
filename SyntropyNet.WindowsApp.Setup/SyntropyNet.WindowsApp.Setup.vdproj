@@ -2671,7 +2671,7 @@
             }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_0CD93AC0A2424A5BA5BA077507D4891E"
             {
-            "SourcePath" = "8:\\\\Mac\\Work 2\\SyntropyNet\\github\\windows-app\\SyntropyNet.WindowsApp\\syntropy-icon.ico"
+            "SourcePath" = "8:..\\SyntropyNet.WindowsApp\\syntropy-icon.ico"
             "TargetName" = "8:syntropy-icon.ico"
             "Tag" = "8:"
             "Folder" = "8:_E19CA855E8544D7990667C568FA6B586"
@@ -4117,7 +4117,7 @@
             }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_41DE17137B05428C9B30A73335CF0BE9"
             {
-            "SourcePath" = "8:\\\\Mac\\Work 2\\SyntropyNet\\github\\windows-app\\SyntropyNet.WindowsApp\\x86\\wintun.dll"
+            "SourcePath" = "8:..\\SyntropyNet.WindowsApp\\x86\\wintun.dll"
             "TargetName" = "8:wintun.dll"
             "Tag" = "8:"
             "Folder" = "8:_E19CA855E8544D7990667C568FA6B586"
@@ -5067,7 +5067,7 @@
             }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_7B239A0BA75B43D899AC111CC5074FA6"
             {
-            "SourcePath" = "8:\\\\Mac\\Work 2\\SyntropyNet\\github\\windows-app\\SyntropyNet.WindowsApp\\x86\\tunnel.dll"
+            "SourcePath" = "8:..\\SyntropyNet.WindowsApp\\x86\\tunnel.dll"
             "TargetName" = "8:tunnel.dll"
             "Tag" = "8:"
             "Folder" = "8:_E19CA855E8544D7990667C568FA6B586"
