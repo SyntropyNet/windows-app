@@ -42,6 +42,9 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
             _networkInformationService = networkInformationService;
             _appSettings = appSettings;
             _httpRequestService = httpRequestService;
+
+            _WGConfigService.CreateInterfaceEvent += WGConfigServiceCreateInterfaceEvent;
+            _WGConfigService.ErrorCreateInterfaceEvent += WGConfigServiceErrorCreateInterfaceEvent;
         }
 
         public void Start(ConfigInfoRequest request)
@@ -58,6 +61,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                             JsonSettings.GetSnakeCaseNamingStrategy());
                         Debug.WriteLine($"Update agent config: {message}");
                         Client.Send(message);
+                        _WGConfigService.ApplyModifiedConfigs();
 
                         if (DebugLogger)
                             LoggerRequestHelper.Send(
@@ -73,10 +77,6 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                     {
                         SetPeers(request);
                     }
-
-                    _WGConfigService.CreateInterfaceEvent += WGConfigServiceCreateInterfaceEvent;
-                    _WGConfigService.ErrorCreateInterfaceEvent += WGConfigServiceErrorCreateInterfaceEvent;
-                    _WGConfigService.ApplyModifiedConfigs();
                 }
                 catch(Exception ex)
                 {
@@ -191,6 +191,11 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                 _WGConfigService.SetPeerSections(WGInterfaceName.SYNTROPY_SDN1, sdn1PeerSection);
                 _WGConfigService.SetPeerSections(WGInterfaceName.SYNTROPY_SDN2, sdn2PeerSection);
                 _WGConfigService.SetPeerSections(WGInterfaceName.SYNTROPY_SDN3, sdn3PeerSection);
+
+                _WGConfigService.SetPeersThroughPipe(WGInterfaceName.SYNTROPY_PUBLIC);
+                _WGConfigService.SetPeersThroughPipe(WGInterfaceName.SYNTROPY_SDN1);
+                _WGConfigService.SetPeersThroughPipe(WGInterfaceName.SYNTROPY_SDN2);
+                _WGConfigService.SetPeersThroughPipe(WGInterfaceName.SYNTROPY_SDN3);
             }
         }
 
