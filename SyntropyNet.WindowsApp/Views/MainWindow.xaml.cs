@@ -119,7 +119,7 @@ namespace SyntropyNet.WindowsApp.Views
         {
             if (e.ChangedButton == MouseButton.Left)
             {
-                var rectangle = sender as ImageAwesome;
+                var rectangle = sender as Image;
                 ContextMenu contextMenu = rectangle.ContextMenu;
                 contextMenu.PlacementTarget = rectangle;
                 contextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Left;
@@ -129,9 +129,9 @@ namespace SyntropyNet.WindowsApp.Views
 
         private void Copy_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if(sender is ImageAwesome)
+            if(sender is Image)
             {
-                System.Windows.Forms.Clipboard.SetText((sender as ImageAwesome).ToolTip.ToString());
+                System.Windows.Forms.Clipboard.SetText((sender as Image).Tag.ToString());
             }
         }
 

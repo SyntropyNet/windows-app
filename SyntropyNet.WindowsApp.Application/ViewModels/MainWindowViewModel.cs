@@ -310,7 +310,6 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
                     ShowError(ex.Message);
                     StopLoading();
                 }
-                
             });
         }
 

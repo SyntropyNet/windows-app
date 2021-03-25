@@ -10,14 +10,20 @@
         mc:Ignorable="d"
         ResizeMode="CanMinimize"
         Title="" Height="475" Width="350"
+        BorderBrush="{DynamicResource AppBlueBrush}"
+        BorderThickness="1"
         WindowStyle="None"
         Padding="20 10 20 10"
         Closing="OnClose" StateChanged="OnStateChanged" IsVisibleChanged="OnIsVisibleChanged">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVisConverter" />
         <Color x:Key="AppGray">#e2e2e2</Color>
+        <Color x:Key="AppBlue">#0178d4</Color>
+        <SolidColorBrush x:Key="AppBlueBrush">#0178d4</SolidColorBrush>
         <SolidColorBrush x:Key="AppGrayBrush">#e2e2e2</SolidColorBrush>
         <SolidColorBrush x:Key="AppMainBrush">#ebebeb</SolidColorBrush>
+        <SolidColorBrush x:Key="AppTextBrush">#5e5e5e</SolidColorBrush>
+        
         <Style TargetType="{x:Type GridViewColumnHeader}" BasedOn="{StaticResource {x:Type GridViewColumnHeader}}">
             <Setter Property="Background" Value="Transparent"/>
         </Style>
@@ -301,39 +307,65 @@
                    Background="{DynamicResource AppMainBrush}"
                     Visibility="{Binding Path=LoggedIn, Converter={StaticResource BoolToVisConverter} }" 
                     Margin="0 0 0 0">
-            <DockPanel Margin="15 0 15 0" DockPanel.Dock="Top" HorizontalAlignment="Stretch" Height="50" >
-                <StackPanel DockPanel.Dock="Left" Orientation="Vertical">
-                    <Label>Agent Token</Label>
-                    <Label Content="{Binding Name}"
-                            Foreground="Gray"></Label>
-                </StackPanel>
-                <StackPanel DockPanel.Dock="Right" Orientation="Vertical" Width="35">
-                    <fa:ImageAwesome Icon="Bars" Width="18" Height="18"
+            <DockPanel DockPanel.Dock="Top" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="{DynamicResource AppGrayBrush}" >
+                <DockPanel Margin="15 0 15 0" DockPanel.Dock="Top" HorizontalAlignment="Stretch" Height="75" >
+                    <StackPanel Margin="0 15 0 0"  DockPanel.Dock="Left" Orientation="Vertical">
+                        <Label >Agent Token</Label>
+                        <Label Content="{Binding Name}"
+                            Foreground="{DynamicResource AppTextBrush}"></Label>
+                    </StackPanel>
+                    <StackPanel DockPanel.Dock="Right" Orientation="Vertical" Width="35">
+                        <Image Width="4" Height="18" 
+                               MouseDown="ImageAwesome_MouseDown" 
+                               Margin="0 28 0 0">
+                            <Image.ContextMenu>
+                                <ContextMenu Name="cm" StaysOpen="true">
+                                    <MenuItem Header="Remove Agent Token" Command="{Binding CommandLogout}" />
+                                    <Separator></Separator>
+                                    <MenuItem Header="Quit" Click="Quit_Click" />
+                                </ContextMenu>
+                            </Image.ContextMenu>
+                            <Image.Style>
+                                <Style TargetType="{x:Type Image}">
+                                    <Setter Property="Source" Value="..\Images\menu_icon.jpg"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Source" Value="..\Images\menu_icon-hover.jpg"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Image.Style>
+                        </Image>
+                        <!--
+                        <fa:ImageAwesome Icon="Bars" Width="4" Height="18"
                                      MouseDown="ImageAwesome_MouseDown"
                              Margin="0 10 0 0" >
-                        <fa:ImageAwesome.ContextMenu>
-                            <ContextMenu Name="cm" StaysOpen="true">
-                                <MenuItem Header="Remove Agent Token" Command="{Binding CommandLogout}" />
-                                <Separator></Separator>
-                                <MenuItem Header="Quit" Click="Quit_Click" />
-                            </ContextMenu>
-                        </fa:ImageAwesome.ContextMenu>
-                        <fa:ImageAwesome.Style>
-                            <Style TargetType="{x:Type fa:ImageAwesome}">
-                                <Setter Property="Foreground" Value="Black"/>
-                                <Style.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Foreground" Value="DarkGray"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </fa:ImageAwesome.Style>
-                    </fa:ImageAwesome>
+                            <fa:ImageAwesome.ContextMenu>
+                                <ContextMenu Name="cm" StaysOpen="true">
+                                    <MenuItem Header="Remove Agent Token" Command="{Binding CommandLogout}" />
+                                    <Separator></Separator>
+                                    <MenuItem Header="Quit" Click="Quit_Click" />
+                                </ContextMenu>
+                            </fa:ImageAwesome.ContextMenu>
+                            <fa:ImageAwesome.Style>
+                                <Style TargetType="{x:Type fa:ImageAwesome}">
+                                    <Setter Property="Foreground" Value="Black"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Foreground" Value="DarkGray"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </fa:ImageAwesome.Style>
+                        </fa:ImageAwesome>
+                        -->
+                        
 
-                </StackPanel>
-                <Label></Label>
+                    </StackPanel>
+                    <Label></Label>
+                </DockPanel>
             </DockPanel>
-            <Separator Margin="15 15 15 10" DockPanel.Dock="Top" Background="LightGray"></Separator>
+            <Separator Margin="15 0 15 10" DockPanel.Dock="Top" Background="LightGray"></Separator>
             <!-- Status & Errors-->
             <StackPanel Margin="15 0 15 0" DockPanel.Dock="Top" Orientation="Vertical" HorizontalAlignment="Left">
                 <Label>Status</Label>
@@ -355,15 +387,15 @@
             <!-- Host-->
             <StackPanel Margin="15 0 15 15" DockPanel.Dock="Top" Orientation="Vertical">
                 <Label>Host Name</Label>
-                <Label Content="{Binding Host}" Foreground="Gray"></Label>
+                <Label Content="{Binding Host}" Foreground="{DynamicResource AppTextBrush}"></Label>
             </StackPanel>
             <DockPanel HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="{DynamicResource AppGrayBrush}" >
                 <Label Margin="15 10 15 0" DockPanel.Dock="Top">Service List</Label>
                 <StackPanel  Margin="15 0 0 0" DockPanel.Dock="Top" 
                             Orientation="Horizontal">
-                    <Label Width="125" Foreground="Gray" FontSize="11">Service name</Label>
+                    <Label Width="125" Foreground="{DynamicResource AppTextBrush}" FontSize="11">Service name</Label>
                     <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Background="Gray"/>
-                    <Label Margin="10 0 0 0"  Foreground="Gray" FontSize="11">IP address</Label>
+                    <Label Margin="10 0 0 0"  Foreground="{DynamicResource AppTextBrush}" FontSize="11">IP address</Label>
                 </StackPanel>
                 <Separator DockPanel.Dock="Top" Margin="15 -3 0 0" Background="Gray" />
                 <ScrollViewer>
@@ -374,23 +406,13 @@
                                     <StackPanel Margin="0 5 0 0" Orientation="Horizontal" HorizontalAlignment="Stretch">
                                         <StackPanel Orientation="Horizontal"  Width="275">
                                             <Label Width="125" Content="{Binding Path=Name}" />
-                                            <Label Margin="10 0 0 0" Foreground="Gray" Content="{Binding Path=Address}"  />
+                                            <Label Margin="10 0 0 0" Foreground="{DynamicResource AppTextBrush}" Content="{Binding Path=Address}"  />
                                         </StackPanel>
-                                        <fa:ImageAwesome Icon="Copy" Width="14" Height="14" HorizontalAlignment="Right"
-                                             MouseDown="Copy_MouseDown"
-                                             ToolTip="{Binding Path=Address}"
-                                             Margin="10 0 0 0" >
-                                            <fa:ImageAwesome.Style>
-                                                <Style TargetType="{x:Type fa:ImageAwesome}">
-                                                    <Setter Property="Foreground" Value="Black"/>
-                                                    <Style.Triggers>
-                                                        <Trigger Property="IsMouseOver" Value="True">
-                                                            <Setter Property="Foreground" Value="DarkGray"/>
-                                                        </Trigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </fa:ImageAwesome.Style>
-                                        </fa:ImageAwesome>
+                                        <Image Source="..\Images\copy-icon.png" Width="24" Height="24" HorizontalAlignment="Right"
+                                                 MouseDown="Copy_MouseDown"
+                                                    Tag="{Binding Path=Address}"
+                                                 ToolTip="Copy IP"
+                                                 Margin="10 0 0 0"/>
                                     </StackPanel>
                                     
                                     <Separator Margin="0 5 0 0" Background="Gray" />

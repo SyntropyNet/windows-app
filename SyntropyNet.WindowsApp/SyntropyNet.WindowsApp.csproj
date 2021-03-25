@@ -179,6 +179,9 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <Resource Include="Images\copy-icon.png" />
+    <Resource Include="Images\menu_icon-hover.jpg" />
+    <Resource Include="Images\menu_icon.jpg" />
     <Content Include="Log4Net.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -220,7 +223,9 @@
     <Content Include="x86\wintun.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Resource Include="Images\syntropy-logo-80.jpg" />
+    <Resource Include="Images\syntropy-logo-80.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
     <Content Include="syntropy-icon.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
