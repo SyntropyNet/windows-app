@@ -35,6 +35,7 @@ namespace SyntropyNet.WindowsApp.Views
 
         private void PrepareNotifyIcon()
         {
+            this.ShowInTaskbar = false;
             // Tray Icon setup
             m_notifyIcon = new System.Windows.Forms.NotifyIcon();
             m_notifyIcon.BalloonTipText = "The app has been minimised. Click the tray icon to show.";

@@ -393,7 +393,7 @@
                 <Label Margin="15 10 15 0" DockPanel.Dock="Top">Service List</Label>
                 <StackPanel  Margin="15 0 0 0" DockPanel.Dock="Top" 
                             Orientation="Horizontal">
-                    <Label Width="125" Foreground="{DynamicResource AppTextBrush}" FontSize="11">Service name</Label>
+                    <Label Margin="10 0 0 7" Width="125" Foreground="{DynamicResource AppTextBrush}" FontSize="11">Service name</Label>
                     <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Background="Gray"/>
                     <Label Margin="10 0 0 0"  Foreground="{DynamicResource AppTextBrush}" FontSize="11">IP address</Label>
                 </StackPanel>
@@ -403,19 +403,19 @@
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Vertical">
-                                    <StackPanel Margin="0 5 0 0" Orientation="Horizontal" HorizontalAlignment="Stretch">
+                                    <StackPanel Margin="10 7 0 0" Orientation="Horizontal" HorizontalAlignment="Stretch">
                                         <StackPanel Orientation="Horizontal"  Width="275">
-                                            <Label Width="125" Content="{Binding Path=Name}" />
-                                            <Label Margin="10 0 0 0" Foreground="{DynamicResource AppTextBrush}" Content="{Binding Path=Address}"  />
+                                            <Label Margin="0 0 0 0" Width="125" Content="{Binding Path=Name}" />
+                                            <Label Margin="15 0 0 0" Foreground="{DynamicResource AppTextBrush}" Content="{Binding Path=Address}"  />
                                         </StackPanel>
                                         <Image Source="..\Images\copy-icon.png" Width="24" Height="24" HorizontalAlignment="Right"
                                                  MouseDown="Copy_MouseDown"
                                                     Tag="{Binding Path=Address}"
                                                  ToolTip="Copy IP"
-                                                 Margin="10 0 0 0"/>
+                                                 Margin="5 0 0 0"/>
                                     </StackPanel>
                                     
-                                    <Separator Margin="0 5 0 0" Background="Gray" />
+                                    <Separator Margin="0 7 0 0" Background="Gray" />
                                 </StackPanel>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
