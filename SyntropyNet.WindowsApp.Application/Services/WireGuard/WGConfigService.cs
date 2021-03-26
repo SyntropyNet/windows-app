@@ -247,7 +247,22 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
                     {
                         var error = line.Substring(6);
                         if (error == "0")
+                        {
+                            foreach (var peer in interfaceConfig.Peers)
+                            {
+                                foreach (var allowedIp in peer.AllowedIPs)
+                                {
+                                    string ip = allowedIp.Split('/')[0];
+                                    string mask = "255.255.255.255";
+                                    string gateway = interfaceConfig.Interface.Address.ToList()[0];
+                                    int metric = 5;
+
+                                    _networkService.AddRoute(ip, mask, gateway, metric);
+                                }
+                            }
+                            
                             break;
+                        } 
                         else
                             new Exception("Update error wg interface");
                     }

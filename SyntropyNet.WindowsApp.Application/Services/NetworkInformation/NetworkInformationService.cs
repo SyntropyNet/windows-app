@@ -125,5 +125,21 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
 
             return false;
         }
+
+        public void AddRoute(string ip, string mask, string gateway, int metric)
+        {
+            var process = new Process();
+
+            var startinfo = new ProcessStartInfo("cmd", "/c " + $"route add {ip} mask {mask} {gateway} metric {metric}");
+            startinfo.RedirectStandardOutput = true;
+            startinfo.UseShellExecute = false;
+            startinfo.CreateNoWindow = true;
+            startinfo.RedirectStandardError = true;
+
+            process.StartInfo = startinfo;
+
+            process.Start();
+            process.WaitForExit();
+        }
     }
 }

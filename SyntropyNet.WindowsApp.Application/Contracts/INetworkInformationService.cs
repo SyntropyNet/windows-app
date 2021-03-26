@@ -12,5 +12,6 @@ namespace SyntropyNet.WindowsApp.Application.Contracts
         IEnumerable<IfaceBWDataRequestData> GetInformNetworkInterface();
         int GetNextFreePort(IEnumerable<int> exceptPort = null);
         bool CheckPing(string ip, int timeout = 1000);
+        void AddRoute(string ip, string mask, string gateway, int metric);
     }
 }
