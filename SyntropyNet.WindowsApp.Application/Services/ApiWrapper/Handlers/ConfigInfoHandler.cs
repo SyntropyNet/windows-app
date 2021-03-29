@@ -75,7 +75,27 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
 
                     if (request.Data.Vpn.Count() != 0)
                     {
-                        SetPeers(request);
+                        var interfaces = new List<VpnConfig>();
+                        var peers = new List<VpnConfig>();
+
+                        foreach (var item in request.Data.Vpn)
+                        {
+                            switch (item.Fn)
+                            {
+                                case "create_interface":
+                                    interfaces.Add(item);
+                                    break;
+                                case "add_peer":
+                                    peers.Add(item);
+                                    break;
+                            }
+                        }
+
+                        if (interfaces.Count > 0)
+                            CreateInterfaces(interfaces);
+
+                        if (peers.Count > 0)
+                            SetPeers(peers);
                     }
                 }
                 catch(Exception ex)
@@ -134,18 +154,58 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                     message);
         }
 
-        private void SetPeers(ConfigInfoRequest request)
+        private void CreateInterfaces(IEnumerable<VpnConfig> interfaces)
+        {
+            var publicInterfaceSection = _WGConfigService.GetInterfaceSection(WGInterfaceName.SYNTROPY_PUBLIC);
+            var sdn1InterfaceSection = _WGConfigService.GetInterfaceSection(WGInterfaceName.SYNTROPY_SDN1);
+            var sdn2InterfaceSection = _WGConfigService.GetInterfaceSection(WGInterfaceName.SYNTROPY_SDN2);
+            var sdn3InterfaceSection = _WGConfigService.GetInterfaceSection(WGInterfaceName.SYNTROPY_SDN3);
+
+            foreach (var @interface in interfaces)
+            {
+                var address = new List<string>();
+
+                if (@interface.Args.Ifname == _WGConfigService.GetInterfaceName(WGInterfaceName.SYNTROPY_PUBLIC))
+                {
+                    address.Add(@interface.Args.InternalIp);
+                    publicInterfaceSection.Address = address;
+                    _WGConfigService.SetInterfaceSection(WGInterfaceName.SYNTROPY_PUBLIC, publicInterfaceSection);
+                }
+                else if(@interface.Args.Ifname == _WGConfigService.GetInterfaceName(WGInterfaceName.SYNTROPY_SDN1))
+                {
+                    address.Add(@interface.Args.InternalIp);
+                    sdn1InterfaceSection.Address = address;
+                    _WGConfigService.SetInterfaceSection(WGInterfaceName.SYNTROPY_SDN1, sdn1InterfaceSection);
+                }
+                else if (@interface.Args.Ifname == _WGConfigService.GetInterfaceName(WGInterfaceName.SYNTROPY_SDN2))
+                {
+                    address.Add(@interface.Args.InternalIp);
+                    sdn2InterfaceSection.Address = address;
+                    _WGConfigService.SetInterfaceSection(WGInterfaceName.SYNTROPY_SDN2, sdn2InterfaceSection);
+                }
+                else if (@interface.Args.Ifname == _WGConfigService.GetInterfaceName(WGInterfaceName.SYNTROPY_SDN3))
+                {
+                    address.Add(@interface.Args.InternalIp);
+                    sdn3InterfaceSection.Address = address;
+                    _WGConfigService.SetInterfaceSection(WGInterfaceName.SYNTROPY_SDN3, sdn3InterfaceSection);
+                }
+            }
+
+            _WGConfigService.ApplyModifiedConfigs();
+        }
+
+        private void SetPeers(IEnumerable<VpnConfig> peers)
         {
             var publicPeerSection = _WGConfigService.GetPeerSections(WGInterfaceName.SYNTROPY_PUBLIC).ToList();
             var sdn1PeerSection = _WGConfigService.GetPeerSections(WGInterfaceName.SYNTROPY_SDN1).ToList();
             var sdn2PeerSection = _WGConfigService.GetPeerSections(WGInterfaceName.SYNTROPY_SDN2).ToList();
             var sdn3PeerSection = _WGConfigService.GetPeerSections(WGInterfaceName.SYNTROPY_SDN3).ToList();
 
-            if (request.Data.Vpn.Count() > 0)
+            if (peers.Count() > 0)
             {
-                foreach (var item in request.Data.Vpn)
+                foreach (var item in peers)
                 {
-                    if(item.Args.Ifname == _WGConfigService.GetInterfaceName(WGInterfaceName.SYNTROPY_PUBLIC))
+                    if (item.Args.Ifname == _WGConfigService.GetInterfaceName(WGInterfaceName.SYNTROPY_PUBLIC))
                     {
                         publicPeerSection.Add(new Peer
                         {
@@ -154,7 +214,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                             Endpoint = $"{item.Args.EndpointIpv4}:{item.Args.EndpointPort}"
                         });
                     }
-                    else if(item.Args.Ifname == _WGConfigService.GetInterfaceName(WGInterfaceName.SYNTROPY_SDN1))
+                    else if (item.Args.Ifname == _WGConfigService.GetInterfaceName(WGInterfaceName.SYNTROPY_SDN1))
                     {
                         sdn1PeerSection.Add(new Peer
                         {
@@ -163,7 +223,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                             Endpoint = $"{item.Args.EndpointIpv4}:{item.Args.EndpointPort}"
                         });
                     }
-                    else if(item.Args.Ifname == _WGConfigService.GetInterfaceName(WGInterfaceName.SYNTROPY_SDN2))
+                    else if (item.Args.Ifname == _WGConfigService.GetInterfaceName(WGInterfaceName.SYNTROPY_SDN2))
                     {
                         sdn2PeerSection.Add(new Peer
                         {
