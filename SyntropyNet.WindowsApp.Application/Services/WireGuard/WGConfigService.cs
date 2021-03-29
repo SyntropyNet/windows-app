@@ -587,6 +587,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
             {
                 Win32.CloseServiceHandle(scm);
                 log.Error($"[WG_CONF] - Error creating WinService {tunnelName}");
+                ErrorCreateInterfaceEvent?.Invoke(this, new WGConfigServiceEventArgs(GetHowName(GetWGInterfaceNameFromString(tunnelName))));
                 return;
             }
             finally
