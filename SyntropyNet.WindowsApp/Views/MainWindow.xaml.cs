@@ -16,6 +16,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 using FontAwesome.WPF;
 using SyntropyNet.WindowsApp.Application.Contracts;
 using SyntropyNet.WindowsApp.Application.Services.ApiWrapper;
@@ -133,6 +134,15 @@ namespace SyntropyNet.WindowsApp.Views
             if(sender is Image)
             {
                 System.Windows.Forms.Clipboard.SetText((sender as Image).Tag.ToString());
+                popup1.IsOpen = true;
+                DispatcherTimer time = new DispatcherTimer();
+                time.Interval = TimeSpan.FromMilliseconds(500);
+                time.Start();
+                time.Tick += delegate
+                {
+                    popup1.IsOpen = false;
+                    time.Stop();
+                };
             }
         }
 

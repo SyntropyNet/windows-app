@@ -122,7 +122,13 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
             }
 
             Services.Clear();
-            Services.AddRange(services);
+            foreach(var service in services)
+            {
+                if(!Services.Any(x => x.Name == service.Name && x.Address == service.Address))
+                {
+                    Services.Add(service);
+                }
+            }
 
         }
 
@@ -139,7 +145,13 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
 
             var persistServices = Services.Where(x => removedPeers.All(uid => uid != x.PeerUid)).ToList();
             Services.Clear();
-            Services.AddRange(persistServices);
+            foreach (var service in persistServices)
+            {
+                if (!Services.Any(x => x.Name == service.Name && x.Address == service.Address))
+                {
+                    Services.Add(service);
+                }
+            }
         }
 
         public ObservableCollection<ServiceModel> Services{ get; private set; } = new ObservableCollection<ServiceModel>();
