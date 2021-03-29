@@ -182,7 +182,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
         private string GetInternalIp(WGInterfaceName interfaceName, IEnumerable<string> allowedIPs)
         {
             Interface @interface = _WGConfigService.GetInterfaceSection(interfaceName);
-            string address = @interface.Address.FirstOrDefault();
+            string address = @interface.Address != null ? @interface.Address.FirstOrDefault() : null;
 
             if (string.IsNullOrEmpty(address))
                 return "";
