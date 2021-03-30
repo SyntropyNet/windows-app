@@ -196,67 +196,95 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
 
         private void SetPeers(IEnumerable<VpnConfig> peers)
         {
-            var publicPeerSection = _WGConfigService.GetPeerSections(WGInterfaceName.SYNTROPY_PUBLIC).ToList();
-            var sdn1PeerSection = _WGConfigService.GetPeerSections(WGInterfaceName.SYNTROPY_SDN1).ToList();
-            var sdn2PeerSection = _WGConfigService.GetPeerSections(WGInterfaceName.SYNTROPY_SDN2).ToList();
-            var sdn3PeerSection = _WGConfigService.GetPeerSections(WGInterfaceName.SYNTROPY_SDN3).ToList();
-
             if (peers.Count() > 0)
             {
+                List<WGRouteStatusData> WGRouteStatusDataResponse = new List<WGRouteStatusData>();
+
                 foreach (var item in peers)
                 {
-                    if (item.Args.Ifname == _WGConfigService.GetInterfaceName(WGInterfaceName.SYNTROPY_PUBLIC))
+                    var nameInterfce = _WGConfigService.GetWGInterfaceNameFromString(item.Args.Ifname);
+                    List<Peer> WgPeers = _WGConfigService.GetPeerSections(nameInterfce).ToList();
+
+                    List<WGRouteStatus> wGRouteStatuses = new List<WGRouteStatus>();
+
+                    var requestPeer = new Peer
                     {
-                        publicPeerSection.Add(new Peer
+                        PublicKey = item.Args.PublicKey,
+                        AllowedIPs = item.Args.AllowedIps,
+                        Endpoint = $"{item.Args.EndpointIpv4}:{item.Args.EndpointPort}"
+                    };
+
+                    foreach (var WgPeer in WgPeers)
+                    {
+                        if (EqualPeer(requestPeer, WgPeer))
                         {
-                            PublicKey = item.Args.PublicKey,
-                            AllowedIPs = item.Args.AllowedIps,
-                            Endpoint = $"{item.Args.EndpointIpv4}:{item.Args.EndpointPort}"
-                        });
-                    }
-                    else if (item.Args.Ifname == _WGConfigService.GetInterfaceName(WGInterfaceName.SYNTROPY_SDN1))
-                    {
-                        sdn1PeerSection.Add(new Peer
-                        {
-                            PublicKey = item.Args.PublicKey,
-                            AllowedIPs = item.Args.AllowedIps,
-                            Endpoint = $"{item.Args.EndpointIpv4}:{item.Args.EndpointPort}"
-                        });
-                    }
-                    else if (item.Args.Ifname == _WGConfigService.GetInterfaceName(WGInterfaceName.SYNTROPY_SDN2))
-                    {
-                        sdn2PeerSection.Add(new Peer
-                        {
-                            PublicKey = item.Args.PublicKey,
-                            AllowedIPs = item.Args.AllowedIps,
-                            Endpoint = $"{item.Args.EndpointIpv4}:{item.Args.EndpointPort}"
-                        });
-                    }
-                    else if (item.Args.Ifname == _WGConfigService.GetInterfaceName(WGInterfaceName.SYNTROPY_SDN3))
-                    {
-                        sdn3PeerSection.Add(new Peer
-                        {
-                            PublicKey = item.Args.PublicKey,
-                            AllowedIPs = item.Args.AllowedIps,
-                            Endpoint = $"{item.Args.EndpointIpv4}:{item.Args.EndpointPort}"
-                        });
-                    }
-                    else
-                    {
-                        throw new NotFoundInterfaceException();
+                            List<string> allowedIps = new List<string>();
+                            foreach (var allowedIpFromRequest in requestPeer.AllowedIPs)
+                            {
+                                if (WgPeer.AllowedIPs.Contains(allowedIpFromRequest))
+                                {
+                                    wGRouteStatuses.Add(new WGRouteStatus
+                                    {
+                                        Ip = allowedIpFromRequest,
+                                        Status = "ERROR",
+                                        //ToDo: error message 
+                                        Msg = ""
+                                    });
+                                }
+                                else
+                                {
+                                    wGRouteStatuses.Add(new WGRouteStatus
+                                    {
+                                        Ip = allowedIpFromRequest,
+                                        Status = "OK",
+                                        Msg = ""
+                                    });
+                                }
+                                allowedIps.Add(allowedIpFromRequest);
+                            }
+
+                            WgPeer.AllowedIPs = allowedIps;
+                            _WGConfigService.SetPeerSections(nameInterfce, WgPeers);
+                            _WGConfigService.SetPeersThroughPipe(nameInterfce);
+
+                            WGRouteStatusDataResponse.Add(new WGRouteStatusData
+                            {
+                                ConnectionId = item.Metadata.ConnectionId,
+                                PublicKey = item.Args.PublicKey,
+                                Statuses = wGRouteStatuses
+                            });
+                        }
                     }
                 }
 
-                _WGConfigService.SetPeerSections(WGInterfaceName.SYNTROPY_PUBLIC, publicPeerSection);
-                _WGConfigService.SetPeerSections(WGInterfaceName.SYNTROPY_SDN1, sdn1PeerSection);
-                _WGConfigService.SetPeerSections(WGInterfaceName.SYNTROPY_SDN2, sdn2PeerSection);
-                _WGConfigService.SetPeerSections(WGInterfaceName.SYNTROPY_SDN3, sdn3PeerSection);
+                if (WGRouteStatusDataResponse.Count > 0)
+                {
+                    var message = JsonConvert.SerializeObject(new WGRouteStatusRequest
+                    {
+                        Data = WGRouteStatusDataResponse
+                    }, JsonSettings.GetSnakeCaseNamingStrategy());
+                    Debug.WriteLine($"WG_ROUTE_STATUS,: {message}");
+                    Client.Send(message);
 
-                _WGConfigService.SetPeersThroughPipe(WGInterfaceName.SYNTROPY_PUBLIC);
-                _WGConfigService.SetPeersThroughPipe(WGInterfaceName.SYNTROPY_SDN1);
-                _WGConfigService.SetPeersThroughPipe(WGInterfaceName.SYNTROPY_SDN2);
-                _WGConfigService.SetPeersThroughPipe(WGInterfaceName.SYNTROPY_SDN3);
+                    if (DebugLogger)
+                        LoggerRequestHelper.Send(
+                        Client,
+                        log4net.Core.Level.Debug,
+                        _appSettings.DeviceId,
+                        _appSettings.DeviceName,
+                        _appSettings.DeviceIp,
+                        message);
+                }
             }
+        }
+
+        private bool EqualPeer(Peer peer1, Peer peer2)
+        {
+            if (peer1.PublicKey != peer2.PublicKey)
+                return false;
+            if (peer1.Endpoint != peer2.Endpoint)
+                return false;
+            return true;
         }
 
         private bool CheckPublicKeyAndPort(ConfigInfoRequest request)
