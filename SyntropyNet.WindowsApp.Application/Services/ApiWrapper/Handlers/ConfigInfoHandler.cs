@@ -214,24 +214,58 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                         Endpoint = $"{item.Args.EndpointIpv4}:{item.Args.EndpointPort}"
                     };
 
-                    foreach (var WgPeer in WgPeers)
+                    if (WgPeers.Count > 0)
                     {
-                        if (EqualPeer(requestPeer, WgPeer))
+                        List<Peer> tempWgPeers = new List<Peer>();
+                        foreach (var item2 in WgPeers)
                         {
-                            List<string> allowedIps = new List<string>();
-                            foreach (var allowedIpFromRequest in requestPeer.AllowedIPs)
+                            tempWgPeers.Add(item2);
+                        }
+
+                        foreach (var WgPeer in WgPeers)
+                        {
+                            if (EqualPeer(requestPeer, WgPeer))
                             {
-                                if (WgPeer.AllowedIPs.Contains(allowedIpFromRequest))
+                                List<string> allowedIps = new List<string>();
+                                foreach (var allowedIpFromRequest in requestPeer.AllowedIPs)
                                 {
-                                    wGRouteStatuses.Add(new WGRouteStatus
+                                    if (WgPeer.AllowedIPs.Contains(allowedIpFromRequest))
                                     {
-                                        Ip = allowedIpFromRequest,
-                                        Status = "ERROR",
-                                        //ToDo: error message 
-                                        Msg = ""
-                                    });
+                                        wGRouteStatuses.Add(new WGRouteStatus
+                                        {
+                                            Ip = allowedIpFromRequest,
+                                            Status = "ERROR",
+                                            //ToDo: error message 
+                                            Msg = ""
+                                        });
+                                    }
+                                    else
+                                    {
+                                        wGRouteStatuses.Add(new WGRouteStatus
+                                        {
+                                            Ip = allowedIpFromRequest,
+                                            Status = "OK",
+                                            Msg = ""
+                                        });
+                                    }
+                                    allowedIps.Add(allowedIpFromRequest);
                                 }
-                                else
+
+                                WgPeer.AllowedIPs = allowedIps;
+                                _WGConfigService.SetPeerSections(nameInterfce, WgPeers);
+                                _WGConfigService.SetPeersThroughPipe(nameInterfce);
+
+                                WGRouteStatusDataResponse.Add(new WGRouteStatusData
+                                {
+                                    ConnectionId = item.Metadata.ConnectionId,
+                                    PublicKey = item.Args.PublicKey,
+                                    Statuses = wGRouteStatuses
+                                });
+                            }
+                            else
+                            {
+                                List<string> allowedIps = new List<string>();
+                                foreach (var allowedIpFromRequest in requestPeer.AllowedIPs)
                                 {
                                     wGRouteStatuses.Add(new WGRouteStatus
                                     {
@@ -239,21 +273,46 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                                         Status = "OK",
                                         Msg = ""
                                     });
+                                    allowedIps.Add(allowedIpFromRequest);
                                 }
-                                allowedIps.Add(allowedIpFromRequest);
+
+                                tempWgPeers.Add(requestPeer);
+                                _WGConfigService.SetPeerSections(nameInterfce, tempWgPeers);
+                                _WGConfigService.SetPeersThroughPipe(nameInterfce);
+
+                                WGRouteStatusDataResponse.Add(new WGRouteStatusData
+                                {
+                                    ConnectionId = item.Metadata.ConnectionId,
+                                    PublicKey = item.Args.PublicKey,
+                                    Statuses = wGRouteStatuses
+                                });
                             }
-
-                            WgPeer.AllowedIPs = allowedIps;
-                            _WGConfigService.SetPeerSections(nameInterfce, WgPeers);
-                            _WGConfigService.SetPeersThroughPipe(nameInterfce);
-
-                            WGRouteStatusDataResponse.Add(new WGRouteStatusData
-                            {
-                                ConnectionId = item.Metadata.ConnectionId,
-                                PublicKey = item.Args.PublicKey,
-                                Statuses = wGRouteStatuses
-                            });
                         }
+                    }
+                    else
+                    {
+                        List<string> allowedIps = new List<string>();
+                        foreach (var allowedIpFromRequest in requestPeer.AllowedIPs)
+                        {
+                            wGRouteStatuses.Add(new WGRouteStatus
+                            {
+                                Ip = allowedIpFromRequest,
+                                Status = "OK",
+                                Msg = ""
+                            });
+                            allowedIps.Add(allowedIpFromRequest);
+                        }
+
+                        WgPeers.Add(requestPeer);
+                        _WGConfigService.SetPeerSections(nameInterfce, WgPeers);
+                        _WGConfigService.SetPeersThroughPipe(nameInterfce);
+
+                        WGRouteStatusDataResponse.Add(new WGRouteStatusData
+                        {
+                            ConnectionId = item.Metadata.ConnectionId,
+                            PublicKey = item.Args.PublicKey,
+                            Statuses = wGRouteStatuses
+                        });
                     }
                 }
 
