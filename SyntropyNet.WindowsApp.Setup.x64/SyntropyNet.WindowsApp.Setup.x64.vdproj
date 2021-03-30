@@ -6248,15 +6248,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:SyntropyNet.WindowsApp"
-        "ProductCode" = "8:{BD544CE9-07A2-49D7-B0C8-98BD7C183FA7}"
-        "PackageCode" = "8:{515342D6-F128-4EA8-AF96-2FCD7EA19985}"
+        "ProductCode" = "8:{682942AE-87A5-4C09-B606-595D992B4EE9}"
+        "PackageCode" = "8:{58878C1F-EA7B-4DE4-9F32-A6A5ED6ACD7B}"
         "UpgradeCode" = "8:{6609D757-FEC6-4BA4-8D1B-BE938C66C188}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:FALSE"
-        "ProductVersion" = "8:1.8.0"
+        "ProductVersion" = "8:1.9.0"
         "Manufacturer" = "8:SyntropyNet"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
@@ -6784,7 +6784,7 @@
         {
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_8E43CCD9E63E4111BCA035443590B84F"
             {
-            "SourcePath" = "8:..\\SyntropyNet.WindowsApp\\obj\\x64\\Release\\SyntropyNet.WindowsApp.exe"
+            "SourcePath" = "8:..\\SyntropyNet.WindowsApp\\obj\\x86\\Debug\\SyntropyNet.WindowsApp.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_E19CA855E8544D7990667C568FA6B586"
