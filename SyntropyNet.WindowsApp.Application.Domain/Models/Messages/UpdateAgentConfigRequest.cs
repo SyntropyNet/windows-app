@@ -11,7 +11,7 @@ namespace SyntropyNet.WindowsApp.Application.Domain.Models.Messages
         public UpdateAgentConfigRequest()
         {
             Id = $"Id{DateTime.UtcNow.Ticks / TimeSpan.TicksPerMillisecond}";
-            Type = "UPDATE_AGENT_CONFIG";
+            Type = "UPDATE_AGENT_CONF";
             Data = new List<DataModel>();
         }
 
