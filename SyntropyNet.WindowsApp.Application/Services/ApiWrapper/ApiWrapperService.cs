@@ -369,6 +369,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                         Debug.WriteLine($"Disconnect: {x.Type}");
                         log.Info($"Disconnected: {x.Type}. {x.Exception?.Message ?? string.Empty}");
                         DisconnectedEvent?.Invoke(x.Type, x.Exception?.Message);
+                        _WGConfigService.StopWG();
                         Running = false;
                         exitEvent.Set();
                     });
@@ -447,6 +448,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                     }
 
                     exitEvent.WaitOne();
+                    _WGConfigService.StopWG();
                     Running = false;
                     //await client.Stop(WebSocketCloseStatus.NormalClosure,string.Empty);
                     Debug.WriteLine($"Connection finished");
