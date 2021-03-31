@@ -367,7 +367,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                     client.DisconnectionHappened.Subscribe(x =>
                     {
                         Debug.WriteLine($"Disconnect: {x.Type}");
-                        log.Info($"Disconnected: {x.Type}. {x.Exception?.Message ?? string.Empty}");
+                        log.Info($"Disconnected: {x.Type}. Status: {x.CloseStatus}, Description: {x.CloseStatusDescription}. {x.Exception?.Message ?? string.Empty}");
                         DisconnectedEvent?.Invoke(x.Type, x.Exception?.Message);
                         _WGConfigService.StopWG();
                         Running = false;
