@@ -106,6 +106,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                     wsCLient.Options.SetRequestHeader("X-DeviceId", _appSettings.DeviceId);
                     wsCLient.Options.SetRequestHeader("X-DeviceIp", _appSettings.DeviceIp);
                     wsCLient.Options.SetRequestHeader("X-DeviceName", _userConfig.TokenName);
+                    wsCLient.Options.SetRequestHeader("X-AgentType", "Windows");
                     wsCLient.Options.SetRequestHeader("X-AgentVersion", _appSettings.AgentVersion);
 
                     return wsCLient;
