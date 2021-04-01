@@ -303,6 +303,7 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
 
         private void Connect()
         {
+            ErrorVisible = false;
             Task.Run(() => {
                 try
                 {
