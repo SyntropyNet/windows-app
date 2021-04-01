@@ -78,9 +78,11 @@ namespace SyntropyNet.WindowsApp.Views
 
         void m_notifyIcon_Click(object sender, EventArgs e)
         {
-            var pos = WindowHelpers.GetWindowPosition(true);
+            var pos = WindowHelpers.GetWindowPosition(this);
             this.Left = pos.Item1;
             this.Top = pos.Item2;
+            var a =this.Width;
+            var b =this.ActualWidth;
             Show();
             WindowState = m_storedWindowState;
         }
@@ -101,9 +103,13 @@ namespace SyntropyNet.WindowsApp.Views
         {
             _appSettings = appSettings;
             PrepareNotifyIcon();
-            var pos = WindowHelpers.GetWindowPosition();
-            this.Left = pos.Item1;
-            this.Top = pos.Item2;
+            Loaded += (object sender, RoutedEventArgs e) =>
+            {
+                var pos = WindowHelpers.GetWindowPosition(this);
+                this.Left = pos.Item1;
+                this.Top = pos.Item2;
+                
+            };
             this.Topmost = true;
             InitializeComponent();
             BrushConverter bc = new BrushConverter();
