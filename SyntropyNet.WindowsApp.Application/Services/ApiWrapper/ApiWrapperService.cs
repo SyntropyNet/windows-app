@@ -117,6 +117,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                 {
                     client.IsReconnectionEnabled = true;
                     client.ErrorReconnectTimeout = new TimeSpan(5000);
+                    client.ReconnectTimeout = new TimeSpan(1000, 1000, 1000);
                     client.ReconnectionHappened.Subscribe(info =>
                     {
                         Debug.WriteLine($"Reconnection happened, type: {info.Type}");
