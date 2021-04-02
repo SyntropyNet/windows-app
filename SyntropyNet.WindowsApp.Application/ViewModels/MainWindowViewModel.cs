@@ -47,6 +47,8 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
             _apiService.ServicesUpdatedEvent += UpdateServices;
             _apiService.PeersServicesUpdatedEvent += UpdatePeersServices;
             _apiService.DisconnectedEvent += Disconnected;
+            _apiService.ReconnectingEvent += Reconnecting;
+            _apiService.ReconnectedEvent += Reconnected;
             _WGConfigService.CreateInterfaceEvent += _WGConfigService_CreateInterfaceEvent;
             _WGConfigService.ErrorCreateInterfaceEvent += _WGConfigService_ErrorCreateInterfaceEvent;
 
@@ -67,6 +69,20 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
             {
                 ShowError(error);
             }
+        }
+        public void Reconnecting(DisconnectionType type, string error)
+        {
+            SetReconnecting();
+        }
+
+        public void Reconnected()
+        {
+            if (!_appContext.IsSynchronized)
+            {
+                _appContext.BeginInvoke(Reconnected);
+                return;
+            }
+            Status = "Connected";
         }
 
         private void ShowError(string error)
@@ -111,6 +127,16 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
             }
             Status = "Connected";
             Started = true;
+        }
+
+        private void SetReconnecting()
+        {
+            if (!_appContext.IsSynchronized)
+            {
+                _appContext.BeginInvoke(SetReconnecting);
+                return;
+            }
+            Status = "Reconnecting";
         }
 
         public void UpdateServices(IEnumerable<ServiceModel> services)

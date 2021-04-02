@@ -39,6 +39,9 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
 
         public delegate void Disconnected(DisconnectionType type, string error);
         public event Disconnected DisconnectedEvent;
+        public event Disconnected ReconnectingEvent;
+        public delegate void Reconnected();
+        public event Reconnected ReconnectedEvent;
 
         private ManualResetEvent exitEvent { get; set;}
         private bool Running { get; set; }
@@ -122,6 +125,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                     {
                         Debug.WriteLine($"Reconnection happened, type: {info.Type}");
                         WaitReconnect = 0;
+                        ReconnectedEvent?.Invoke();
                     });
 
                     client.MessageReceived.Subscribe(msg => {
@@ -377,6 +381,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
 
                         if (Running)
                         {
+                            ReconnectingEvent?.Invoke(x.Type, x.Exception?.Message);
                             Thread.Sleep(WaitReconnect);
                             try
                             {

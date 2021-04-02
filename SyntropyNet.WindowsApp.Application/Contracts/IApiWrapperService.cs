@@ -13,6 +13,8 @@ namespace SyntropyNet.WindowsApp.Application.Contracts
         event ServicesUpdated ServicesUpdatedEvent;
         event PeersServicesUpdated PeersServicesUpdatedEvent;
         event Disconnected DisconnectedEvent;
+        event Disconnected ReconnectingEvent;
+        event Reconnected ReconnectedEvent;
         void Run(Action<WSConnectionResponse> callback);
         void Stop();
     }
