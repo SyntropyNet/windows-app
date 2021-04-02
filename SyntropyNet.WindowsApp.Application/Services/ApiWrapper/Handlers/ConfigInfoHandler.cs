@@ -226,12 +226,12 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
             List<Peer> WgPeers = _WGConfigService.GetPeerSections(nameInterfce).ToList();
 
             List<WGRouteStatus> wGRouteStatuses = new List<WGRouteStatus>();
-
+            
             var requestPeer = new Peer
             {
                 PublicKey = peer.Args.PublicKey,
                 AllowedIPs = peer.Args.AllowedIps,
-                Endpoint = $"{peer.Args.EndpointIpv4}:{peer.Args.EndpointPort}"
+                Endpoint = peer.Args.EndpointIpv4 != null ? $"{peer.Args.EndpointIpv4}:{peer.Args.EndpointPort}" : null
             };
 
             foreach (var WgPeer in WgPeers)

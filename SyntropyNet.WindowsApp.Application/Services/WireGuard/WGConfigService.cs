@@ -213,10 +213,13 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
                     }
                     set.Append($"persistent_keepalive_interval=15\n");
 
-                    string address = peer.Endpoint.Remove(peer.Endpoint.LastIndexOf(@":"));
-                    string port = peer.Endpoint.Substring(peer.Endpoint.LastIndexOf(@":") + 1);
-                    string endpoint = $"{GetIpInRequiredFormatRecord(address)}:{port}";
-                    set.Append($"endpoint={endpoint}\n");
+                    if(peer.Endpoint != null)
+                    {
+                        string address = peer.Endpoint.Remove(peer.Endpoint.LastIndexOf(@":"));
+                        string port = peer.Endpoint.Substring(peer.Endpoint.LastIndexOf(@":") + 1);
+                        string endpoint = $"{GetIpInRequiredFormatRecord(address)}:{port}";
+                        set.Append($"endpoint={endpoint}\n");
+                    }
                 }
             }
             set.Append("\n");
@@ -352,19 +355,24 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
             {
                 foreach (var item in peerSection)
                 {
-                    string address = item.Endpoint.Remove(item.Endpoint.LastIndexOf(@":"));
-                    string port = item.Endpoint.Substring(item.Endpoint.LastIndexOf(@":") + 1);
-                    string endpoint = $"{GetIpInRequiredFormatRecord(address)}:{port}";
+                    string endpoint = null;
+                    if (item.Endpoint != null)
+                    {
+                        string address = item.Endpoint.Remove(item.Endpoint.LastIndexOf(@":"));
+                        string port = item.Endpoint.Substring(item.Endpoint.LastIndexOf(@":") + 1);
+                        endpoint = $"{GetIpInRequiredFormatRecord(address)}:{port}";
+                    }
 
                     configString.AppendLine("[Peer]")
                         .AppendLine(
                             TunnelConfigConstants.PUBLIC_KEY + item.PublicKey)
                         .AppendLine(
-                            TunnelConfigConstants.ALLOWED_IPs + String.Join(",", item.AllowedIPs))
-                        .AppendLine(
-                            TunnelConfigConstants.ENDPOINT + endpoint)
-                        .AppendLine(
-                            TunnelConfigConstants.PERSISTEN_KEEPALIVE);
+                            TunnelConfigConstants.ALLOWED_IPs + String.Join(",", item.AllowedIPs));
+                    if(endpoint != null)
+                        configString.AppendLine(
+                            TunnelConfigConstants.ENDPOINT + endpoint);
+                    configString.AppendLine(
+                        TunnelConfigConstants.PERSISTEN_KEEPALIVE);
                 }
             }
 

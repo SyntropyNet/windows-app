@@ -38,7 +38,7 @@ namespace SyntropyNet.WindowsApp.Application.Domain.Models.Messages
         public IEnumerable<string> AllowedIps { get; set; }
         public string GwIpv4 { get; set; }
         public string EndpointIpv4 { get; set; }
-        public int EndpointPort { get; set; }
+        public int? EndpointPort { get; set; }
     }
 
     public class WGConfRequestMetadata
