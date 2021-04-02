@@ -43,6 +43,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
         private ManualResetEvent exitEvent { get; set;}
         private bool Running { get; set; }
         private bool Stopping { get; set; }
+        private int WaitReconnect { get; set; } = 0;
 
         private AutoPingHandler autoPingHandler;
         private GetInfoHandler getInfoHandler;
@@ -114,9 +115,13 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
 
                 using (var client = new WebsocketClient(url, factory))
                 {
-                    client.IsReconnectionEnabled = false;
+                    client.IsReconnectionEnabled = true;
+                    client.ErrorReconnectTimeout = new TimeSpan(5000);
                     client.ReconnectionHappened.Subscribe(info =>
-                        Debug.WriteLine($"Reconnection happened, type: {info.Type}"));
+                    {
+                        Debug.WriteLine($"Reconnection happened, type: {info.Type}");
+                        WaitReconnect = 0;
+                    });
 
                     client.MessageReceived.Subscribe(msg => {
                         if (Stopping)
@@ -368,6 +373,26 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                     {
                         Debug.WriteLine($"Disconnect: {x.Type}");
                         log.Info($"Disconnected: {x.Type}. Status: {x.CloseStatus}, Description: {x.CloseStatusDescription}. {x.Exception?.Message ?? string.Empty}");
+
+                        if (Running)
+                        {
+                            Thread.Sleep(WaitReconnect);
+                            try
+                            {
+                                checked
+                                {
+                                    WaitReconnect += 5000;
+                                }
+                            }
+                            catch (OverflowException ex)
+                            {
+                                Running = false;
+                                WaitReconnect = 0;
+                            }
+
+                            return;
+                        }
+
                         DisconnectedEvent?.Invoke(x.Type, x.Exception?.Message);
                         _WGConfigService.StopWG();
                         Running = false;
