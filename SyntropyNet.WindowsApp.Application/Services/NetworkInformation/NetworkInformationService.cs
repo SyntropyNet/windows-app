@@ -1,4 +1,5 @@
-﻿using SyntropyNet.WindowsApp.Application.Contracts;
+﻿using CodeCowboy.NetworkRoute;
+using SyntropyNet.WindowsApp.Application.Contracts;
 using SyntropyNet.WindowsApp.Application.Domain.Models.Messages;
 using SyntropyNet.WindowsApp.Application.Exceptions;
 using System;
@@ -126,9 +127,9 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
             return false;
         }
 
-        public void AddRoute(string ip, string mask, string gateway, int metric)
+        public void AddRoute(string interfaceName, string ip, string mask, string gateway, int metric)
         {
-            var process = new Process();
+            /*var process = new Process();
 
             var startinfo = new ProcessStartInfo("cmd", "/c " + $"route add {ip} mask {mask} {gateway} metric {metric}");
             startinfo.RedirectStandardOutput = true;
@@ -139,7 +140,35 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
             process.StartInfo = startinfo;
 
             process.Start();
-            process.WaitForExit();
+            process.WaitForExit();*/
+
+            int interfaceIndex = 0;
+            var adaptors = NicInterface.GetAllNetworkAdaptor();
+            
+            foreach (var adaptor in adaptors)
+            {
+                if(adaptor.Name == interfaceName)
+                {
+                    interfaceIndex = adaptor.InterfaceIndex;
+                }
+            }
+            if(interfaceIndex != 0)
+            {
+                NetworkAdaptor na = NicInterface.GetNetworkAdaptor(interfaceIndex);
+                Ip4RouteEntry ip4RouteEntry = new Ip4RouteEntry()
+                {
+                    GatewayIP = System.Net.IPAddress.Parse(gateway),
+                    SubnetMask = System.Net.IPAddress.Parse(mask),
+                    DestinationIP = System.Net.IPAddress.Parse(ip),
+                    InterfaceIndex = interfaceIndex,
+                    Metric = metric,
+                };
+
+                Ip4RouteTable.CreateRoute(ip4RouteEntry);
+                return;
+            }
+
+            throw new Exception($"Error adding route {ip}");
         }
     }
 }

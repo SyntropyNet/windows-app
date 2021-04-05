@@ -260,7 +260,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
                                     string gateway = interfaceConfig.Interface.Address.ToList()[0];
                                     int metric = 5;
 
-                                    _networkService.AddRoute(ip, mask, gateway, metric);
+                                    _networkService.AddRoute(interfaceName.ToString(), ip, mask, gateway, metric);
                                 }
                             }
                             
