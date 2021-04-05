@@ -17,6 +17,7 @@ using SyntropyNet.WindowsApp.Application.Models;
 using System.Web.Configuration;
 using log4net;
 using SyntropyNet.WindowsApp.Application.Constants;
+using System.Net;
 
 namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
 {
@@ -379,24 +380,29 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                         Debug.WriteLine($"Disconnect: {x.Type}");
                         log.Info($"Disconnected: {x.Type}. Status: {x.CloseStatus}, Description: {x.CloseStatusDescription}. {x.Exception?.Message ?? string.Empty}");
 
-                        if (Running)
+                        if (x.Exception?.InnerException is WebException && (x.Exception?.InnerException as WebException)?.Response is HttpWebResponse)
                         {
-                            ReconnectingEvent?.Invoke(x.Type, x.Exception?.Message);
-                            Thread.Sleep(WaitReconnect);
-                            try
-                            {
-                                checked
-                                {
-                                    WaitReconnect += 5000;
-                                }
-                            }
-                            catch (OverflowException ex)
-                            {
-                                Running = false;
-                                WaitReconnect = 0;
-                            }
+                            var code = ((x.Exception?.InnerException as WebException)?.Response as HttpWebResponse).StatusCode;
 
-                            return;
+                            if (Running && code != HttpStatusCode.Unauthorized)
+                            {
+                                ReconnectingEvent?.Invoke(x.Type, x.Exception?.Message);
+                                Thread.Sleep(WaitReconnect);
+                                try
+                                {
+                                    checked
+                                    {
+                                        WaitReconnect += 5000;
+                                    }
+                                }
+                                catch (OverflowException ex)
+                                {
+                                    Running = false;
+                                    WaitReconnect = 0;
+                                }
+
+                                return;
+                            }
                         }
 
                         DisconnectedEvent?.Invoke(x.Type, x.Exception?.Message);
