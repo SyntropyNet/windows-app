@@ -2474,7 +2474,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:SyntropyNet.WindowsApp.Application.Domain, Version=1.12.0.0, Culture=neutral, processorArchitecture=x86"
+            "AssemblyAsmDisplayName" = "8:SyntropyNet.WindowsApp.Application.Domain, Version=1.13.0.0, Culture=neutral, processorArchitecture=x86"
                 "ScatterAssemblies"
                 {
                     "_0462882B47539DE7110991A7E955BC1C"
@@ -4633,7 +4633,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:SyntropyNet.WindowsApp.Application, Version=1.12.0.0, Culture=neutral, processorArchitecture=x86"
+            "AssemblyAsmDisplayName" = "8:SyntropyNet.WindowsApp.Application, Version=1.13.0.0, Culture=neutral, processorArchitecture=x86"
                 "ScatterAssemblies"
                 {
                     "_6BE5CFDBFDB1ECDF28DC741C22A860B9"
@@ -7712,15 +7712,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:SyntropyNet.WindowsApp"
-        "ProductCode" = "8:{674124A0-275F-4FB0-A5A1-85EDB615D999}"
-        "PackageCode" = "8:{60E307AE-DCEF-4223-9F4B-A1FFB14B7EAA}"
+        "ProductCode" = "8:{433FB067-1EAC-4025-8CBC-2EA68CFA92D6}"
+        "PackageCode" = "8:{22311D41-5084-412A-A02E-B7785EF59707}"
         "UpgradeCode" = "8:{6609D757-FEC6-4BA4-8D1B-BE938C66C188}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:FALSE"
-        "ProductVersion" = "8:1.13.0"
+        "ProductVersion" = "8:1.14.0"
         "Manufacturer" = "8:SyntropyNet"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
