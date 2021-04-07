@@ -48,6 +48,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
         private bool Running { get; set; }
         private bool Stopping { get; set; }
         private int WaitReconnect { get; set; } = 0;
+        private string UserError { get; set; }
 
         private AutoPingHandler autoPingHandler;
         private GetInfoHandler getInfoHandler;
@@ -119,6 +120,8 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
 
                 using (var client = new WebsocketClient(url, factory))
                 {
+                    UserError = null;
+
                     client.IsReconnectionEnabled = true;
                     client.ErrorReconnectTimeout = new TimeSpan(5000);
                     client.ReconnectTimeout = new TimeSpan(1000, 1000, 1000);
@@ -404,6 +407,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
 
                             if(code == HttpStatusCode.Unauthorized)
                             {
+                                UserError = "Token is invalid";
                                 DisconnectedEvent?.Invoke(x.Type, x.Exception?.Message);
                                 _WGConfigService.StopWG();
                                 Running = false;
@@ -451,6 +455,10 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                         if(e.InnerException != null)
                         {
                             error = e.InnerException.Message;
+                        }
+                        if(UserError != null)
+                        {
+                            error = UserError;
                         }
                         callback?.Invoke(new WSConnectionResponse{
                              State = Domain.Enums.WSConnectionState.Failed,
