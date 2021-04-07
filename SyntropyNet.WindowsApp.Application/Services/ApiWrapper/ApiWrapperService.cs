@@ -383,7 +383,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                         Debug.WriteLine($"Disconnect: {x.Type}");
                         log.Info($"Disconnected: {x.Type}. Status: {x.CloseStatus}, Description: {x.CloseStatusDescription}. {x.Exception?.Message ?? string.Empty}");
 
-                        if(x.Type == DisconnectionType.Lost)
+                        if(x.Type == DisconnectionType.Lost && x.CloseStatus == null)
                         {
                             DisconnectedEvent?.Invoke(x.Type, x.Exception?.Message);
                             _WGConfigService.StopWG();
