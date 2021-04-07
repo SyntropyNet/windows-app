@@ -380,35 +380,64 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                         Debug.WriteLine($"Disconnect: {x.Type}");
                         log.Info($"Disconnected: {x.Type}. Status: {x.CloseStatus}, Description: {x.CloseStatusDescription}. {x.Exception?.Message ?? string.Empty}");
 
+                        if(x.Type == DisconnectionType.Lost)
+                        {
+                            DisconnectedEvent?.Invoke(x.Type, x.Exception?.Message);
+                            _WGConfigService.StopWG();
+                            Running = false;
+                            exitEvent.Set();
+                            return;
+                        }
+
+                        if (x.CloseStatus != null && (x.CloseStatus.ToString() == "4000" || x.CloseStatus.ToString() == "4001"))
+                        {
+                            DisconnectedEvent?.Invoke(x.Type, x.Exception?.Message);
+                            _WGConfigService.StopWG();
+                            Running = false;
+                            exitEvent.Set();
+                            return;
+                        }
+                        
                         if (x.Exception?.InnerException is WebException && (x.Exception?.InnerException as WebException)?.Response is HttpWebResponse)
                         {
                             var code = ((x.Exception?.InnerException as WebException)?.Response as HttpWebResponse).StatusCode;
 
-                            if (Running && code != HttpStatusCode.Unauthorized)
+                            if(code == HttpStatusCode.Unauthorized)
                             {
-                                ReconnectingEvent?.Invoke(x.Type, x.Exception?.Message);
-                                Thread.Sleep(WaitReconnect);
-                                try
-                                {
-                                    checked
-                                    {
-                                        WaitReconnect += 5000;
-                                    }
-                                }
-                                catch (OverflowException ex)
-                                {
-                                    Running = false;
-                                    WaitReconnect = 0;
-                                }
-
+                                DisconnectedEvent?.Invoke(x.Type, x.Exception?.Message);
+                                _WGConfigService.StopWG();
+                                Running = false;
+                                exitEvent.Set();
                                 return;
                             }
                         }
 
-                        DisconnectedEvent?.Invoke(x.Type, x.Exception?.Message);
-                        _WGConfigService.StopWG();
-                        Running = false;
-                        exitEvent.Set();
+                        if (Running)
+                        {
+                            ReconnectingEvent?.Invoke(x.Type, x.Exception?.Message);
+                            Thread.Sleep(WaitReconnect);
+                            try
+                            {
+                                checked
+                                {
+                                    WaitReconnect += 5000;
+                                }
+                            }
+                            catch (OverflowException ex)
+                            {
+                                Running = false;
+                                WaitReconnect = 0;
+                            }
+
+                            return;
+                        }
+                        else
+                        {
+                            DisconnectedEvent?.Invoke(x.Type, x.Exception?.Message);
+                            _WGConfigService.StopWG();
+                            Running = false;
+                            exitEvent.Set();
+                        }
                     });
 
                     try
