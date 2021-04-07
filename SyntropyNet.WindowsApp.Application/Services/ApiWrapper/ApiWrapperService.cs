@@ -418,6 +418,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
 
                         if (Running)
                         {
+                            log.Info($"Attempt to reconnect via {WaitReconnect}ms");
                             ReconnectingEvent?.Invoke(x.Type, x.Exception?.Message);
                             Thread.Sleep(WaitReconnect);
                             try
