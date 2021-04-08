@@ -28,6 +28,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
         private readonly INetworkInformationService _networkInformationService;
         private readonly IAppSettings _appSettings;
         private readonly IHttpRequestService _httpRequestService;
+        private bool isReconnect = false;
 
         public ConfigInfoHandler(WebsocketClient client, 
             IWGConfigService WGConfigService,
@@ -47,9 +48,10 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
             _WGConfigService.ErrorCreateInterfaceEvent += WGConfigServiceErrorCreateInterfaceEvent;
         }
 
-        public void Start(ConfigInfoRequest request)
+        public void Start(ConfigInfoRequest request, bool isReconnect)
         {
             mainTask?.Abort();
+            this.isReconnect = isReconnect;
 
             mainTask = new Thread(async () =>
             {
@@ -234,43 +236,46 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                 Endpoint = peer.Args.EndpointIpv4 != null ? $"{peer.Args.EndpointIpv4}:{peer.Args.EndpointPort}" : null
             };
 
-            foreach (var WgPeer in WgPeers)
+            if (!isReconnect)
             {
-                if (EqualPeer(requestPeer, WgPeer))
+                foreach (var WgPeer in WgPeers)
                 {
-                    List<string> allowedIps = new List<string>();
-                    foreach (var allowedIpFromRequest in requestPeer.AllowedIPs)
+                    if (EqualPeer(requestPeer, WgPeer))
                     {
-                        if (WgPeer.AllowedIPs.Contains(allowedIpFromRequest))
+                        List<string> allowedIps = new List<string>();
+                        foreach (var allowedIpFromRequest in requestPeer.AllowedIPs)
                         {
-                            wGRouteStatuses.Add(new WGRouteStatus
+                            if (WgPeer.AllowedIPs.Contains(allowedIpFromRequest))
                             {
-                                Ip = allowedIpFromRequest,
-                                Status = "ERROR",
-                                //ToDo: error message 
-                                Msg = ""
-                            });
-                        }
-                        else
-                        {
-                            wGRouteStatuses.Add(new WGRouteStatus
+                                wGRouteStatuses.Add(new WGRouteStatus
+                                {
+                                    Ip = allowedIpFromRequest,
+                                    Status = "ERROR",
+                                    //ToDo: error message 
+                                    Msg = ""
+                                });
+                            }
+                            else
                             {
-                                Ip = allowedIpFromRequest,
-                                Status = "OK"
-                            });
+                                wGRouteStatuses.Add(new WGRouteStatus
+                                {
+                                    Ip = allowedIpFromRequest,
+                                    Status = "OK"
+                                });
+                            }
+                            allowedIps.Add(allowedIpFromRequest);
                         }
-                        allowedIps.Add(allowedIpFromRequest);
-                    }
 
-                    WgPeer.AllowedIPs = allowedIps;
-                    _WGConfigService.SetPeerSections(nameInterfce, WgPeers);
-                    _WGConfigService.SetPeersThroughPipe(nameInterfce);
-                    return new WGRouteStatusData
-                    {
-                        ConnectionId = peer.Metadata.ConnectionId,
-                        PublicKey = peer.Args.PublicKey,
-                        Statuses = wGRouteStatuses
-                    };
+                        WgPeer.AllowedIPs = allowedIps;
+                        _WGConfigService.SetPeerSections(nameInterfce, WgPeers);
+                        _WGConfigService.SetPeersThroughPipe(nameInterfce);
+                        return new WGRouteStatusData
+                        {
+                            ConnectionId = peer.Metadata.ConnectionId,
+                            PublicKey = peer.Args.PublicKey,
+                            Statuses = wGRouteStatuses
+                        };
+                    }
                 }
             }
 

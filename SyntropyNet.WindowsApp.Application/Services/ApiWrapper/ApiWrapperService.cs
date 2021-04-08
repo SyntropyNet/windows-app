@@ -49,6 +49,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
         private bool Stopping { get; set; }
         private int WaitReconnect { get; set; } = 0;
         private string UserError { get; set; }
+        private bool IsRecconect { get; set; } = false;
 
         private AutoPingHandler autoPingHandler;
         private GetInfoHandler getInfoHandler;
@@ -192,7 +193,8 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                                     }
 
                                     configInfoHandler = new ConfigInfoHandler(client, _WGConfigService, _networkInformationService, _appSettings, _httpRequestService);
-                                    configInfoHandler.Start(configInfoRequest);
+                                    configInfoHandler.Start(configInfoRequest, IsRecconect);
+                                    IsRecconect = false;
                                 }
                                 catch(Exception ex)
                                 {
@@ -427,10 +429,13 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                                 {
                                     WaitReconnect += 5000;
                                 }
+
+                                IsRecconect = true;
                             }
                             catch (OverflowException ex)
                             {
                                 Running = false;
+                                IsRecconect = false;
                                 WaitReconnect = 0;
                             }
 
