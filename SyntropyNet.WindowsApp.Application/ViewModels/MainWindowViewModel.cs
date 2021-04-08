@@ -235,10 +235,7 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
             get { return _errorVisible; }
             set
             {
-                if(SetProperty(ref _errorVisible, value))
-                {
-                    StatusVisible = !value;
-                }
+                SetProperty(ref _errorVisible, value);
             }
         }
 
