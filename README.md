@@ -9,9 +9,7 @@
 * Wireguard installed
 
 * .Net Framework 4.7 Installed
-```sh
-docker system info
-```
+
 ---
 #### Limitations
 
