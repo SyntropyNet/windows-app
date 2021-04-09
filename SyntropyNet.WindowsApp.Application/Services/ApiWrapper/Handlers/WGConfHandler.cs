@@ -186,6 +186,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
             List<Peer> WgPeers = _WGConfigService.GetPeerSections(nameInterfce).ToList();
             
             List<WGRouteStatus> wGRouteStatuses = new List<WGRouteStatus>();
+            List<Peer> newPeers = new List<Peer>();
 
             var requestPeer = new Peer
             {
@@ -218,13 +219,15 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                                 Ip = allowedIpFromRequest,
                                 Status = "OK"
                             });
+                            newPeers.Add(WgPeer);
                         }
                         allowedIps.Add(allowedIpFromRequest);
                     }
 
                     WgPeer.AllowedIPs = allowedIps;
                     _WGConfigService.SetPeerSections(nameInterfce, WgPeers);
-                    _WGConfigService.SetPeersThroughPipe(nameInterfce);
+                    if(newPeers.Count > 0)
+                        _WGConfigService.SetPeersThroughPipe(nameInterfce, newPeers);
                     return new WGRouteStatusData
                     {
                         ConnectionId = data.Metadata.ConnectionId,
@@ -242,11 +245,13 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                     Status = "OK",
                     Msg = ""
                 });
+                newPeers.Add(requestPeer);
             }
 
             WgPeers.Add(requestPeer);
             _WGConfigService.SetPeerSections(nameInterfce, WgPeers);
-            _WGConfigService.SetPeersThroughPipe(nameInterfce);
+            if (newPeers.Count > 0)
+                _WGConfigService.SetPeersThroughPipe(nameInterfce, newPeers);
             return new WGRouteStatusData
             {
                 ConnectionId = data.Metadata.ConnectionId,
@@ -267,7 +272,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                     {
                         WgPeers.Remove(WgPeer);
                         _WGConfigService.SetPeerSections(interfaceName, WgPeers);
-                        _WGConfigService.SetPeersThroughPipe(interfaceName);
+                        _WGConfigService.DeletePeersThroughPipe(interfaceName, WgPeer);
                         return;
                     }
                 }

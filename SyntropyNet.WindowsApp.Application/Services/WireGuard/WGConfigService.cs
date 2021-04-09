@@ -195,15 +195,14 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
             return BitConverter.ToString(bytes).Replace("-", "").ToLower();
         }
 
-        public void SetPeersThroughPipe(WGInterfaceName interfaceName)
+        public void SetPeersThroughPipe(WGInterfaceName interfaceName, IEnumerable<Peer> peers)
         {
             TunnelConfig interfaceConfig = GetHowName(interfaceName);
             StringBuilder set = new StringBuilder("set=1\n");
-            set.Append("replace_peers=true\n");
 
-            if (interfaceConfig.Peers != null && interfaceConfig.Peers.Count() > 0)
+            if (peers != null && peers.Count() > 0)
             {
-                foreach (var peer in interfaceConfig.Peers)
+                foreach (var peer in peers)
                 {
                     set.Append($"public_key={Base64ToHex(peer.PublicKey)}\n");
                     set.Append("replace_allowed_ips=true\n");
@@ -251,7 +250,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
                         var error = line.Substring(6);
                         if (error == "0")
                         {
-                            foreach (var peer in interfaceConfig.Peers)
+                            foreach (var peer in peers)
                             {
                                 foreach (var allowedIp in peer.AllowedIPs)
                                 {
@@ -279,6 +278,84 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
             }
         }
 
+        public void DeletePeersThroughPipe(WGInterfaceName interfaceName, Peer peer)
+        {
+            TunnelConfig interfaceConfig = GetHowName(interfaceName);
+            StringBuilder set = new StringBuilder("set=1\n");
+
+            if (peer != null)
+            {
+                set.Append($"public_key={Base64ToHex(peer.PublicKey)}\n");
+                set.Append("replace_allowed_ips=true\n");
+                foreach (var allowedIp in peer.AllowedIPs)
+                {
+                    set.Append($"allowed_ip={allowedIp}\n");
+                }
+                set.Append($"persistent_keepalive_interval=15\n");
+
+                if (peer.Endpoint != null)
+                {
+                    string address = peer.Endpoint.Remove(peer.Endpoint.LastIndexOf(@":"));
+                    string port = peer.Endpoint.Substring(peer.Endpoint.LastIndexOf(@":") + 1);
+                    string endpoint = $"{GetIpInRequiredFormatRecord(address)}:{port}";
+                    set.Append($"endpoint={endpoint}\n");
+                }
+                set.Append($"remove=true\n");
+                set.Append("\n");
+            }
+
+            StreamReader reader = null;
+            NamedPipeClientStream stream = null;
+
+            try
+            {
+                stream = GetPipe(GetPathToInterfaceConfig(interfaceName));
+                stream.Connect();
+                reader = new StreamReader(stream);
+            }
+            catch { }
+
+            try
+            {
+                var pipe = Encoding.UTF8.GetBytes(set.ToString());
+                stream.Write(pipe, 0, pipe.Length);
+
+                while (true)
+                {
+                    var line = reader.ReadLine();
+                    if (line == "")
+                        break;
+
+                    if (line.StartsWith("errno="))
+                    {
+                        var error = line.Substring(6);
+                        if (error == "0")
+                        {
+
+                            foreach (var allowedIp in peer.AllowedIPs)
+                            {
+                                string ip = allowedIp.Split('/')[0];
+                                string mask = "255.255.255.255";
+                                string gateway = interfaceConfig.Interface.Address.ToList()[0];
+                                int metric = 5;
+
+                                _networkService.AddRoute(interfaceName.ToString(), ip, mask, gateway, metric);
+                            }
+
+                            break;
+                        }
+                        else
+                            new Exception("Update error wg interface");
+                    }
+                }
+            }
+            catch { }
+            finally
+            {
+                if (stream != null && stream.IsConnected)
+                    stream.Close();
+            }
+        }
         private void CreateInterface(WGInterfaceName interfaces)
         {
             var expectPort = GetUsedPorts();
