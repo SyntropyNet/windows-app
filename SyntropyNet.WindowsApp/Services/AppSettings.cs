@@ -1,4 +1,5 @@
-﻿using SyntropyNet.WindowsApp.Application.Constants;
+﻿using log4net;
+using SyntropyNet.WindowsApp.Application.Constants;
 using SyntropyNet.WindowsApp.Application.Contracts;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,8 @@ namespace SyntropyNet.WindowsApp.Services
 {
     public class AppSettings: IAppSettings
     {
+        private static readonly ILog log = LogManager.GetLogger(typeof(AppSettings));
+
         public AppSettings(IHttpRequestService httpRequestService)
         {
             const string queryString = "SELECT SerialNumber FROM Win32_OperatingSystem";
@@ -28,7 +31,7 @@ namespace SyntropyNet.WindowsApp.Services
             }
             catch(Exception ex)
             {
-                // ToDo :: log exception if internet is not available
+                log.Error("Internet is not available");
             }
             _deviceId = productId ?? $"{System.Environment.MachineName}-{extIp}";
             _deviceName = System.Environment.MachineName;

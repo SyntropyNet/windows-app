@@ -252,8 +252,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                                 {
                                     Ip = allowedIpFromRequest,
                                     Status = "ERROR",
-                                    //ToDo: error message 
-                                    Msg = ""
+                                    Msg = $"[WG_CONF] add route failed[{ allowedIpFromRequest }] - already exists"
                                 });
                             }
                             else

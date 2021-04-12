@@ -88,8 +88,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
             }
             if(!_userConfig.IsAuthenticated || String.IsNullOrEmpty(_userConfig.AgentToken))
             {
-                // User needs to enter Agent Token & Name
-                // ToDo:: add custom exception here;
+                log.Info("Needs to enter Agent Token & Name");
                 return;
             }
             Stopping = false;

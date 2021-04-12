@@ -1,4 +1,5 @@
 ﻿using CodeCowboy.NetworkRoute;
+using log4net;
 using SyntropyNet.WindowsApp.Application.Contracts;
 using SyntropyNet.WindowsApp.Application.Domain.Models.Messages;
 using SyntropyNet.WindowsApp.Application.Exceptions;
@@ -15,6 +16,8 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
 {
     public class NetworkInformationService : INetworkInformationService
     {
+        private static readonly ILog log = LogManager.GetLogger(typeof(NetworkInformationService));
+
         private const int START_PORT = 1024;
         private const int MAX_PORT = 65535;
         public IEnumerable<IfaceBWDataRequestData> GetInformNetworkInterface()
@@ -36,8 +39,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
             }
             catch (NetworkInformationException ex)
             {
-                //Todo: An error "Channel closing in progress" occurs with code 232, how to handle it correctly
-                Debug.WriteLine(ex.Message);
+                log.Error(ex.Message);
             }
 
             return ifaceBWDataRequestData;
