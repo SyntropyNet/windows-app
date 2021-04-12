@@ -62,7 +62,6 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
 
                     var message = JsonConvert.SerializeObject(response,
                         JsonSettings.GetSnakeCaseNamingStrategy());
-                    Debug.WriteLine($"Get info: {message}");
                     Client.Send(message);
 
                     if (DebugLogger)
@@ -90,7 +89,6 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
 
                         var message = JsonConvert.SerializeObject(errorMsg,
                             JsonSettings.GetSnakeCaseNamingStrategy());
-                        Debug.WriteLine($"'GET_INFO' error: {message}");
                         Client.Send(message);
 
                         LoggerRequestHelper.Send(

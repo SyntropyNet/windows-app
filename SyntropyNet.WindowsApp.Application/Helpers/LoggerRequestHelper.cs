@@ -36,7 +36,6 @@ namespace SyntropyNet.WindowsApp.Application.Helpers
 
             var request = JsonConvert.SerializeObject(loggerRequest,
                 JsonSettings.GetSnakeCaseNamingStrategy());
-            Debug.WriteLine($"Logger: {request}");
             client.Send(request);
         }
     }

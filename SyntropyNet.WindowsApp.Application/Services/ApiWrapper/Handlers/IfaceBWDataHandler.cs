@@ -58,7 +58,6 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
 
                         var message = JsonConvert.SerializeObject(ifaceBWDataRequest,
                             JsonSettings.GetSnakeCaseNamingStrategy());
-                        Debug.WriteLine($"IFACES_BW_DATA: {message}");
                         Client.Send(message);
 
                         if (DebugLogger)
@@ -70,7 +69,6 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                                 _appSettings.DeviceIp,
                                 message);
 
-                        //await Task.Delay(REFRESH_INFO);
                         Thread.Sleep(REFRESH_INFO);
                     }
                 }

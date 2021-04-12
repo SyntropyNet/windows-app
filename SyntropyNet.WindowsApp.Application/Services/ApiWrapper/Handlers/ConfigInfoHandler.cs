@@ -61,7 +61,6 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                     {
                         var message = JsonConvert.SerializeObject(SetPublicKeyAndPort(request),
                             JsonSettings.GetSnakeCaseNamingStrategy());
-                        Debug.WriteLine($"Update agent config: {message}");
                         Client.Send(message);
                         _WGConfigService.ApplyModifiedConfigs();
 
@@ -111,7 +110,6 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                                 {
                                     Data = WGRouteStatusDataResponse
                                 }, JsonSettings.GetSnakeCaseNamingStrategy());
-                                Debug.WriteLine($"WG_ROUTE_STATUS,: {message}");
                                 Client.Send(message);
 
                                 if (DebugLogger)
@@ -449,7 +447,6 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
 
             var message = JsonConvert.SerializeObject(error,
                 JsonSettings.GetSnakeCaseNamingStrategy());
-            Debug.WriteLine($"'UPDATE_AGENT_CONF' error: { message}");
             Client.Send(message);
 
             if (DebugLogger)

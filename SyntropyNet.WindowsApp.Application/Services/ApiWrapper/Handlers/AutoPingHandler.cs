@@ -69,7 +69,6 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
 
                         var message = JsonConvert.SerializeObject(response,
                             JsonSettings.GetSnakeCaseNamingStrategy());
-                        Debug.WriteLine($"auto ping: {message}");
                         Client.Send(message);
 
                         if (DebugLogger)
@@ -81,7 +80,6 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                                 _appSettings.DeviceIp,
                                 message);
 
-                        //await Task.Delay(TimeSpan.FromSeconds(request.Data.Interval));
                         Thread.Sleep(TimeSpan.FromSeconds(request.Data.Interval));
                     }
                 } 

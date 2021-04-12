@@ -66,7 +66,6 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
 
                             var message = JsonConvert.SerializeObject(containerInfoRequest,
                                 JsonSettings.GetSnakeCaseNamingStrategy());
-                            Debug.WriteLine($"Updated info containers: {message}");
                             Client.Send(message);
 
                             if (DebugLogger)
@@ -79,7 +78,6 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                                     message);
                         }
 
-                        //await Task.Delay(REFRESH_INFO);
                         Thread.Sleep(REFRESH_INFO);
                     }
                 }

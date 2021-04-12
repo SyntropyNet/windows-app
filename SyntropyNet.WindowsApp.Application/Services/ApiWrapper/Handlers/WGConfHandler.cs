@@ -78,7 +78,6 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                             {
                                 Data = WGRouteStatusDataResponse
                             }, JsonSettings.GetSnakeCaseNamingStrategy());
-                            Debug.WriteLine($"WG_ROUTE_STATUS,: {message}");
                             Client.Send(message);
 
                             if (DebugLogger)
@@ -90,9 +89,6 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                                 _appSettings.DeviceIp,
                                 message);
                         }
-
-                        //_WGConfigService.ApplyModifiedConfigs();
-                        Debug.WriteLine("+++ WG_CONF emd");
                     }
                 }
                 catch (Exception ex)
@@ -111,7 +107,6 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
 
                         var message = JsonConvert.SerializeObject(errorMsg,
                             JsonSettings.GetSnakeCaseNamingStrategy());
-                        Debug.WriteLine($"'WG_CONF' error: {message}");
                         Client.Send(message);
 
                         LoggerRequestHelper.Send(
@@ -160,7 +155,6 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
 
             var message = JsonConvert.SerializeObject(WGConfResponse, 
                 JsonSettings.GetSnakeCaseNamingStrategy());
-            Debug.WriteLine($"WG_CONF response: {message}");
             Client.Send(message);
 
             if (DebugLogger)
