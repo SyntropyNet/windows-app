@@ -59,11 +59,13 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                         //var count = 0;
                         foreach (var ip in request.Data.Ips)
                         {
-                            //if (count == 10)
+                            //if (count == 20)
                                 //break;
                             results.Add(Ping(ip));
                             //count++;
                         }
+
+                        results = results.Where(p => p.LatencyMs > 0).OrderBy(p => p.LatencyMs).Take(5).ToList();
 
                         var response = new AutoPingResponse
                         {
@@ -148,7 +150,10 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
             {
                 result.LatencyMs = summLatency / successCount;
             }
-
+            else
+            {
+                result.LatencyMs = -1;
+            }
             return result;
         }
     }
