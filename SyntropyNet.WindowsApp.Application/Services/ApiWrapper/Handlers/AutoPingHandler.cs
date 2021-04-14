@@ -56,9 +56,13 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                     {
                         var responseData = new AutoPingResponseData();
                         var results = new List<AutoPingResponseItem>();
+                        //var count = 0;
                         foreach (var ip in request.Data.Ips)
                         {
+                            //if (count == 10)
+                                //break;
                             results.Add(Ping(ip));
+                            //count++;
                         }
 
                         var response = new AutoPingResponse
@@ -116,20 +120,28 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
             result.Ip = ip;
             var pingSender = new Ping();
 
+            var ipParse = IPAddress.Parse(ip);
             int successCount = 0;
             long summLatency = 0;
             for (var i = 0; i < pingAmount; i++)
             {
-                var reply = pingSender.Send(ip);
-               if (reply.Status != IPStatus.Success)
-               {
-                   result.PacketLoss++;
-               }
-               else
-               {
-                   successCount++;
-                   summLatency += reply.RoundtripTime;
-               }  
+                try
+                {
+                    var reply = pingSender.Send(ipParse);
+                    if (reply.Status != IPStatus.Success)
+                    {
+                        result.PacketLoss++;
+                    }
+                    else
+                    {
+                        successCount++;
+                        summLatency += reply.RoundtripTime;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    result.PacketLoss++;
+                } 
             }
 
             if (successCount > 0)
