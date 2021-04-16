@@ -2756,7 +2756,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:SyntropyNet.WindowsApp.Application.Domain, Version=1.17.0.0, Culture=neutral, processorArchitecture=x86"
+            "AssemblyAsmDisplayName" = "8:SyntropyNet.WindowsApp.Application.Domain, Version=1.18.0.0, Culture=neutral, processorArchitecture=x86"
                 "ScatterAssemblies"
                 {
                     "_0462882B47539DE7110991A7E955BC1C"
@@ -5090,7 +5090,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:SyntropyNet.WindowsApp.Application, Version=1.17.0.0, Culture=neutral, processorArchitecture=x86"
+            "AssemblyAsmDisplayName" = "8:SyntropyNet.WindowsApp.Application, Version=1.18.0.0, Culture=neutral, processorArchitecture=x86"
                 "ScatterAssemblies"
                 {
                     "_6BE5CFDBFDB1ECDF28DC741C22A860B9"
@@ -8304,15 +8304,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:SyntropyNet.WindowsApp"
-        "ProductCode" = "8:{60F5EEA4-6714-4234-9B13-B3D475E7BC61}"
-        "PackageCode" = "8:{77E31FCC-ACA3-44EC-B020-E277D4E81A55}"
+        "ProductCode" = "8:{5AD8F5F6-06EA-4FD2-A392-4668ECB0C459}"
+        "PackageCode" = "8:{EA8BF0C8-2629-4F89-AD07-9010576ED3C4}"
         "UpgradeCode" = "8:{6609D757-FEC6-4BA4-8D1B-BE938C66C188}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:FALSE"
-        "ProductVersion" = "8:1.18.0"
+        "ProductVersion" = "8:1.19.0"
         "Manufacturer" = "8:SyntropyNet"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
@@ -8840,7 +8840,7 @@
         {
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_DCCC83DAA7774A9EAD2C4D0A413655BE"
             {
-            "SourcePath" = "8:"
+            "SourcePath" = "8:..\\SyntropyNet.WindowsApp\\obj\\x86\\Release\\SyntropyNet.WindowsApp.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_E19CA855E8544D7990667C568FA6B586"
