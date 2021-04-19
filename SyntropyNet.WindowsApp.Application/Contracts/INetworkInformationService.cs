@@ -13,5 +13,6 @@ namespace SyntropyNet.WindowsApp.Application.Contracts
         int GetNextFreePort(IEnumerable<int> exceptPort = null);
         bool CheckPing(string ip, int timeout = 1000);
         void AddRoute(string interfaceName, string ip, string mask, string gateway, int metric);
+        bool IsLocalIpAddress(string host);
     }
 }

@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net;
 using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading;
@@ -158,6 +159,31 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
             }
 
             throw new Exception($"Error adding route {ip}");
+        }
+
+        public bool IsLocalIpAddress(string host)
+        {
+            try
+            {
+                IPAddress[] hostIPs = Dns.GetHostAddresses(host);
+                IPAddress[] localIPs = Dns.GetHostAddresses(Dns.GetHostName());
+
+                foreach (IPAddress hostIP in hostIPs)
+                {
+                    // is localhost
+                    if (IPAddress.IsLoopback(hostIP)) return true;
+                    // is local address
+                    foreach (IPAddress localIP in localIPs)
+                    {
+                        if (hostIP.Equals(localIP)) return true;
+                    }
+                }
+            }
+            catch(Exception ex) 
+            {
+                log.Error(ex.Message);
+            }
+            return false;
         }
     }
 }

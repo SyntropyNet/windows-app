@@ -340,7 +340,8 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
 
             var data = new List<CreateInterface>();
 
-            if ( isReconnect || !_networkInformationService.CheckPing(request.Data.Network.Public.InternalIp))
+            if (!_networkInformationService.IsLocalIpAddress(request.Data.Network.Public.InternalIp) || 
+                (publicInterfaceSection.Address.Contains(request.Data.Network.Public.InternalIp) && _networkInformationService.IsLocalIpAddress(request.Data.Network.Public.InternalIp)))
             {
                 data.Add(new CreateInterface
                 {
@@ -360,7 +361,8 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                 SendError(request.Id, request.Data.Network.Public.InternalIp);
             }
 
-            if (isReconnect || !_networkInformationService.CheckPing(request.Data.Network.Sdn1.InternalIp))
+            if (!_networkInformationService.IsLocalIpAddress(request.Data.Network.Sdn1.InternalIp) ||
+                (sdn1InterfaceSection.Address.Contains(request.Data.Network.Sdn1.InternalIp) && _networkInformationService.IsLocalIpAddress(request.Data.Network.Sdn1.InternalIp)))
             {
                 data.Add(new CreateInterface
                 {
@@ -380,7 +382,8 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                 SendError(request.Id, request.Data.Network.Sdn1.InternalIp);
             }
 
-            if (isReconnect || !_networkInformationService.CheckPing(request.Data.Network.Sdn2.InternalIp))
+            if (!_networkInformationService.IsLocalIpAddress(request.Data.Network.Sdn2.InternalIp) ||
+                (sdn2InterfaceSection.Address.Contains(request.Data.Network.Sdn2.InternalIp) && _networkInformationService.IsLocalIpAddress(request.Data.Network.Sdn2.InternalIp)))
             {
                 data.Add(new CreateInterface
                 {
@@ -400,7 +403,8 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                 SendError(request.Id, request.Data.Network.Sdn2.InternalIp);
             }
 
-            if (isReconnect || !_networkInformationService.CheckPing(request.Data.Network.Sdn3.InternalIp))
+            if (!_networkInformationService.IsLocalIpAddress(request.Data.Network.Sdn3.InternalIp) ||
+                (sdn3InterfaceSection.Address.Contains(request.Data.Network.Sdn3.InternalIp) && _networkInformationService.IsLocalIpAddress(request.Data.Network.Sdn3.InternalIp)))
             {
                 data.Add(new CreateInterface
                 {
