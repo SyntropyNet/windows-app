@@ -383,8 +383,8 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
 
                         if(x.Type == DisconnectionType.Lost && x.CloseStatus == null)
                         {
-                            DisconnectedEvent?.Invoke(x.Type, x.Exception?.Message);
                             _WGConfigService.StopWG();
+                            DisconnectedEvent?.Invoke(x.Type, x.Exception?.Message);
                             Running = false;
                             exitEvent.Set();
                             return;
@@ -392,8 +392,8 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
 
                         if (x.CloseStatus != null && (x.CloseStatus.ToString() == "4000" || x.CloseStatus.ToString() == "4001"))
                         {
-                            DisconnectedEvent?.Invoke(x.Type, x.Exception?.Message);
                             _WGConfigService.StopWG();
+                            DisconnectedEvent?.Invoke(x.Type, x.Exception?.Message);
                             Running = false;
                             exitEvent.Set();
                             return;
@@ -406,8 +406,8 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                             if(code == HttpStatusCode.Unauthorized)
                             {
                                 UserError = "Token is invalid";
-                                DisconnectedEvent?.Invoke(x.Type, x.Exception?.Message);
                                 _WGConfigService.StopWG();
+                                DisconnectedEvent?.Invoke(x.Type, x.Exception?.Message);
                                 Running = false;
                                 exitEvent.Set();
                                 return;
@@ -439,8 +439,8 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                         }
                         else
                         {
-                            DisconnectedEvent?.Invoke(x.Type, x.Exception?.Message);
                             _WGConfigService.StopWG();
+                            DisconnectedEvent?.Invoke(x.Type, x.Exception?.Message);
                             Running = false;
                             exitEvent.Set();
                         }

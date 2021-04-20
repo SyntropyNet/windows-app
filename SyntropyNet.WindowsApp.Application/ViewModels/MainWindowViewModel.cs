@@ -63,6 +63,10 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
                 _appContext.BeginInvoke(methodDelegate, type, error);
                 return;
             }
+            OnoffEnabled = true;
+            Loading = false;
+            Status = "Disconnected";
+
             _autoDisconnection = true;
             Started = false;
             if(type == DisconnectionType.Error)
@@ -212,7 +216,9 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
                     }
                     else
                     {
-                        Status = "Disconnected";
+                        OnoffEnabled = false;
+                        Loading = true;
+                        Status = "Disconnecting";
                         if (!_autoDisconnection)
                         {
                             Task.Run(() => {
