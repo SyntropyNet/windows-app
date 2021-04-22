@@ -14,5 +14,6 @@ namespace SyntropyNet.WindowsApp.Application.Contracts
         bool CheckPing(string ip, int timeout = 1000);
         void AddRoute(string interfaceName, string ip, string mask, string gateway, uint metric);
         bool IsLocalIpAddress(string host);
+        void DeleteRoute(string interfaceName, string ip, string mask, string gateway, int metric);
     }
 }

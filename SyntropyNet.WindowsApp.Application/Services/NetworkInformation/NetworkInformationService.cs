@@ -161,6 +161,36 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
             throw new Exception($"Error adding route {ip}");
         }
 
+        public void DeleteRoute(string interfaceName, string ip, string mask, string gateway, int metric)
+        {
+            int interfaceIndex = 0;
+            var adaptors = NicInterface.GetAllNetworkAdaptor();
+
+            foreach (var adaptor in adaptors)
+            {
+                if (adaptor.Name == interfaceName)
+                {
+                    interfaceIndex = adaptor.InterfaceIndex;
+                }
+            }
+            if (interfaceIndex != 0)
+            {
+                CodeCowboy.NetworkRoute.Ip4RouteEntry ip4RouteEntry = new CodeCowboy.NetworkRoute.Ip4RouteEntry()
+                {
+                    GatewayIP = System.Net.IPAddress.Parse(gateway),
+                    SubnetMask = System.Net.IPAddress.Parse(mask),
+                    DestinationIP = System.Net.IPAddress.Parse(ip),
+                    InterfaceIndex = interfaceIndex,
+                    Metric = metric
+                };
+
+                Ip4RouteTable.DeleteRoute(ip4RouteEntry);
+                return;
+            }
+
+            throw new Exception($"Error deleting route {ip}");
+        }
+
         public bool IsLocalIpAddress(string host)
         {
             try

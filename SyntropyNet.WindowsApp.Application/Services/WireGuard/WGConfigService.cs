@@ -338,11 +338,16 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
                             foreach (var allowedIp in peer.AllowedIPs)
                             {
                                 string ip = allowedIp.Split('/')[0];
-                                string mask = "255.255.255.255";
-                                string gateway = interfaceConfig.Interface.Address.ToList()[0];
-                                uint metric = 5;
 
-                                _networkService.AddRoute(interfaceName.ToString(), ip, mask, gateway, metric);
+                                if(ip == "0.0.0.0")
+                                {
+                                    string mask = "0.0.0.0";
+                                    string gateway = interfaceConfig.Interface.Address.ToList()[0];
+                                    int metric = 5;
+
+                                    _networkService.DeleteRoute(interfaceName.ToString(), ip, mask, gateway, metric);
+                                }
+                                    
                             }
 
                             break;
