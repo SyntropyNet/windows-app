@@ -255,8 +255,13 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
                                     string ip = allowedIp.Split('/')[0];
                                     string mask = "255.255.255.255";
                                     string gateway = interfaceConfig.Interface.Address.ToList()[0];
-                                    int metric = 5;
+                                    uint metric = 5;
 
+                                    if(ip == "0.0.0.0")
+                                    {
+                                        _networkService.AddRoute(interfaceName.ToString(), "0.0.0.0", "0.0.0.0", gateway, metric);
+                                        continue;
+                                    }
                                     _networkService.AddRoute(interfaceName.ToString(), ip, mask, gateway, metric);
                                 }
                             }
@@ -335,7 +340,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
                                 string ip = allowedIp.Split('/')[0];
                                 string mask = "255.255.255.255";
                                 string gateway = interfaceConfig.Interface.Address.ToList()[0];
-                                int metric = 5;
+                                uint metric = 5;
 
                                 _networkService.AddRoute(interfaceName.ToString(), ip, mask, gateway, metric);
                             }

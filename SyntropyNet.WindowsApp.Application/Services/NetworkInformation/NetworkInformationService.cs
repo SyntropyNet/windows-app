@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -130,7 +131,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
             return false;
         }
 
-        public void AddRoute(string interfaceName, string ip, string mask, string gateway, int metric)
+        public void AddRoute(string interfaceName, string ip, string mask, string gateway, uint metric)
         {
             int interfaceIndex = 0;
             var adaptors = NicInterface.GetAllNetworkAdaptor();
@@ -144,7 +145,6 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
             }
             if(interfaceIndex != 0)
             {
-                NetworkAdaptor na = NicInterface.GetNetworkAdaptor(interfaceIndex);
                 Ip4RouteEntry ip4RouteEntry = new Ip4RouteEntry()
                 {
                     GatewayIP = System.Net.IPAddress.Parse(gateway),
@@ -154,7 +154,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
                     Metric = metric,
                 };
 
-                Ip4RouteTable.CreateRoute(ip4RouteEntry);
+                CreateRoute(ip4RouteEntry);
                 return;
             }
 
@@ -184,6 +184,33 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
                 log.Error(ex.Message);
             }
             return false;
+        }
+
+        private void CreateRoute(Ip4RouteEntry routeEntry)
+        {
+            var route = new NativeMethods.MIB_IPFORWARDROW
+            {
+                dwForwardDest = BitConverter.ToUInt32(IPAddress.Parse(routeEntry.DestinationIP.ToString()).GetAddressBytes(), 0),
+                dwForwardMask = BitConverter.ToUInt32(IPAddress.Parse(routeEntry.SubnetMask.ToString()).GetAddressBytes(), 0),
+                dwForwardNextHop = BitConverter.ToUInt32(IPAddress.Parse(routeEntry.GatewayIP.ToString()).GetAddressBytes(), 0),
+                dwForwardMetric1 = routeEntry.Metric,
+                dwForwardType = Convert.ToUInt32(3), //Default to 3
+                dwForwardProto = Convert.ToUInt32(3), //Default to 3
+                dwForwardAge = 0,
+                dwForwardIfIndex = Convert.ToUInt32(routeEntry.InterfaceIndex)
+            };
+
+            IntPtr ptr = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(NativeMethods.MIB_IPFORWARDROW)));
+            try
+            {
+                Marshal.StructureToPtr(route, ptr, false);
+                var status = NativeMethods.CreateIpForwardEntry(ptr);
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(ptr);
+            }
+
         }
     }
 }
