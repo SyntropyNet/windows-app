@@ -712,6 +712,12 @@
         "Entry"
         {
         "MsmKey" = "8:_1A75708F82BEF37CE085DE5A5DD21130"
+        "OwnerKey" = "8:_018D1ACD81E8877DE16284BF58979EEE"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_1A75708F82BEF37CE085DE5A5DD21130"
         "OwnerKey" = "8:_8165F54C066CFE25DCEF6EAD8C73BD68"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -725,6 +731,12 @@
         {
         "MsmKey" = "8:_1A75708F82BEF37CE085DE5A5DD21130"
         "OwnerKey" = "8:_141E4D7CE56762F2A0163B5A9C1A2440"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_1A75708F82BEF37CE085DE5A5DD21130"
+        "OwnerKey" = "8:_4E5BFE7A8C3D196C96490266D7414E58"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -881,6 +893,18 @@
         {
         "MsmKey" = "8:_3BD568001FAB7A84EF8BD7E417AB62F5"
         "OwnerKey" = "8:_34D25F61C484C9A7F618AD38E3C813AE"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_3D26C645086BA6E778A2FFB79B2BE91C"
+        "OwnerKey" = "8:_0FC170275D0D941D12F8AD09A1278E88"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_3D26C645086BA6E778A2FFB79B2BE91C"
+        "OwnerKey" = "8:_FCFC9D6B8B8965C9149786C36AD940C8"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -1738,7 +1762,31 @@
         "Entry"
         {
         "MsmKey" = "8:_DD2E97E0F2DA14CDF831847FB33D2CD4"
+        "OwnerKey" = "8:_1A75708F82BEF37CE085DE5A5DD21130"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_DD2E97E0F2DA14CDF831847FB33D2CD4"
         "OwnerKey" = "8:_DCCC83DAA7774A9EAD2C4D0A413655BE"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_DD2E97E0F2DA14CDF831847FB33D2CD4"
+        "OwnerKey" = "8:_141E4D7CE56762F2A0163B5A9C1A2440"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_DD2E97E0F2DA14CDF831847FB33D2CD4"
+        "OwnerKey" = "8:_10943174B74B19BFC128E1BD5DD44535"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_DD2E97E0F2DA14CDF831847FB33D2CD4"
+        "OwnerKey" = "8:_27E00E1246BEAACBF2610C1461146753"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -2708,7 +2756,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:SyntropyNet.WindowsApp.Application.Domain, Version=1.21.0.0, Culture=neutral, processorArchitecture=x86"
+            "AssemblyAsmDisplayName" = "8:SyntropyNet.WindowsApp.Application.Domain, Version=1.22.0.0, Culture=neutral, processorArchitecture=x86"
                 "ScatterAssemblies"
                 {
                     "_0462882B47539DE7110991A7E955BC1C"
@@ -5042,7 +5090,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:SyntropyNet.WindowsApp.Application, Version=1.21.0.0, Culture=neutral, processorArchitecture=x86"
+            "AssemblyAsmDisplayName" = "8:SyntropyNet.WindowsApp.Application, Version=1.22.0.0, Culture=neutral, processorArchitecture=x86"
                 "ScatterAssemblies"
                 {
                     "_6BE5CFDBFDB1ECDF28DC741C22A860B9"
@@ -8256,15 +8304,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:SyntropyNet.WindowsApp"
-        "ProductCode" = "8:{BD53A564-7AA7-466B-9D4E-351AC33DBC92}"
-        "PackageCode" = "8:{CDB0EDBE-0FA5-48C3-AFC6-2E141AE0C9BD}"
+        "ProductCode" = "8:{1852BA0F-306D-4A85-8A1D-519E766775D4}"
+        "PackageCode" = "8:{6DA431C1-86F1-4AB0-B768-5D1C379E4514}"
         "UpgradeCode" = "8:{6609D757-FEC6-4BA4-8D1B-BE938C66C188}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:FALSE"
-        "ProductVersion" = "8:1.22.0"
+        "ProductVersion" = "8:1.23.0"
         "Manufacturer" = "8:SyntropyNet"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
