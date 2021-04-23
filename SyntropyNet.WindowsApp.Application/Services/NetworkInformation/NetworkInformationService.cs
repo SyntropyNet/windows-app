@@ -242,5 +242,12 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
             }
 
         }
+
+        public bool RouteExists(string destinationIP, string gateway)
+        {
+            List<CodeCowboy.NetworkRoute.Ip4RouteEntry> routeTable = Ip4RouteTable.GetRouteTable();
+            CodeCowboy.NetworkRoute.Ip4RouteEntry routeEntry = routeTable.Find(i => i.DestinationIP.ToString().Equals(destinationIP) && i.GatewayIP.ToString().Equals(gateway));
+            return (routeEntry != null);
+        }
     }
 }

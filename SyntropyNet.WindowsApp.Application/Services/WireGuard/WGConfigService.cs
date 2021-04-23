@@ -1,4 +1,5 @@
-﻿using log4net;
+﻿using CodeCowboy.NetworkRoute;
+using log4net;
 using SyntropyNet.WindowsApp.Application.Constants.WireGuard;
 using SyntropyNet.WindowsApp.Application.Contracts;
 using SyntropyNet.WindowsApp.Application.Domain.Enums.WireGuard;
@@ -257,12 +258,19 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
                                     string gateway = interfaceConfig.Interface.Address.ToList()[0];
                                     uint metric = 5;
 
-                                    if(ip == "0.0.0.0")
+                                    if (!_networkService.RouteExists(ip, PublicInterface.Interface.Address.First()) ||
+                                        !_networkService.RouteExists(ip, SDN1Interface.Interface.Address.First()) ||
+                                        !_networkService.RouteExists(ip, SDN2Interface.Interface.Address.First()) ||
+                                        !_networkService.RouteExists(ip, SDN3Interface.Interface.Address.First())
+                                        )
                                     {
-                                        _networkService.AddRoute(interfaceName.ToString(), "0.0.0.0", "0.0.0.0", gateway, metric);
-                                        continue;
+                                        if (ip == "0.0.0.0")
+                                        {
+                                            _networkService.AddRoute(interfaceName.ToString(), "0.0.0.0", "0.0.0.0", gateway, metric);
+                                            continue;
+                                        }
+                                        _networkService.AddRoute(interfaceName.ToString(), ip, mask, gateway, metric);
                                     }
-                                    _networkService.AddRoute(interfaceName.ToString(), ip, mask, gateway, metric);
                                 }
                             }
                             
@@ -338,16 +346,11 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
                             foreach (var allowedIp in peer.AllowedIPs)
                             {
                                 string ip = allowedIp.Split('/')[0];
+                                string mask = ip == "0.0.0.0" ? "0.0.0.0" : "255.255.255.255";
+                                string gateway = interfaceConfig.Interface.Address.ToList()[0];
+                                int metric = 5;
 
-                                if(ip == "0.0.0.0")
-                                {
-                                    string mask = "0.0.0.0";
-                                    string gateway = interfaceConfig.Interface.Address.ToList()[0];
-                                    int metric = 5;
-
-                                    _networkService.DeleteRoute(interfaceName.ToString(), ip, mask, gateway, metric);
-                                }
-                                    
+                                _networkService.DeleteRoute(interfaceName.ToString(), ip, mask, gateway, metric);
                             }
 
                             break;
