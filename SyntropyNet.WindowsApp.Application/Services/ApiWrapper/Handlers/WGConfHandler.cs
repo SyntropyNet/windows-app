@@ -1,5 +1,6 @@
 ﻿using log4net;
 using Newtonsoft.Json;
+using SyntropyNet.WindowsApp.Application.Comparers;
 using SyntropyNet.WindowsApp.Application.Constants;
 using SyntropyNet.WindowsApp.Application.Contracts;
 using SyntropyNet.WindowsApp.Application.Domain.Enums.WireGuard;
@@ -53,7 +54,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                     {
                         List<WGRouteStatusData> WGRouteStatusDataResponse = new List<WGRouteStatusData>();
 
-                        foreach (var item in request.Data)
+                        foreach (var item in request.Data.OrderBy(x => x, new WGConfRequestDataComparer()))
                         {
                             switch (item.Fn)
                             {

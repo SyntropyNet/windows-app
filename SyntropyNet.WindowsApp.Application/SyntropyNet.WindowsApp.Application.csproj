@@ -117,6 +117,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Comparers\VpnConfigComparer.cs" />
     <Compile Include="Constants\AppConstants.cs" />
     <Compile Include="Constants\WireGuard\TunnelConfigConstants.cs" />
     <Compile Include="Constants\WireGuard\WireGuardConstants.cs" />

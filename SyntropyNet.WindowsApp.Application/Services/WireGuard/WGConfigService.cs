@@ -258,9 +258,9 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
                                     string gateway = interfaceConfig.Interface.Address.ToList()[0];
                                     uint metric = 5;
 
-                                    if (!_networkService.RouteExists(ip, PublicInterface.Interface.Address.First()) ||
-                                        !_networkService.RouteExists(ip, SDN1Interface.Interface.Address.First()) ||
-                                        !_networkService.RouteExists(ip, SDN2Interface.Interface.Address.First()) ||
+                                    if (!_networkService.RouteExists(ip, PublicInterface.Interface.Address.First()) &&
+                                        !_networkService.RouteExists(ip, SDN1Interface.Interface.Address.First()) &&
+                                        !_networkService.RouteExists(ip, SDN2Interface.Interface.Address.First()) &&
                                         !_networkService.RouteExists(ip, SDN3Interface.Interface.Address.First())
                                         )
                                     {
