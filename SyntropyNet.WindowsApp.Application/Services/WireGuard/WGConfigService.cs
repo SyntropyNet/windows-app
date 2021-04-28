@@ -266,6 +266,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
                                     {
                                         if (ip == "0.0.0.0")
                                         {
+                                            log.Info($"Add 0.0.0.0 route for IF: {interfaceName}");
                                             _networkService.AddRoute(interfaceName.ToString(), "0.0.0.0", "0.0.0.0", gateway, metric);
                                             continue;
                                         }

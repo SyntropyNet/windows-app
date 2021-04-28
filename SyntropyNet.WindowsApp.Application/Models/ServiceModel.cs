@@ -13,6 +13,6 @@ namespace SyntropyNet.WindowsApp.Application.Models
         public string Ip { get; set; }
         public string Port { get; set; }
 
-        public string Address => $"{Ip}:{Port}";
+        public string Address => string.IsNullOrEmpty(Port) ? Ip : $"{Ip}:{Port}";
     }
 }

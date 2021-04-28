@@ -247,6 +247,19 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
         {
             List<CodeCowboy.NetworkRoute.Ip4RouteEntry> routeTable = Ip4RouteTable.GetRouteTable();
             CodeCowboy.NetworkRoute.Ip4RouteEntry routeEntry = routeTable.Find(i => i.DestinationIP.ToString().Equals(destinationIP) && i.GatewayIP.ToString().Equals(gateway));
+            if(destinationIP == "0.0.0.0")
+            {
+                log.Info($"RouteExistsDetails: {destinationIP}, {gateway}. Exists: {routeEntry != null}");
+                log.Info($"RouteExistsDetails: {string.Join(";", routeTable.Select(x => $"{x.DestinationIP.ToString()}, {x.GatewayIP.ToString()}"))}");
+                if(routeEntry == null)
+                {
+                    var extraRoute = routeTable.Find(i => i.DestinationIP.ToString().Equals(destinationIP,StringComparison.InvariantCultureIgnoreCase) && i.GatewayIP.ToString().Equals(gateway, StringComparison.InvariantCultureIgnoreCase));
+                    if(extraRoute != null)
+                    {
+                        log.Info($"RouteExistsDetails: Extra route found");
+                    }
+                }
+            }
             return (routeEntry != null);
         }
     }

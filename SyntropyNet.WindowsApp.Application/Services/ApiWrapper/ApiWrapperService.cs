@@ -222,24 +222,45 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                                     {
                                         foreach(var service in vpnData.Metadata.AllowedIpsInfo)
                                         {
-                                            foreach(var tcpPort in service.AgentServiceTcpPorts)
+                                            var serviceAdded = false;
+                                            if(service.AgentServiceTcpPorts != null)
                                             {
-                                                newServices.Add(new ServiceModel{
-                                                    PeerUid = vpnData.Args.PublicKey,
-                                                    Name = service.AgentServiceName,
-                                                    Ip = service.AgentServiceSubnetIp,
-                                                    Port = tcpPort.ToString()
-                                                });
+                                                foreach (var tcpPort in service.AgentServiceTcpPorts)
+                                                {
+                                                    newServices.Add(new ServiceModel
+                                                    {
+                                                        PeerUid = vpnData.Args.PublicKey,
+                                                        Name = service.AgentServiceName,
+                                                        Ip = service.AgentServiceSubnetIp,
+                                                        Port = tcpPort.ToString()
+                                                    });
+                                                    serviceAdded = true;
+                                                }
                                             }
 
-                                            foreach (var udpPort in service.AgentServiceUdpPorts)
+                                            if(service.AgentServiceUdpPorts != null)
+                                            {
+                                                foreach (var udpPort in service.AgentServiceUdpPorts)
+                                                {
+                                                    newServices.Add(new ServiceModel
+                                                    {
+                                                        PeerUid = vpnData.Args.PublicKey,
+                                                        Name = service.AgentServiceName,
+                                                        Ip = service.AgentServiceSubnetIp,
+                                                        Port = udpPort.ToString()
+                                                    });
+                                                    serviceAdded = true;
+                                                }
+                                            }
+
+                                            if (!serviceAdded)
                                             {
                                                 newServices.Add(new ServiceModel
                                                 {
                                                     PeerUid = vpnData.Args.PublicKey,
                                                     Name = service.AgentServiceName,
                                                     Ip = service.AgentServiceSubnetIp,
-                                                    Port = udpPort.ToString()
+                                                    Port = string.Empty
                                                 });
                                             }
                                         }
@@ -339,27 +360,48 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                                         case "add_peer":
                                             foreach (var service in item.Metadata.AllowedIpsInfo)
                                             {
-                                                foreach (var tcpPort in service.AgentServiceTcpPorts)
+                                                var serviceAdded = false;
+                                                if(service.AgentServiceTcpPorts != null)
+                                                {
+                                                    foreach (var tcpPort in service.AgentServiceTcpPorts)
+                                                    {
+                                                        addedServices.Add(new ServiceModel
+                                                        {
+                                                            PeerUid = item.Args.PublicKey,
+                                                            Name = service.AgentServiceName,
+                                                            Ip = service.AgentServiceSubnetIp,
+                                                            Port = tcpPort.ToString()
+                                                        });
+                                                        serviceAdded = true;
+                                                    }
+                                                }
+
+                                                if(service.AgentServiceUdpPorts != null)
+                                                {
+                                                    foreach (var udpPort in service.AgentServiceUdpPorts)
+                                                    {
+                                                        addedServices.Add(new ServiceModel
+                                                        {
+                                                            PeerUid = item.Args.PublicKey,
+                                                            Name = service.AgentServiceName,
+                                                            Ip = service.AgentServiceSubnetIp,
+                                                            Port = udpPort.ToString()
+                                                        });
+                                                        serviceAdded = true;
+                                                    }
+                                                }
+
+                                                if (!serviceAdded)
                                                 {
                                                     addedServices.Add(new ServiceModel
                                                     {
                                                         PeerUid = item.Args.PublicKey,
                                                         Name = service.AgentServiceName,
                                                         Ip = service.AgentServiceSubnetIp,
-                                                        Port = tcpPort.ToString()
+                                                        Port = string.Empty
                                                     });
                                                 }
 
-                                                foreach (var udpPort in service.AgentServiceUdpPorts)
-                                                {
-                                                    addedServices.Add(new ServiceModel
-                                                    {
-                                                        PeerUid = item.Args.PublicKey,
-                                                        Name = service.AgentServiceName,
-                                                        Ip = service.AgentServiceSubnetIp,
-                                                        Port = udpPort.ToString()
-                                                    });
-                                                }
                                             }
                                             break;
                                         case "remove_peer":
