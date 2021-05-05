@@ -35,6 +35,9 @@ namespace SyntropyNet.WindowsApp
     /// </summary>
     public partial class App: PrismApplication
     {
+        private static Mutex _mutex = null;
+        private const string appMutexName = "SyntropyNetWinApp";
+
         private static readonly ILog log = LogManager.GetLogger(typeof(App));
 
         const uint LOAD_LIBRARY_SEARCH_DEFAULT_DIRS = 0x00001000;
@@ -64,6 +67,10 @@ namespace SyntropyNet.WindowsApp
                 AddDllDirectory(Path.Combine(Directory.GetCurrentDirectory(), "x86"));
             }
 
+            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+            this.Dispatcher.UnhandledException += App_DispatcherUnhandledException;
+            this.DispatcherUnhandledException += App_DispatcherUnhandledException;
+
             if (e.Args.Any() && e.Args.Contains("/service"))
             {
                 log.Info("Started as Service");
@@ -78,18 +85,37 @@ namespace SyntropyNet.WindowsApp
                         uiProcess.WaitForExit();
                         WGConfigService.Remove(e.Args[1], false);
                     }
-                    catch { }
+                    catch(Exception ex) {
+                        
+                    }
                 });
-                t.Start();
-                WGConfigService.Run(e.Args[1]);
-                t.Interrupt();
+                try { 
+                    t.Start();
+                    WGConfigService.Run(e.Args[1]);
+                    log.Info("Service stopped");
+                    t.Interrupt();
+                }
+                catch (Exception ex)
+                {
+                    log.Error("Failed to start WG winservice", ex);
+                    throw ex;
+                }
                 return;
             }
+            else
+            {
+                bool createdNew;
+                _mutex = new Mutex(true, appMutexName, out createdNew);
+
+                if (!createdNew)
+                {
+                    //app is already running! Exiting the application  
+                    this.Shutdown();
+                }
+            }
+
             log.Info("Started as Desktop App");
             base.OnStartup(e);
-            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
-            this.Dispatcher.UnhandledException += App_DispatcherUnhandledException;
-            this.DispatcherUnhandledException += App_DispatcherUnhandledException;
         }
 
         private void App_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)

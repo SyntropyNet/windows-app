@@ -74,19 +74,22 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                 }
                 catch(Exception ex)
                 {
-                    try
+                    if (!(ex is System.Threading.ThreadAbortException))
                     {
-                        LoggerRequestHelper.Send(
-                            Client,
-                            log4net.Core.Level.Error,
-                            _appSettings.DeviceId,
-                            _appSettings.DeviceName,
-                            _appSettings.DeviceIp,
-                            $"[Message: {ex.Message}, stacktrace: {ex.StackTrace}]");
-                    }
-                    catch (Exception ex2)
-                    {
-                        log.Error($"[Message: {ex2.Message}, stacktrace: {ex2.StackTrace}]");
+                        try
+                        {
+                            LoggerRequestHelper.Send(
+                                Client,
+                                log4net.Core.Level.Error,
+                                _appSettings.DeviceId,
+                                _appSettings.DeviceName,
+                                _appSettings.DeviceIp,
+                                $"[Message: {ex.Message}, stacktrace: {ex.StackTrace}]");
+                        }
+                        catch (Exception ex2)
+                        {
+                            log.Error($"[Message: {ex2.Message}, stacktrace: {ex2.StackTrace}]");
+                        }
                     }
                 }
             });
