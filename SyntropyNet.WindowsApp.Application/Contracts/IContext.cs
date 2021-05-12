@@ -13,5 +13,6 @@ namespace SyntropyNet.WindowsApp.Application.Contracts
         void BeginInvoke(Action action);
         void BeginInvoke<T>(Action<T> action, T e);
         void BeginInvoke(Delegate action, params object[] args);
+        void ShowBalloonTip(string text);
     }
 }

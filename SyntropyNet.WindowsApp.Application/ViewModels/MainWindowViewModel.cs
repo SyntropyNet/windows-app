@@ -1,4 +1,5 @@
-﻿using Prism.Commands;
+﻿using Microsoft.Win32;
+using Prism.Commands;
 using Prism.Mvvm;
 using SyntropyNet.WindowsApp.Application.Contracts;
 using SyntropyNet.WindowsApp.Application.Domain.Enums.WireGuard;
@@ -9,8 +10,10 @@ using SyntropyNet.WindowsApp.Application.Services.ApiWrapper;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Websocket.Client;
 using static SyntropyNet.WindowsApp.Application.Services.ApiWrapper.ApiWrapperService;
@@ -53,6 +56,41 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
             _WGConfigService.ErrorCreateInterfaceEvent += _WGConfigService_ErrorCreateInterfaceEvent;
 
             Host = _appSettings.DeviceName;
+            Microsoft.Win32.SystemEvents.PowerModeChanged += this.SystemEvents_PowerModeChanged;
+        }
+
+        private bool WasStartedBeforeSuspending = false;
+        private bool TryToReconnect = false;
+        private void SystemEvents_PowerModeChanged(object sender, Microsoft.Win32.PowerModeChangedEventArgs e)
+        {
+            if (LoggedIn)
+            {
+                if (e.Mode == PowerModes.Suspend)
+                {
+                    WasStartedBeforeSuspending = Started;
+                }
+                else if (e.Mode == PowerModes.Resume)
+                {
+                    if (WasStartedBeforeSuspending)
+                    {
+                        if (!Started)
+                        {
+                            SetReconnecting();
+                            Started = true;
+                        }
+                        else
+                        {
+                            TryToReconnect = true;
+                            Task.Run(() => { 
+                                Thread.Sleep(20000);
+                                TryToReconnect = false;
+                            });
+                        }
+                        
+                    }
+                    WasStartedBeforeSuspending = false;
+                }
+            }
         }
 
         public void Disconnected(DisconnectionType type, string error)
@@ -66,12 +104,20 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
             OnoffEnabled = true;
             Loading = false;
             Status = "Disconnected";
-
             _autoDisconnection = true;
             Started = false;
-            if(type == DisconnectionType.Error)
+            if (TryToReconnect)
             {
-                ShowError(error);
+                TryToReconnect = false;
+                SetReconnecting();
+                Started = true;
+            }
+            else
+            {
+                if (type == DisconnectionType.Error)
+                {
+                    ShowError(error);
+                }
             }
         }
         public void Reconnecting(DisconnectionType type, string error)
@@ -216,14 +262,20 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
                     }
                     else
                     {
-                        OnoffEnabled = false;
-                        Loading = true;
-                        Status = "Disconnecting";
+                        
                         if (!_autoDisconnection)
                         {
+                            OnoffEnabled = false;
+                            Loading = true;
+                            Status = "Disconnecting";
+                            TryToReconnect = false;
                             Task.Run(() => {
                                 _apiService.Stop();
                             });
+                        }
+                        else
+                        {
+                            _appContext.ShowBalloonTip("The connection has been lost.");
                         }
                         _autoDisconnection = false;
                     }
@@ -386,6 +438,7 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
             _apiService.Stop();
             Name = string.Empty;
             LoggedIn = false;
+            WasStartedBeforeSuspending = false;
         }
 
 

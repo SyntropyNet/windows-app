@@ -46,6 +46,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
 
         private ManualResetEvent exitEvent { get; set;}
         private bool Running { get; set; }
+        private bool ConnectionLost { get; set; }
         private bool Stopping { get; set; }
         private int WaitReconnect { get; set; } = 0;
         private string UserError { get; set; }
@@ -92,6 +93,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                 return;
             }
             Stopping = false;
+            ConnectionLost = false;
             _WGConfigService.StopWG();
             _WGConfigService.CreateInterfaces();
             new Thread(async () =>
@@ -425,6 +427,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
 
                         if(x.Type == DisconnectionType.Lost && x.CloseStatus == null)
                         {
+                            ConnectionLost = true;
                             _WGConfigService.StopWG();
                             DisconnectedEvent?.Invoke(x.Type, x.Exception?.Message);
                             Running = false;
@@ -481,10 +484,13 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                         }
                         else
                         {
-                            _WGConfigService.StopWG();
-                            DisconnectedEvent?.Invoke(x.Type, x.Exception?.Message);
-                            Running = false;
-                            exitEvent.Set();
+                            if (!ConnectionLost) { 
+                                _WGConfigService.StopWG();
+                                DisconnectedEvent?.Invoke(x.Type, x.Exception?.Message);
+                                Running = false;
+                                exitEvent.Set();
+                            }
+                            ConnectionLost = false;
                         }
                     });
 

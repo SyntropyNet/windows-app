@@ -32,7 +32,7 @@ namespace SyntropyNet.WindowsApp.Views
     public partial class MainWindow : Window
     {
         #region Tray Icon
-        private System.Windows.Forms.NotifyIcon m_notifyIcon;
+        public static System.Windows.Forms.NotifyIcon m_notifyIcon;
 
         private void PrepareNotifyIcon()
         {
@@ -65,8 +65,7 @@ namespace SyntropyNet.WindowsApp.Views
             if (WindowState == WindowState.Minimized)
             {
                 Hide();
-                if (m_notifyIcon != null)
-                    m_notifyIcon.ShowBalloonTip(2000);
+                _wpfContext.ShowBalloonTip("The app has been minimised. Click the tray icon to show.");
             }
             else
                 m_storedWindowState = WindowState;
@@ -99,8 +98,11 @@ namespace SyntropyNet.WindowsApp.Views
 
         #endregion
         private readonly IAppSettings _appSettings;
-        public MainWindow(IAppSettings appSettings)
+        private readonly IContext _wpfContext;
+
+        public MainWindow(IAppSettings appSettings, IContext wpfContext)
         {
+            _wpfContext = wpfContext;
             _appSettings = appSettings;
             PrepareNotifyIcon();
             Loaded += (object sender, RoutedEventArgs e) =>

@@ -1,4 +1,5 @@
 ﻿using SyntropyNet.WindowsApp.Application.Contracts;
+using SyntropyNet.WindowsApp.Views;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -51,6 +52,16 @@ namespace SyntropyNet.WindowsApp.Services
             Debug.Assert(action != null);
 
             this._dispatcher.BeginInvoke(action, args);
+        }
+
+        public void ShowBalloonTip(string text)
+        {
+            if (MainWindow.m_notifyIcon != null)
+            {
+                MainWindow.m_notifyIcon.BalloonTipText = text;
+                MainWindow.m_notifyIcon.ShowBalloonTip(2000);
+            }
+
         }
     }
 }
