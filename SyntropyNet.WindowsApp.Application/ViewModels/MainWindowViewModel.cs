@@ -73,17 +73,21 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
                 {
                     if (WasStartedBeforeSuspending)
                     {
+                        Debug.WriteLine("------------ 1 Sleep Wake");
                         if (!Started)
                         {
+                            Debug.WriteLine("------------ 2 Sleep start");
                             SetReconnecting();
                             Started = true;
                         }
                         else
                         {
+                            Debug.WriteLine("------------ 3 try to reconect");
                             TryToReconnect = true;
                             Task.Run(() => { 
                                 Thread.Sleep(20000);
                                 TryToReconnect = false;
+                                Debug.WriteLine("------------ 4 drop try to reconnect");
                             });
                         }
                         
@@ -106,8 +110,10 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
             Status = "Disconnected";
             _autoDisconnection = true;
             Started = false;
+            Debug.WriteLine($"------------ 5 Disconnected {TryToReconnect}");
             if (TryToReconnect)
             {
+                Debug.WriteLine($"------------ 6 Trying to reconnect");
                 TryToReconnect = false;
                 SetReconnecting();
                 Started = true;
