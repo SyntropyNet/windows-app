@@ -1,4 +1,5 @@
-﻿using Microsoft.Win32;
+﻿using log4net;
+using Microsoft.Win32;
 using Prism.Commands;
 using Prism.Mvvm;
 using SyntropyNet.WindowsApp.Application.Contracts;
@@ -22,6 +23,8 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
 {
     public class MainWindowViewModel: BindableBase
     {
+        private static readonly ILog log = LogManager.GetLogger(typeof(MainWindowViewModel));
+
         private readonly IApiWrapperService _apiService;
         private readonly IAppSettings _appSettings;
         private readonly IUserConfig _userConfig;
@@ -71,23 +74,24 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
                 }
                 else if (e.Mode == PowerModes.Resume)
                 {
+                    log.Info("------------ 0 Wakeup event fired");
                     if (WasStartedBeforeSuspending)
                     {
-                        Debug.WriteLine("------------ 1 Sleep Wake");
+                        log.Info("------------ 1 Sleep Wake");
                         if (!Started)
                         {
-                            Debug.WriteLine("------------ 2 Sleep start");
+                            log.Info("------------ 2 Sleep start");
                             SetReconnecting();
                             Started = true;
                         }
                         else
                         {
-                            Debug.WriteLine("------------ 3 try to reconect");
+                            log.Info("------------ 3 try to reconect");
                             TryToReconnect = true;
                             Task.Run(() => { 
                                 Thread.Sleep(20000);
                                 TryToReconnect = false;
-                                Debug.WriteLine("------------ 4 drop try to reconnect");
+                                log.Info("------------ 4 drop try to reconnect");
                             });
                         }
                         
@@ -110,10 +114,10 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
             Status = "Disconnected";
             _autoDisconnection = true;
             Started = false;
-            Debug.WriteLine($"------------ 5 Disconnected {TryToReconnect}");
+            log.Info($"------------ 5 Disconnected {TryToReconnect}, type: {type}");
             if (TryToReconnect)
             {
-                Debug.WriteLine($"------------ 6 Trying to reconnect");
+                log.Info($"------------ 6 Trying to reconnect");
                 TryToReconnect = false;
                 SetReconnecting();
                 Started = true;
@@ -261,6 +265,7 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
                 {
                     if (value)
                     {
+                        log.Info($"--- Started");
                         OnoffEnabled = false;
                         Status = string.Empty;
                         Loading = true;
@@ -268,7 +273,7 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
                     }
                     else
                     {
-                        
+                        log.Info($"--- Stopped: {_autoDisconnection}");
                         if (!_autoDisconnection)
                         {
                             OnoffEnabled = false;

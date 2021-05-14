@@ -437,10 +437,13 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
 
                         if (x.CloseStatus != null && (x.CloseStatus.ToString() == "4000" || x.CloseStatus.ToString() == "4001"))
                         {
-                            _WGConfigService.StopWG();
-                            DisconnectedEvent?.Invoke(x.Type, x.Exception?.Message);
-                            Running = false;
-                            exitEvent.Set();
+                            if(Running)
+                            {
+                                _WGConfigService.StopWG();
+                                DisconnectedEvent?.Invoke(x.Type, x.Exception?.Message);
+                                Running = false;
+                                exitEvent.Set();
+                            }
                             return;
                         }
                         
