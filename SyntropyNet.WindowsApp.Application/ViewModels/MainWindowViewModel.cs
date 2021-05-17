@@ -54,6 +54,7 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
             _apiService.PeersServicesUpdatedEvent += UpdatePeersServices;
             _apiService.DisconnectedEvent += Disconnected;
             _apiService.ReconnectingEvent += Reconnecting;
+            _apiService.ConnectionLostEvent += ConnectionLost;
             _apiService.ReconnectedEvent += Reconnected;
             _WGConfigService.CreateInterfaceEvent += _WGConfigService_CreateInterfaceEvent;
             _WGConfigService.ErrorCreateInterfaceEvent += _WGConfigService_ErrorCreateInterfaceEvent;
@@ -74,31 +75,21 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
                 }
                 else if (e.Mode == PowerModes.Resume)
                 {
-                    log.Info("------------ 0 Wakeup event fired");
-                    if (WasStartedBeforeSuspending)
-                    {
-                        log.Info("------------ 1 Sleep Wake");
-                        if (!Started)
-                        {
-                            log.Info("------------ 2 Sleep start");
-                            SetReconnecting();
-                            Started = true;
-                        }
-                        else
-                        {
-                            log.Info("------------ 3 try to reconect");
-                            TryToReconnect = true;
-                            Task.Run(() => { 
-                                Thread.Sleep(20000);
-                                TryToReconnect = false;
-                                log.Info("------------ 4 drop try to reconnect");
-                            });
-                        }
-                        
-                    }
+                    log.Info("Wakeup event fired");
                     WasStartedBeforeSuspending = false;
                 }
             }
+        }
+
+        public void ConnectionLost()
+        {
+            if (!_appContext.IsSynchronized)
+            {
+                _appContext.BeginInvoke(ConnectionLost);
+                return;
+            }
+
+            _appContext.ShowBalloonTip("The connection has been lost.");
         }
 
         public void Disconnected(DisconnectionType type, string error)
@@ -114,20 +105,9 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
             Status = "Disconnected";
             _autoDisconnection = true;
             Started = false;
-            log.Info($"------------ 5 Disconnected {TryToReconnect}, type: {type}");
-            if (TryToReconnect)
+            if (type == DisconnectionType.Error)
             {
-                log.Info($"------------ 6 Trying to reconnect");
-                TryToReconnect = false;
-                SetReconnecting();
-                Started = true;
-            }
-            else
-            {
-                if (type == DisconnectionType.Error)
-                {
-                    ShowError(error);
-                }
+                ShowError(error);
             }
         }
         public void Reconnecting(DisconnectionType type, string error)
@@ -143,6 +123,7 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
                 return;
             }
             Status = "Connected";
+            Loading = false;
         }
 
         private void ShowError(string error)
@@ -197,6 +178,7 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
                 return;
             }
             Status = "Reconnecting";
+            Loading = true;
         }
 
         public void UpdateServices(IEnumerable<ServiceModel> services)

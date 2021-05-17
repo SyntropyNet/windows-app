@@ -43,6 +43,8 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
         public event Disconnected ReconnectingEvent;
         public delegate void Reconnected();
         public event Reconnected ReconnectedEvent;
+        public delegate void ConnectionLostDelegate();
+        public event ConnectionLostDelegate ConnectionLostEvent;
 
         private ManualResetEvent exitEvent { get; set;}
         private bool Running { get; set; }
@@ -132,6 +134,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                     {
                         Debug.WriteLine($"Reconnection happened, type: {info.Type}");
                         WaitReconnect = 0;
+                        ConnectionLost = false;
                         ReconnectedEvent?.Invoke();
                     });
 
@@ -197,6 +200,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                                     configInfoHandler = new ConfigInfoHandler(client, _WGConfigService, _networkInformationService, _appSettings, _httpRequestService);
                                     configInfoHandler.Start(configInfoRequest, IsRecconect);
                                     IsRecconect = false;
+                                    ConnectionLost = false;
                                 }
                                 catch(Exception ex)
                                 {
@@ -427,12 +431,8 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
 
                         if(x.Type == DisconnectionType.Lost && x.CloseStatus == null)
                         {
+                            ConnectionLostEvent?.Invoke();
                             ConnectionLost = true;
-                            _WGConfigService.StopWG();
-                            DisconnectedEvent?.Invoke(x.Type, x.Exception?.Message);
-                            Running = false;
-                            exitEvent.Set();
-                            return;
                         }
 
                         if (x.CloseStatus != null && (x.CloseStatus.ToString() == "4000" || x.CloseStatus.ToString() == "4001"))
@@ -471,7 +471,12 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                             {
                                 checked
                                 {
-                                    WaitReconnect += 5000;
+                                    if(!ConnectionLost || WaitReconnect < 20000)
+                                    {
+                                        // If connection was lost, try to re-connect every 20 secs, 
+                                        // if no then increase timeout by 5sec every iteration
+                                        WaitReconnect += 5000;
+                                    }
                                 }
 
                                 IsRecconect = true;
