@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Net.WebSockets;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -42,7 +43,7 @@ namespace SyntropyNet.WindowsApp.Views
             m_notifyIcon.BalloonTipText = "The app has been minimised. Click the tray icon to show.";
             m_notifyIcon.BalloonTipTitle = "Syntropy";
             m_notifyIcon.Text = "Syntropy";
-            m_notifyIcon.Icon = new System.Drawing.Icon("syntropy-icon.ico");
+            m_notifyIcon.Icon = new System.Drawing.Icon(System.IO.Path.Combine(System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "syntropy-icon.ico"));
             m_notifyIcon.Click += new EventHandler(m_notifyIcon_Click);
             m_notifyIcon.Visible = true;
             var trayMenu = new System.Windows.Forms.ContextMenu();

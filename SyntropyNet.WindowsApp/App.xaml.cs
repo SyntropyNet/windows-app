@@ -42,80 +42,97 @@ namespace SyntropyNet.WindowsApp
 
         const uint LOAD_LIBRARY_SEARCH_DEFAULT_DIRS = 0x00001000;
 
-        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        static extern bool SetDefaultDllDirectories(uint DirectoryFlags);
-
-        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-        static extern int AddDllDirectory(string NewDirectory);
-
         protected override void OnStartup(StartupEventArgs e)
         {
-            log4net.Config.XmlConfigurator.Configure();
-            // Setup correct references to tunnel.dll
-            if (Environment.Is64BitProcess)
-            {
-                SetDefaultDllDirectories(LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
-                
-                // Add the directory of the native dll
-                AddDllDirectory(Path.Combine(Directory.GetCurrentDirectory(), "x64"));
-            }
-            else
-            {
-                SetDefaultDllDirectories(LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
-
-                // Add the directory of the native dll
-                AddDllDirectory(Path.Combine(Directory.GetCurrentDirectory(), "x86"));
-            }
-
-            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
-            this.Dispatcher.UnhandledException += App_DispatcherUnhandledException;
-            this.DispatcherUnhandledException += App_DispatcherUnhandledException;
-
-            if (e.Args.Any() && e.Args.Contains("/service"))
-            {
-                log.Info("Started as Service");
-                var t = new Thread(() =>
+            try { 
+                var startingAsAService = e.Args.Any() && e.Args.Contains("/service");
+                log4net.Config.XmlConfigurator.Configure();
+                var currentDir = System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+                // Setup correct references to tunnel.dll
+                if (Environment.Is64BitProcess)
                 {
-                    try
+                    // Add the directory of the native dll
+                    if (!startingAsAService)
                     {
-                        var currentProcess = Process.GetCurrentProcess();
-                        var uiProcess = Process.GetProcessById(int.Parse(e.Args[2]));
-                        if (uiProcess.MainModule.FileName != currentProcess.MainModule.FileName)
-                            return;
-                        uiProcess.WaitForExit();
-                        WGConfigService.Remove(e.Args[1], false);
+                        foreach (var file in Directory.GetFiles(Path.Combine(currentDir, "x64")))
+                        {
+                            if(!File.Exists(Path.Combine(currentDir, Path.GetFileName(file))))
+                            {
+                                File.Copy(file, Path.Combine(currentDir, Path.GetFileName(file)), true);
+                            }
+                        }
                     }
-                    catch(Exception ex) {
+                }
+                else
+                {
+
+                    if (!startingAsAService)
+                    {
+                        // Add the directory of the native dll
+                        foreach (var file in Directory.GetFiles(Path.Combine(currentDir, "x86")))
+                        {
+                            if (!File.Exists(Path.Combine(currentDir, Path.GetFileName(file))))
+                            {
+                                File.Copy(file, Path.Combine(currentDir, Path.GetFileName(file)), true);
+                            }
+                        }
+                    }
+                }
+
+                AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+                this.Dispatcher.UnhandledException += App_DispatcherUnhandledException;
+                this.DispatcherUnhandledException += App_DispatcherUnhandledException;
+
+                if (e.Args.Any() && e.Args.Contains("/service"))
+                {
+                    log.Info("Started as Service");
+                    var t = new Thread(() =>
+                    {
+                        try
+                        {
+                            var currentProcess = Process.GetCurrentProcess();
+                            var uiProcess = Process.GetProcessById(int.Parse(e.Args[2]));
+                            if (uiProcess.MainModule.FileName != currentProcess.MainModule.FileName)
+                                return;
+                            uiProcess.WaitForExit();
+                            WGConfigService.Remove(e.Args[1], false);
+                        }
+                        catch(Exception ex) {
                         
+                        }
+                    });
+                    try { 
+                        t.Start();
+                        WGConfigService.Run(e.Args[1]);
+                        log.Info("Service stopped");
+                        t.Interrupt();
                     }
-                });
-                try { 
-                    t.Start();
-                    WGConfigService.Run(e.Args[1]);
-                    log.Info("Service stopped");
-                    t.Interrupt();
+                    catch (Exception ex)
+                    {
+                        log.Error("Failed to start WG winservice", ex);
+                        throw ex;
+                    }
+                    return;
                 }
-                catch (Exception ex)
+                else
                 {
-                    log.Error("Failed to start WG winservice", ex);
-                    throw ex;
+                    bool createdNew;
+                    _mutex = new Mutex(true, appMutexName, out createdNew);
+
+                    if (!createdNew)
+                    {
+                        //app is already running! Exiting the application  
+                        this.Shutdown();
+                    }
                 }
-                return;
+
+                log.Info("Started as Desktop App");
+                base.OnStartup(e);
             }
-            else
+            catch(Exception ex)
             {
-                bool createdNew;
-                _mutex = new Mutex(true, appMutexName, out createdNew);
-
-                if (!createdNew)
-                {
-                    //app is already running! Exiting the application  
-                    this.Shutdown();
-                }
+                log.Error("Error in Startup", ex);
             }
-
-            log.Info("Started as Desktop App");
-            base.OnStartup(e);
         }
 
         private void App_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)

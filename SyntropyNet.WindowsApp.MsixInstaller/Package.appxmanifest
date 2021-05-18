@@ -8,12 +8,12 @@
 
   <Identity
     Name="661fc5c1-7366-4617-a076-8f00dc1b8d4e"
-    Publisher="CN=zeez"
-    Version="1.31.0.0" />
+    Publisher="CN=Syntropy"
+    Version="1.34.10.0" />
 
   <Properties>
     <DisplayName>Syntropy</DisplayName>
-    <PublisherDisplayName>zeez</PublisherDisplayName>
+    <PublisherDisplayName>Syntropy</PublisherDisplayName>
     <Logo>Images\StoreLogo.png</Logo>
   </Properties>
 
@@ -36,7 +36,7 @@
         BackgroundColor="transparent"
         Square150x150Logo="Images\Square150x150Logo.png"
         Square44x44Logo="Images\Square44x44Logo.png">
-        <uap:DefaultTile Wide310x150Logo="Images\Wide310x150Logo.png"  ShortName="Syntropy">
+        <uap:DefaultTile Wide310x150Logo="Images\Wide310x150Logo.png"  ShortName="Syntropy" Square71x71Logo="Images\SmallTile.png" Square310x310Logo="Images\LargeTile.png">
           <uap:ShowNameOnTiles>
             <uap:ShowOn Tile="square150x150Logo"/>
             <uap:ShowOn Tile="wide310x150Logo"/>
@@ -50,5 +50,6 @@
   <Capabilities>
     <Capability Name="internetClient" />
     <rescap:Capability Name="runFullTrust" />
+	<rescap:Capability Name="allowElevation" />
   </Capabilities>
 </Package>
