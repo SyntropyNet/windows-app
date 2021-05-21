@@ -1,2 +1,2 @@
-MainPackage=C:\work\syntropy\github\windows-app\SyntropyNet.WindowsApp.MsixInstaller\bin\x86\Release\SyntropyNet.WindowsApp.MsixInstaller_1.34.14.0_x86.appx
-SymbolPackage=C:\work\syntropy\github\windows-app\SyntropyNet.WindowsApp.MsixInstaller\obj\x86\Release\Symbols\SyntropyNet.WindowsApp.MsixInstaller_1.34.14.0_x86.appxsym
+MainPackage=C:\work\syntropy\github\windows-app\SyntropyNet.WindowsApp.MsixInstaller\bin\x86\Debug\SyntropyNet.WindowsApp.MsixInstaller_1.34.15.0_x86_Debug.appx
+SymbolPackage=C:\work\syntropy\github\windows-app\SyntropyNet.WindowsApp.MsixInstaller\obj\x86\Debug\Symbols\SyntropyNet.WindowsApp.MsixInstaller_1.34.15.0_x86_Debug.appxsym

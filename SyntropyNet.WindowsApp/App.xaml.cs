@@ -42,42 +42,15 @@ namespace SyntropyNet.WindowsApp
 
         const uint LOAD_LIBRARY_SEARCH_DEFAULT_DIRS = 0x00001000;
 
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        static extern bool SetDllDirectory(string lpPathName);
+
         protected override void OnStartup(StartupEventArgs e)
         {
             try { 
                 var startingAsAService = e.Args.Any() && e.Args.Contains("/service");
                 log4net.Config.XmlConfigurator.Configure();
                 var currentDir = System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
-                // Setup correct references to tunnel.dll
-                if (Environment.Is64BitProcess)
-                {
-                    // Add the directory of the native dll
-                    if (!startingAsAService)
-                    {
-                        foreach (var file in Directory.GetFiles(Path.Combine(currentDir, "x64")))
-                        {
-                            if(!File.Exists(Path.Combine(currentDir, Path.GetFileName(file))))
-                            {
-                                File.Copy(file, Path.Combine(currentDir, Path.GetFileName(file)), true);
-                            }
-                        }
-                    }
-                }
-                else
-                {
-
-                    if (!startingAsAService)
-                    {
-                        // Add the directory of the native dll
-                        foreach (var file in Directory.GetFiles(Path.Combine(currentDir, "x86")))
-                        {
-                            if (!File.Exists(Path.Combine(currentDir, Path.GetFileName(file))))
-                            {
-                                File.Copy(file, Path.Combine(currentDir, Path.GetFileName(file)), true);
-                            }
-                        }
-                    }
-                }
 
                 AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
                 this.Dispatcher.UnhandledException += App_DispatcherUnhandledException;
