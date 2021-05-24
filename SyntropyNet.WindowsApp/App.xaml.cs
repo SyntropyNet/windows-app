@@ -1,4 +1,6 @@
 ﻿using log4net;
+using log4net.Appender;
+using log4net.Repository.Hierarchy;
 using Prism.Ioc;
 using Prism.Mvvm;
 using Prism.Unity;
@@ -47,7 +49,9 @@ namespace SyntropyNet.WindowsApp
 
         protected override void OnStartup(StartupEventArgs e)
         {
-            try { 
+            try {
+                SetupProgramDataDirs();
+
                 var startingAsAService = e.Args.Any() && e.Args.Contains("/service");
                 log4net.Config.XmlConfigurator.Configure();
                 var currentDir = System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
@@ -152,6 +156,20 @@ namespace SyntropyNet.WindowsApp
                 var viewModelName = $"{viewName}ViewModel, {viewAssemblyName}";
                 return Type.GetType(viewModelName);
             });
+        }
+
+        private void SetupProgramDataDirs()
+        {
+            var syntropyLocalDir = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Syntropy\\");
+            if (!Directory.Exists(syntropyLocalDir))
+            {
+                var dirInfo = Directory.CreateDirectory(syntropyLocalDir);
+            }
+            var logsDir = Path.Combine(syntropyLocalDir, "logs\\");
+            if (!Directory.Exists(logsDir))
+            {
+                Directory.CreateDirectory(logsDir);
+            }
         }
 
         private void Application_Exit(object sender, ExitEventArgs e)

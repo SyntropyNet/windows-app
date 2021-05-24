@@ -1,7 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-  
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -17,16 +16,13 @@
     <Deterministic>true</Deterministic>
     <Copy64Files>false</Copy64Files>
   </PropertyGroup>
-  
   <!-- Declare the condition property at the beggining of the build file -->
   <PropertyGroup Condition="$(Platform) == 'x64'">
     <Copy64Files>true</Copy64Files>
   </PropertyGroup>
-
   <PropertyGroup Condition="$(Platform) == 'x86'">
     <Copy64Files>false</Copy64Files>
   </PropertyGroup>
-  
   <PropertyGroup>
     <ApplicationIcon>syntropy-icon.ico</ApplicationIcon>
   </PropertyGroup>
@@ -202,6 +198,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Converter\SpecialFolderPatternConverter.cs" />
     <Compile Include="Converter\StarWidthConverter.cs" />
     <Compile Include="Enums\TaskBarLocation.cs" />
     <Compile Include="Helpers\WindowHelpers.cs" />
@@ -272,8 +269,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  
-  <ItemGroup  Condition="$(Copy64Files)==true">
+  <ItemGroup Condition="$(Copy64Files)==true">
     <ContentWithTargetPath Include="x64\tunnel.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <TargetPath>tunnel.dll</TargetPath>
@@ -283,7 +279,7 @@
       <TargetPath>wintun.dll</TargetPath>
     </ContentWithTargetPath>
   </ItemGroup>
-  <ItemGroup  Condition="$(Copy64Files)==false">
+  <ItemGroup Condition="$(Copy64Files)==false">
     <!--<Content Include="x86\tunnel.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>-->
@@ -299,6 +295,5 @@
       <TargetPath>wintun.dll</TargetPath>
     </ContentWithTargetPath>
   </ItemGroup>
-
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
