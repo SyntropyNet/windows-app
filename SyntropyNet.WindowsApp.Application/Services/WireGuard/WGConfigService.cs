@@ -671,7 +671,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
                     }
                     else
                     {
-                        log.Error($"[WG_CONF] - Error creating interface {tunnelName}");
+                        log.Error($"[WG_CONF] - Error creating interface {tunnelName}. Winservice still in not Running state after 60 start attempts");
                         ErrorCreateInterfaceEvent?.Invoke(this, new WGConfigServiceEventArgs(GetHowName(GetWGInterfaceNameFromString(tunnelName))));
                     }
                 }
@@ -683,7 +683,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
             catch (Exception ex)
             {
                 Win32.CloseServiceHandle(scm);
-                log.Error($"[WG_CONF] - Error creating WinService {tunnelName}");
+                log.Error($"[WG_CONF] - Error creating WinService {tunnelName}", ex);
                 ErrorCreateInterfaceEvent?.Invoke(this, new WGConfigServiceEventArgs(GetHowName(GetWGInterfaceNameFromString(tunnelName))));
                 return;
             }

@@ -37,6 +37,13 @@ namespace SyntropyNet.WindowsApp.Views
 
         private void PrepareNotifyIcon()
         {
+            // In rare cases we may have a "The root Visual of a VisualTarget cannot have a parent. " with Windows.Forms.NotifyIcon
+            // tto avoid that we initialize and hide a tooltip before creating Windows.Forms.NotifyIcon;
+            ToolTip tt = new ToolTip();
+            tt.IsOpen = true;
+            tt.IsOpen = false;
+            // --
+
             this.ShowInTaskbar = false;
             // Tray Icon setup
             m_notifyIcon = new System.Windows.Forms.NotifyIcon();

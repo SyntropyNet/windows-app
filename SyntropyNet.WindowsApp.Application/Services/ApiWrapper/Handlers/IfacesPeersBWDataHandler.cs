@@ -124,7 +124,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                         }
                         catch (Exception ex2)
                         {
-                            log.Error($"[Message: {ex2.Message}, stacktrace: {ex2.StackTrace}]");
+                            log.Error($"[Message: {ex2.Message}, stacktrace: {ex2.StackTrace}]", ex);
                         }
                     }
                 }

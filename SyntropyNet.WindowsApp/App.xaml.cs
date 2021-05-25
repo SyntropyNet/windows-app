@@ -41,6 +41,7 @@ namespace SyntropyNet.WindowsApp
         private const string appMutexName = "SyntropyNetWinApp";
 
         private static readonly ILog log = LogManager.GetLogger(typeof(App));
+        private static readonly string EnableSentry = ConfigurationManager.AppSettings["EnableSentry"];
 
         const uint LOAD_LIBRARY_SEARCH_DEFAULT_DIRS = 0x00001000;
 
@@ -51,6 +52,7 @@ namespace SyntropyNet.WindowsApp
         {
             try {
                 SetupProgramDataDirs();
+                SetupLoggerAppenders();
 
                 var startingAsAService = e.Args.Any() && e.Args.Contains("/service");
                 log4net.Config.XmlConfigurator.Configure();
@@ -156,6 +158,20 @@ namespace SyntropyNet.WindowsApp
                 var viewModelName = $"{viewName}ViewModel, {viewAssemblyName}";
                 return Type.GetType(viewModelName);
             });
+        }
+
+        private void SetupLoggerAppenders()
+        {
+            if(EnableSentry.ToLower() != "true")
+            {
+                // Remove Sentry Log4Net appender if it is disabled in config
+                var root = ((log4net.Repository.Hierarchy.Hierarchy)LogManager.GetRepository()).Root;
+                IAppender removedAppender = null;
+                if (root.Appenders.ToArray().Any(x => x.Name == "SentryAppender"))
+                {
+                    removedAppender = root.RemoveAppender("SentryAppender");
+                }
+            }
         }
 
         private void SetupProgramDataDirs()

@@ -36,12 +36,20 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
 
                 foreach (NetworkInterface ni in interfaces)
                 {
-                    ifaceBWDataRequestData.Add(IfaceBWDataRequestData(ni));
+                    try { 
+                        ifaceBWDataRequestData.Add(IfaceBWDataRequestData(ni));
+                    }
+                    catch (NetworkInformationException ex)
+                    {
+                        // There can be some interfaces which already does not exists due to VPN settings,
+                        // it is an expected behavior, just log a debug message.
+                        log.Debug(ex.Message, ex);
+                    }
                 }
             }
-            catch (NetworkInformationException ex)
+            catch (Exception ex)
             {
-                log.Error(ex.Message);
+                log.Error(ex.Message, ex);
             }
 
             return ifaceBWDataRequestData;
@@ -211,7 +219,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
             }
             catch(Exception ex) 
             {
-                log.Error(ex.Message);
+                log.Error(ex.Message, ex);
             }
             return false;
         }

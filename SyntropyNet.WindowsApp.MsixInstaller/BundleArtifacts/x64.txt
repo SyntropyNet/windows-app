@@ -1,6 +1,6 @@
-MainPackage=C:\work\syntropy\github\windows-app\SyntropyNet.WindowsApp.MsixInstaller\bin\x64\Debug\SyntropyNet.WindowsApp.MsixInstaller_1.34.29.0_x64_Debug.appx
-SymbolPackage=C:\work\syntropy\github\windows-app\SyntropyNet.WindowsApp.MsixInstaller\obj\x64\Debug\Symbols\SyntropyNet.WindowsApp.MsixInstaller_1.34.29.0_x64_Debug.appxsym
-ResourcePack=C:\work\syntropy\github\windows-app\SyntropyNet.WindowsApp.MsixInstaller\bin\x64\Debug\SyntropyNet.WindowsApp.MsixInstaller_1.34.29.0_scale-100.appx
-ResourcePack=C:\work\syntropy\github\windows-app\SyntropyNet.WindowsApp.MsixInstaller\bin\x64\Debug\SyntropyNet.WindowsApp.MsixInstaller_1.34.29.0_scale-125.appx
-ResourcePack=C:\work\syntropy\github\windows-app\SyntropyNet.WindowsApp.MsixInstaller\bin\x64\Debug\SyntropyNet.WindowsApp.MsixInstaller_1.34.29.0_scale-150.appx
-ResourcePack=C:\work\syntropy\github\windows-app\SyntropyNet.WindowsApp.MsixInstaller\bin\x64\Debug\SyntropyNet.WindowsApp.MsixInstaller_1.34.29.0_scale-400.appx
+MainPackage=C:\work\syntropy\github\windows-app\SyntropyNet.WindowsApp.MsixInstaller\bin\x64\Release\SyntropyNet.WindowsApp.MsixInstaller_1.34.49.0_x64.appx
+SymbolPackage=C:\work\syntropy\github\windows-app\SyntropyNet.WindowsApp.MsixInstaller\obj\x64\Release\Symbols\SyntropyNet.WindowsApp.MsixInstaller_1.34.49.0_x64.appxsym
+ResourcePack=C:\work\syntropy\github\windows-app\SyntropyNet.WindowsApp.MsixInstaller\bin\x64\Release\SyntropyNet.WindowsApp.MsixInstaller_1.34.49.0_scale-100.appx
+ResourcePack=C:\work\syntropy\github\windows-app\SyntropyNet.WindowsApp.MsixInstaller\bin\x64\Release\SyntropyNet.WindowsApp.MsixInstaller_1.34.49.0_scale-125.appx
+ResourcePack=C:\work\syntropy\github\windows-app\SyntropyNet.WindowsApp.MsixInstaller\bin\x64\Release\SyntropyNet.WindowsApp.MsixInstaller_1.34.49.0_scale-150.appx
+ResourcePack=C:\work\syntropy\github\windows-app\SyntropyNet.WindowsApp.MsixInstaller\bin\x64\Release\SyntropyNet.WindowsApp.MsixInstaller_1.34.49.0_scale-400.appx

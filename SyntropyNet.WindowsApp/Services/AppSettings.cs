@@ -31,7 +31,7 @@ namespace SyntropyNet.WindowsApp.Services
             }
             catch(Exception ex)
             {
-                log.Error("Internet is not available");
+                log.Error("Internet is not available", ex);
             }
             _deviceId = productId ?? $"{System.Environment.MachineName}-{extIp}";
             _deviceName = System.Environment.MachineName;
