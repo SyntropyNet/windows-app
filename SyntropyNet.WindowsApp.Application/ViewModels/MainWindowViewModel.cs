@@ -122,8 +122,6 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
                 _appContext.BeginInvoke(Reconnected);
                 return;
             }
-            Status = "Connected";
-            Loading = false;
         }
 
         private void ShowError(string error)
