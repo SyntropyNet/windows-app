@@ -35,6 +35,7 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
         private int _totalInterfaces = Enum.GetNames(typeof(WGInterfaceName)).Length;
 
         private bool _autoDisconnection = false;
+        private bool _interfacesLoaded = false;
 
         public MainWindowViewModel(IApiWrapperService apiService,
                                    Prism.Services.Dialogs.IDialogService prismDialogs,
@@ -121,6 +122,12 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
             {
                 _appContext.BeginInvoke(Reconnected);
                 return;
+            }
+
+            // Check if WireGuard interfaces were loaded;
+            if (_interfacesLoaded) { 
+                Status = "Connected";
+                Loading = false;
             }
         }
 
@@ -412,6 +419,7 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
 
             if (_countCreatedInterface == _totalInterfaces)
             {
+                _interfacesLoaded = true;
                 _countCreatedInterface = 0;
                 SetConnected();
                 StopLoading();
