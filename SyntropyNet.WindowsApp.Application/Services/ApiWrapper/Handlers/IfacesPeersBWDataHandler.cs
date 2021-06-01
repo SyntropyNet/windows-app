@@ -171,7 +171,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                 catch (PingException ex)
                 {
                     peerForRequest.Status = IfacesPeersBWDataRequestStatus.OFFLINE;
-                    peerForRequest.LatencyMs = 0;
+                    peerForRequest.LatencyMs = null;
                     peerForRequest.PacketLoss = 1;
                     continue;
                 }

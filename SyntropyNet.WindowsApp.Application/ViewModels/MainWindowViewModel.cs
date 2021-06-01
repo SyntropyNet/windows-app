@@ -264,6 +264,7 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
                         if (!_autoDisconnection)
                         {
                             OnoffEnabled = false;
+                            _interfacesLoaded = false;
                             Loading = true;
                             Status = "Disconnecting";
                             TryToReconnect = false;
@@ -407,6 +408,7 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
 
         private void _WGConfigService_ErrorCreateInterfaceEvent(object arg1, Services.WireGuard.WGConfigServiceEventArgs arg2)
         {
+            _interfacesLoaded = false;
             _countCreatedInterface = 0;
             SetDisconnected();
             StopLoading();

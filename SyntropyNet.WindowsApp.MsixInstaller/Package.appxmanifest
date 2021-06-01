@@ -9,7 +9,7 @@
   <Identity
     Name="661fc5c1-7366-4617-a076-8f00dc1b8d4e"
     Publisher="CN=Syntropy"
-    Version="1.34.49.0" />
+    Version="1.34.50.0" />
 
   <Properties>
     <DisplayName>Syntropy</DisplayName>

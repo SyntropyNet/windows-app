@@ -50,7 +50,7 @@ namespace SyntropyNet.WindowsApp.Application.Domain.Models.Messages
         public int KeepAliveInterval { get; set; }
         public IEnumerable<string> AllowedIps { get; set; }
         public string InternalIp { get; set; }
-        public double LatencyMs { get; set; }
+        public double? LatencyMs { get; set; }
         public double PacketLoss { get; set; }
         [JsonConverter(typeof(StringEnumConverter))]
         public IfacesPeersBWDataRequestStatus Status { get; set; }
