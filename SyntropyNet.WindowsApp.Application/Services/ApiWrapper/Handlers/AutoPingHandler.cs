@@ -59,7 +59,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
 
                         Parallel.ForEach(request.Data.Ips, x => results.Add(Ping(x)));
 
-                        results = results.Where(p => p.LatencyMs > 0).OrderBy(p => p.LatencyMs).Take(5).ToList();
+                        results = results.OrderBy(p => p.LatencyMs).Take(5).ToList();
 
                         var response = new AutoPingResponse
                         {
@@ -149,7 +149,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
             }
             else
             {
-                result.LatencyMs = -1;
+                result.LatencyMs = null;
             }
             return result;
         }

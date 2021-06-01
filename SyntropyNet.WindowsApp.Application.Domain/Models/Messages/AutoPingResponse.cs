@@ -20,7 +20,7 @@ namespace SyntropyNet.WindowsApp.Application.Domain.Models.Messages
     public class AutoPingResponseItem
     {
         public string Ip { get; set; }
-        public long LatencyMs { get; set; }
+        public long? LatencyMs { get; set; }
         public double PacketLoss { get; set; }
     }
 }
