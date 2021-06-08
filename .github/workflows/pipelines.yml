@@ -36,7 +36,7 @@
 # For a complete CI/CD sample to get started with GitHub Action workflows for Desktop Applications,
 # refer to https://github.com/microsoft/github-actions-for-desktop-apps
 
-name: .NET Core Desktop
+name: Create Installer
 
 on:
   push:
@@ -56,9 +56,9 @@ jobs:
                              # https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idruns-on
 
     env:
-      Solution_Name: SyntropyNet                      
+      Solution_Name: SyntropyNet.sln                
       SigningCertificate: GitHubActions.pfx
-      Wap_Project_Directory: SyntropyNet.WindowsApp.MsixInstaller   
+      Wap_Project_Directory: SyntropyNet.WindowsApp.MsixInstaller
       Wap_Project_Path: SyntropyNet.WindowsApp.MsixInstaller\SyntropyNet.WindowsApp.MsixInstaller.wapproj
 
     steps:
