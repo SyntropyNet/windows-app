@@ -57,7 +57,7 @@ jobs:
 
     env:
       Solution_Name: SyntropyNet.sln                
-      SigningCertificate: GitHubActions.pfx
+      SigningCertificate: GitHubActionsWorkflow.pfx
       Wap_Project_Directory: SyntropyNet.WindowsApp.MsixInstaller
       Wap_Project_Path: SyntropyNet.WindowsApp.MsixInstaller\SyntropyNet.WindowsApp.MsixInstaller.wapproj
 
