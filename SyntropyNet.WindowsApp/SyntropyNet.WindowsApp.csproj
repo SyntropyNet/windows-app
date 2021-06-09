@@ -101,7 +101,7 @@
     <ManifestCertificateThumbprint>33BC7694AB7F46F8B4214A4D70851A06F38287FC</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>SyntropyNet.WindowsApp_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestKeyFile>GitHubActionsWorkflow.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <GenerateManifests>false</GenerateManifests>
@@ -110,7 +110,7 @@
     <TargetZone>LocalIntranet</TargetZone>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyOriginatorKeyFile>SyntropyNet.WindowsApp_TemporaryKey.pfx</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>GitHubActionsWorkflow.pfx</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="FontAwesome.WPF, Version=4.7.0.37774, Culture=neutral, PublicKeyToken=0758b07a11a4f466, processorArchitecture=MSIL">
@@ -262,7 +262,7 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <None Include="SyntropyNet.WindowsApp_TemporaryKey.pfx" />
+    <None Include="GitHubActionsWorkflow.pfx" />
     <Resource Include="Images\copy-icon.png" />
     <Resource Include="Images\menu_icon-hover.jpg" />
     <Resource Include="Images\menu_icon.jpg" />
