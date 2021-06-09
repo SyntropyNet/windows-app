@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Sentry.Log4Net</name>
+    </assembly>
+    <members>
+        <member name="T:Sentry.Log4Net.Constants">
+            <summary>
+            log4net Constant Values.
+            </summary>
+        </member>
+        <member name="F:Sentry.Log4Net.Constants.SdkName">
+            <summary>
+            log4net SDK name.
+            </summary>
+            <see href="https://github.com/getsentry/sentry-release-registry" />
+        </member>
+        <member name="T:Sentry.Log4Net.SentryAppender">
+            <summary>
+            Sentry appender for log4net.
+            </summary>
+        </member>
+        <member name="P:Sentry.Log4Net.SentryAppender.Dsn">
+            <summary>
+            Sentry DSN.
+            </summary>
+        </member>
+        <member name="P:Sentry.Log4Net.SentryAppender.SendIdentity">
+            <summary>
+            Whether to send the Identity or not.
+            </summary>
+        </member>
+        <member name="P:Sentry.Log4Net.SentryAppender.Environment">
+            <summary>
+            Environment to send in the event.
+            </summary>
+        </member>
+        <member name="M:Sentry.Log4Net.SentryAppender.#ctor">
+            <summary>
+            Creates a new instance of the <see cref="T:Sentry.Log4Net.SentryAppender"/>.
+            </summary>
+        </member>
+        <member name="M:Sentry.Log4Net.SentryAppender.Append(log4net.Core.LoggingEvent)">
+            <summary>
+            Append log.
+            </summary>
+            <param name="loggingEvent">The event.</param>
+        </member>
+        <member name="M:Sentry.Log4Net.SentryAppender.OnClose">
+            <summary>
+            Disposes the SDK if initialized.
+            </summary>
+        </member>
+    </members>
+</doc>
