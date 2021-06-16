@@ -10,6 +10,7 @@
     <RootNamespace>SyntropyNet.WindowsApp</RootNamespace>
     <AssemblyName>SyntropyNet.WindowsApp</AssemblyName>
     <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
+    <RuntimeIdentifier>win</RuntimeIdentifier>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <WarningLevel>4</WarningLevel>
@@ -92,16 +93,16 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
+    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
     <SignManifests>false</SignManifests>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>33BC7694AB7F46F8B4214A4D70851A06F38287FC</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>12DB701E12D800B13B23EB4801AE45554693B384</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>GitHubActionsWorkflow.pfx</ManifestKeyFile>
+    <ManifestKeyFile>SyntropyNet.WindowsApp.MsixInstaller_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <GenerateManifests>false</GenerateManifests>
@@ -110,7 +111,10 @@
     <TargetZone>LocalIntranet</TargetZone>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyOriginatorKeyFile>GitHubActionsWorkflow.pfx</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>SyntropyNet.WindowsApp.MsixInstaller_TemporaryKey.pfx</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <DelaySign>false</DelaySign>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="FontAwesome.WPF, Version=4.7.0.37774, Culture=neutral, PublicKeyToken=0758b07a11a4f466, processorArchitecture=MSIL">
@@ -263,6 +267,8 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <None Include="GitHubActionsWorkflow.pfx" />
+    <None Include="SyntropyNet.WindowsApp.MsixInstaller_TemporaryKey.pfx" />
+    <None Include="SyntropyNet.WindowsApp_TemporaryKey.pfx" />
     <Resource Include="Images\copy-icon.png" />
     <Resource Include="Images\menu_icon-hover.jpg" />
     <Resource Include="Images\menu_icon.jpg" />
@@ -306,6 +312,7 @@
     <Resource Include="Images\syntropy-logo-80.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
+    <Content Include="nuget.exe" />
     <Content Include="syntropy-icon.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -375,4 +382,8 @@
     <!--Publish copies the untransformed App.config to deployment directory so overwrite it-->
     <Copy Condition="Exists('$(DeployedConfig)')" SourceFiles="$(IntermediateOutputPath)$(TargetFileName).config" DestinationFiles="$(DeployedConfig)" />
   </Target>
+  <PropertyGroup>
+    <PostBuildEvent>if $(ConfigurationName) == Release ( $(SignTool) sign /f $(CertPath) /p $(PackageCertificatePassword) $(TargetPath) )
+</PostBuildEvent>
+  </PropertyGroup>
 </Project>
