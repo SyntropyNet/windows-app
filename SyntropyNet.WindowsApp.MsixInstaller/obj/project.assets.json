@@ -17,9 +17,7 @@
       },
       "SyntropyNet.WindowsApp.Application/1.0.0": {
         "type": "project",
-        "dependencies": {
-          "SyntropyNet.WindowsApp.Application.Domain": "1.0.0"
-        },
+        "framework": ".NETFramework,Version=v4.7",
         "compile": {
           "bin/placeholder/SyntropyNet.WindowsApp.Application.dll": {}
         },
@@ -54,9 +52,7 @@
       },
       "SyntropyNet.WindowsApp.Application/1.0.0": {
         "type": "project",
-        "dependencies": {
-          "SyntropyNet.WindowsApp.Application.Domain": "1.0.0"
-        },
+        "framework": ".NETFramework,Version=v4.7",
         "compile": {
           "bin/placeholder/SyntropyNet.WindowsApp.Application.dll": {}
         },
@@ -91,9 +87,7 @@
       },
       "SyntropyNet.WindowsApp.Application/1.0.0": {
         "type": "project",
-        "dependencies": {
-          "SyntropyNet.WindowsApp.Application.Domain": "1.0.0"
-        },
+        "framework": ".NETFramework,Version=v4.7",
         "compile": {
           "bin/placeholder/SyntropyNet.WindowsApp.Application.dll": {}
         },
@@ -128,9 +122,7 @@
       },
       "SyntropyNet.WindowsApp.Application/1.0.0": {
         "type": "project",
-        "dependencies": {
-          "SyntropyNet.WindowsApp.Application.Domain": "1.0.0"
-        },
+        "framework": ".NETFramework,Version=v4.7",
         "compile": {
           "bin/placeholder/SyntropyNet.WindowsApp.Application.dll": {}
         },
@@ -165,9 +157,7 @@
       },
       "SyntropyNet.WindowsApp.Application/1.0.0": {
         "type": "project",
-        "dependencies": {
-          "SyntropyNet.WindowsApp.Application.Domain": "1.0.0"
-        },
+        "framework": ".NETFramework,Version=v4.7",
         "compile": {
           "bin/placeholder/SyntropyNet.WindowsApp.Application.dll": {}
         },
@@ -202,9 +192,7 @@
       },
       "SyntropyNet.WindowsApp.Application/1.0.0": {
         "type": "project",
-        "dependencies": {
-          "SyntropyNet.WindowsApp.Application.Domain": "1.0.0"
-        },
+        "framework": ".NETFramework,Version=v4.7",
         "compile": {
           "bin/placeholder/SyntropyNet.WindowsApp.Application.dll": {}
         },
@@ -239,9 +227,7 @@
       },
       "SyntropyNet.WindowsApp.Application/1.0.0": {
         "type": "project",
-        "dependencies": {
-          "SyntropyNet.WindowsApp.Application.Domain": "1.0.0"
-        },
+        "framework": ".NETFramework,Version=v4.7",
         "compile": {
           "bin/placeholder/SyntropyNet.WindowsApp.Application.dll": {}
         },
@@ -276,9 +262,7 @@
       },
       "SyntropyNet.WindowsApp.Application/1.0.0": {
         "type": "project",
-        "dependencies": {
-          "SyntropyNet.WindowsApp.Application.Domain": "1.0.0"
-        },
+        "framework": ".NETFramework,Version=v4.7",
         "compile": {
           "bin/placeholder/SyntropyNet.WindowsApp.Application.dll": {}
         },
