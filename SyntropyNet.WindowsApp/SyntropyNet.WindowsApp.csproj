@@ -384,6 +384,7 @@
   </Target>
   <PropertyGroup>
     <PostBuildEvent>if $(ConfigurationName) == Release ( $(SignTool) sign /f $(CertPath) /p $(PackageCertificatePassword) $(TargetPath) )
+
 </PostBuildEvent>
   </PropertyGroup>
 </Project>
