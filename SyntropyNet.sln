@@ -9,11 +9,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SyntropyNet.WindowsApp.Appl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SyntropyNet.WindowsApp.Application.Domain", "SyntropyNet.WindowsApp.Application.Domain\SyntropyNet.WindowsApp.Application.Domain.csproj", "{B18AA660-C236-4B77-95BA-E26CAF169E69}"
 EndProject
-Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "SyntropyNet.WindowsApp.Setup", "SyntropyNet.WindowsApp.Setup\SyntropyNet.WindowsApp.Setup.vdproj", "{2BBC8D77-E3F0-4809-BEBD-D1A4DBBE5EC2}"
-EndProject
-Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "SyntropyNet.WindowsApp.Setup.x64", "SyntropyNet.WindowsApp.Setup.x64\SyntropyNet.WindowsApp.Setup.x64.vdproj", "{CFFD3BF5-AD49-4E5B-A2C1-F29DD1988EEF}"
-EndProject
 Project("{C7167F0D-BC9F-4E6E-AFE1-012C56B48DB5}") = "SyntropyNet.WindowsApp.MsixInstaller", "SyntropyNet.WindowsApp.MsixInstaller\SyntropyNet.WindowsApp.MsixInstaller.wapproj", "{B29F9565-01FA-4229-8D9E-13D946B24DF0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{ED8ACCF2-3E33-48E7-9D85-97BF218FC3EA}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\pipelines.yml = .github\workflows\pipelines.yml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -71,46 +72,6 @@ Global
 		{B18AA660-C236-4B77-95BA-E26CAF169E69}.Release|x64.Build.0 = Release|x64
 		{B18AA660-C236-4B77-95BA-E26CAF169E69}.Release|x86.ActiveCfg = Release|x86
 		{B18AA660-C236-4B77-95BA-E26CAF169E69}.Release|x86.Build.0 = Release|x86
-		{2BBC8D77-E3F0-4809-BEBD-D1A4DBBE5EC2}.Debug|Any CPU.ActiveCfg = Debug
-		{2BBC8D77-E3F0-4809-BEBD-D1A4DBBE5EC2}.Debug|Any CPU.Build.0 = Debug
-		{2BBC8D77-E3F0-4809-BEBD-D1A4DBBE5EC2}.Debug|ARM.ActiveCfg = Debug
-		{2BBC8D77-E3F0-4809-BEBD-D1A4DBBE5EC2}.Debug|ARM.Build.0 = Debug
-		{2BBC8D77-E3F0-4809-BEBD-D1A4DBBE5EC2}.Debug|ARM64.ActiveCfg = Debug
-		{2BBC8D77-E3F0-4809-BEBD-D1A4DBBE5EC2}.Debug|ARM64.Build.0 = Debug
-		{2BBC8D77-E3F0-4809-BEBD-D1A4DBBE5EC2}.Debug|x64.ActiveCfg = Debug
-		{2BBC8D77-E3F0-4809-BEBD-D1A4DBBE5EC2}.Debug|x64.Build.0 = Debug
-		{2BBC8D77-E3F0-4809-BEBD-D1A4DBBE5EC2}.Debug|x86.ActiveCfg = Debug
-		{2BBC8D77-E3F0-4809-BEBD-D1A4DBBE5EC2}.Debug|x86.Build.0 = Debug
-		{2BBC8D77-E3F0-4809-BEBD-D1A4DBBE5EC2}.Release|Any CPU.ActiveCfg = Release
-		{2BBC8D77-E3F0-4809-BEBD-D1A4DBBE5EC2}.Release|Any CPU.Build.0 = Release
-		{2BBC8D77-E3F0-4809-BEBD-D1A4DBBE5EC2}.Release|ARM.ActiveCfg = Release
-		{2BBC8D77-E3F0-4809-BEBD-D1A4DBBE5EC2}.Release|ARM.Build.0 = Release
-		{2BBC8D77-E3F0-4809-BEBD-D1A4DBBE5EC2}.Release|ARM64.ActiveCfg = Release
-		{2BBC8D77-E3F0-4809-BEBD-D1A4DBBE5EC2}.Release|ARM64.Build.0 = Release
-		{2BBC8D77-E3F0-4809-BEBD-D1A4DBBE5EC2}.Release|x64.ActiveCfg = Release
-		{2BBC8D77-E3F0-4809-BEBD-D1A4DBBE5EC2}.Release|x64.Build.0 = Release
-		{2BBC8D77-E3F0-4809-BEBD-D1A4DBBE5EC2}.Release|x86.ActiveCfg = Release
-		{2BBC8D77-E3F0-4809-BEBD-D1A4DBBE5EC2}.Release|x86.Build.0 = Release
-		{CFFD3BF5-AD49-4E5B-A2C1-F29DD1988EEF}.Debug|Any CPU.ActiveCfg = Debug
-		{CFFD3BF5-AD49-4E5B-A2C1-F29DD1988EEF}.Debug|Any CPU.Build.0 = Debug
-		{CFFD3BF5-AD49-4E5B-A2C1-F29DD1988EEF}.Debug|ARM.ActiveCfg = Debug
-		{CFFD3BF5-AD49-4E5B-A2C1-F29DD1988EEF}.Debug|ARM.Build.0 = Debug
-		{CFFD3BF5-AD49-4E5B-A2C1-F29DD1988EEF}.Debug|ARM64.ActiveCfg = Debug
-		{CFFD3BF5-AD49-4E5B-A2C1-F29DD1988EEF}.Debug|ARM64.Build.0 = Debug
-		{CFFD3BF5-AD49-4E5B-A2C1-F29DD1988EEF}.Debug|x64.ActiveCfg = Debug
-		{CFFD3BF5-AD49-4E5B-A2C1-F29DD1988EEF}.Debug|x64.Build.0 = Debug
-		{CFFD3BF5-AD49-4E5B-A2C1-F29DD1988EEF}.Debug|x86.ActiveCfg = Debug
-		{CFFD3BF5-AD49-4E5B-A2C1-F29DD1988EEF}.Debug|x86.Build.0 = Debug
-		{CFFD3BF5-AD49-4E5B-A2C1-F29DD1988EEF}.Release|Any CPU.ActiveCfg = Release
-		{CFFD3BF5-AD49-4E5B-A2C1-F29DD1988EEF}.Release|Any CPU.Build.0 = Release
-		{CFFD3BF5-AD49-4E5B-A2C1-F29DD1988EEF}.Release|ARM.ActiveCfg = Release
-		{CFFD3BF5-AD49-4E5B-A2C1-F29DD1988EEF}.Release|ARM.Build.0 = Release
-		{CFFD3BF5-AD49-4E5B-A2C1-F29DD1988EEF}.Release|ARM64.ActiveCfg = Release
-		{CFFD3BF5-AD49-4E5B-A2C1-F29DD1988EEF}.Release|ARM64.Build.0 = Release
-		{CFFD3BF5-AD49-4E5B-A2C1-F29DD1988EEF}.Release|x64.ActiveCfg = Release
-		{CFFD3BF5-AD49-4E5B-A2C1-F29DD1988EEF}.Release|x64.Build.0 = Release
-		{CFFD3BF5-AD49-4E5B-A2C1-F29DD1988EEF}.Release|x86.ActiveCfg = Release
-		{CFFD3BF5-AD49-4E5B-A2C1-F29DD1988EEF}.Release|x86.Build.0 = Release
 		{B29F9565-01FA-4229-8D9E-13D946B24DF0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B29F9565-01FA-4229-8D9E-13D946B24DF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B29F9565-01FA-4229-8D9E-13D946B24DF0}.Debug|Any CPU.Deploy.0 = Debug|Any CPU

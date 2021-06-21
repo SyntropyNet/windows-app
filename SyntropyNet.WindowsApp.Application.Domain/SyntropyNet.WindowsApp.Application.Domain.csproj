@@ -5,6 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{B18AA660-C236-4B77-95BA-E26CAF169E69}</ProjectGuid>
+	<OutputPath>bin\Debug\</OutputPath>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>SyntropyNet.WindowsApp.Application.Domain</RootNamespace>
