@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{B18AA660-C236-4B77-95BA-E26CAF169E69}</ProjectGuid>
-	<OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>bin\Debug\</OutputPath>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>SyntropyNet.WindowsApp.Application.Domain</RootNamespace>
@@ -67,7 +67,9 @@
   <ItemGroup>
     <Compile Include="Enums\WireGuard\WGInterfaceName.cs" />
     <Compile Include="Enums\WSConnectionState.cs" />
+    <Compile Include="Events\FastestRouteFoundEventArgs.cs" />
     <Compile Include="Models\DockerApi\DataFromInspectCommand.cs" />
+    <Compile Include="Models\InterfaceInfo.cs" />
     <Compile Include="Models\Messages\AutoPingRequest.cs" />
     <Compile Include="Models\Messages\AutoPingResponse.cs" />
     <Compile Include="Models\Messages\BaseMessage.cs" />
@@ -79,6 +81,8 @@
     <Compile Include="Models\Messages\GetInfoResponse.cs" />
     <Compile Include="Models\Messages\IfaceBWDataRequest.cs" />
     <Compile Include="Models\Messages\IfacesPeersBWDataRequest.cs" />
+    <Compile Include="Models\Messages\LatencyPingRequest.cs" />
+    <Compile Include="Models\Messages\LatencyPingResponse.cs" />
     <Compile Include="Models\Messages\LoggerRequest.cs" />
     <Compile Include="Models\Messages\UpdateAgentConfigError.cs" />
     <Compile Include="Models\Messages\UpdateAgentConfigRequest.cs" />
@@ -97,5 +101,6 @@
       <Version>12.0.3</Version>
     </PackageReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

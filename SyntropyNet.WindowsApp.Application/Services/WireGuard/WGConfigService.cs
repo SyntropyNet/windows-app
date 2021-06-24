@@ -93,6 +93,8 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
 
         public void StopWG()
         {
+            SdnRouter.Instance.StopPing();
+
             var t1 = new Task(() =>
                 Remove(GetPathToInterfaceConfig(WGInterfaceName.SYNTROPY_PUBLIC), true)
             );
@@ -249,13 +251,15 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
                         var error = line.Substring(6);
                         if (error == "0")
                         {
+                            string gateway = interfaceConfig.Interface.Address.ToList()[0];
+                            SdnRouter.Instance.SetPeers(interfaceName, gateway, peers);
+
                             foreach (var peer in peers)
                             {
                                 foreach (var allowedIp in peer.AllowedIPs)
                                 {
                                     string ip = allowedIp.Split('/')[0];
                                     string mask = "255.255.255.255";
-                                    string gateway = interfaceConfig.Interface.Address.ToList()[0];
                                     uint metric = 5;
 
                                     if (!_networkService.RouteExists(ip, PublicInterface.Interface.Address.First()) &&

@@ -98,6 +98,8 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
             ConnectionLost = false;
             _WGConfigService.StopWG();
             _WGConfigService.CreateInterfaces();
+            SdnRouter.Instance.StartPing();
+
             new Thread(async () =>
             {
                 exitEvent = new ManualResetEvent(false);

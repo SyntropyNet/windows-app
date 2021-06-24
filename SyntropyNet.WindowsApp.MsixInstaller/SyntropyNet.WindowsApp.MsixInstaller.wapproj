@@ -56,7 +56,7 @@
     <DefaultLanguage>en-US</DefaultLanguage>
     <AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
     <EntryPointProjectUniqueName>..\SyntropyNet.WindowsApp\SyntropyNet.WindowsApp.csproj</EntryPointProjectUniqueName>
-    <PackageCertificateThumbprint>33BC7694AB7F46F8B4214A4D70851A06F38287FC</PackageCertificateThumbprint>
+    <PackageCertificateThumbprint>12DB701E12D800B13B23EB4801AE45554693B384</PackageCertificateThumbprint>
     <GenerateAppInstallerFile>False</GenerateAppInstallerFile>
     <AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
     <AppxAutoIncrementPackageRevision>True</AppxAutoIncrementPackageRevision>

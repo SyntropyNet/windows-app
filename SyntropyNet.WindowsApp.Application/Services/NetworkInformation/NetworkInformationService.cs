@@ -1,6 +1,8 @@
 ﻿using CodeCowboy.NetworkRoute;
 using log4net;
+using SyntropyNet.WindowsApp.Application.Constants;
 using SyntropyNet.WindowsApp.Application.Contracts;
+using SyntropyNet.WindowsApp.Application.Domain.Events;
 using SyntropyNet.WindowsApp.Application.Domain.Models.Messages;
 using SyntropyNet.WindowsApp.Application.Exceptions;
 using System;
@@ -22,7 +24,13 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
 
         private const int START_PORT = 1024;
         private const int MAX_PORT = 65535;
-        public IEnumerable<IfaceBWDataRequestData> GetInformNetworkInterface()
+
+        public NetworkInformationService() {
+            SdnRouter pinger = SdnRouter.Instance;
+            pinger.FastestIpFound += _OnFastestIpFound;
+        }
+
+    public IEnumerable<IfaceBWDataRequestData> GetInformNetworkInterface()
         {
             var ifaceBWDataRequestData = new List<IfaceBWDataRequestData>();
 
@@ -94,6 +102,41 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
                 RxPackets = rxPacketsAfter - rxPackets,
                 Interval = interval
             };
+        }
+
+        private void _OnFastestIpFound(object o, FastestRouteFoundEventArgs args) {
+            if (args == null) {
+                return;
+            }
+
+            string interfaceName = args.InterfaceName.ToString();
+
+            if (RouteExists(args.Ip, out CodeCowboy.NetworkRoute.Ip4RouteEntry routeEntry)) {
+                // Delete existing route to replace it after
+                var adaptors = NicInterface.GetAllNetworkAdaptor();
+                string interfaceToDeleteIpName = null;
+                string gateway = routeEntry.GatewayIP.ToString();
+
+                foreach (var adaptor in adaptors) {
+                    if (adaptor.InterfaceIndex == routeEntry.InterfaceIndex) {
+                        interfaceToDeleteIpName = adaptor.Name;
+                        break;
+                    }
+                }
+
+                if (interfaceToDeleteIpName == null) {
+                    throw new NotFoundInterfaceException($"Not found interface name by index to delete IP from. Index: {routeEntry.InterfaceIndex}");
+                }
+
+                // If Ip is already linked to the fastest interface => DO NOTHING
+                if (interfaceToDeleteIpName == interfaceName) {
+                    return;
+                }
+
+                DeleteRoute(interfaceToDeleteIpName, args.Ip, RouteTableConstants.Mask, gateway, RouteTableConstants.Metric);
+            }
+
+            AddRoute(interfaceName, args.Ip, args.Mask, args.Gateway, (uint)args.Metric);
         }
 
         public int GetNextFreePort(IEnumerable<int> exceptPort = null)
@@ -269,6 +312,20 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
                 }
             }
             return (routeEntry != null);
+        }
+
+        public bool RouteExists(string destinationIP, string gateway, out CodeCowboy.NetworkRoute.Ip4RouteEntry routeEntry) {
+            List<CodeCowboy.NetworkRoute.Ip4RouteEntry> routeTable = Ip4RouteTable.GetRouteTable();
+            routeEntry = routeTable.Find(i => i.DestinationIP.ToString().Equals(destinationIP) && i.GatewayIP.ToString().Equals(gateway));
+            
+            return routeEntry != null;
+        }
+
+        public bool RouteExists(string destinationIP, out CodeCowboy.NetworkRoute.Ip4RouteEntry routeEntry) {
+            List<CodeCowboy.NetworkRoute.Ip4RouteEntry> routeTable = Ip4RouteTable.GetRouteTable();
+            routeEntry = routeTable.Find(i => i.DestinationIP.ToString().Equals(destinationIP));
+
+            return routeEntry != null;
         }
     }
 }

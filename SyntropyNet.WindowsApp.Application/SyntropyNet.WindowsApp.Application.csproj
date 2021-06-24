@@ -111,6 +111,7 @@
   <ItemGroup>
     <Compile Include="Comparers\VpnConfigComparer.cs" />
     <Compile Include="Constants\AppConstants.cs" />
+    <Compile Include="Constants\RouteTableConstants.cs" />
     <Compile Include="Constants\WireGuard\TunnelConfigConstants.cs" />
     <Compile Include="Constants\WireGuard\WireGuardConstants.cs" />
     <Compile Include="Contracts\IApiWrapperService.cs" />
@@ -124,6 +125,7 @@
     <Compile Include="Exceptions\InvalidIpFormatException.cs" />
     <Compile Include="Exceptions\NoFreePortException.cs" />
     <Compile Include="Exceptions\NotFoundInterfaceException.cs" />
+    <Compile Include="Helpers\IpHelper.cs" />
     <Compile Include="Helpers\LoggerRequestHelper.cs" />
     <Compile Include="Models\ServiceModel.cs" />
     <Compile Include="Helpers\JsonSettings.cs" />
@@ -144,6 +146,7 @@
     <Compile Include="Services\ApiWrapper\Handlers\WGConfHandler.cs" />
     <Compile Include="Services\DockerApi\DockerApiService.cs" />
     <Compile Include="Services\HttpRequest\HttpRequestService.cs" />
+    <Compile Include="Services\SdnRouter.cs" />
     <Compile Include="Services\NetworkInformation\Ip4RouteEntry.cs" />
     <Compile Include="Services\NetworkInformation\NativeMethods.cs" />
     <Compile Include="Services\NetworkInformation\NetworkInformationService.cs" />
