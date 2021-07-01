@@ -18,7 +18,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
         {
             public uint Size;
 
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 1)]
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 10)]
             public MIB_IPFORWARDROW[] Table;
         };
 
@@ -101,7 +101,12 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
         public extern static int DeleteIpForwardEntry(IntPtr /*PMIB_IPFORWARDROW*/ pRoute);
 
         [DllImport("iphlpapi", CharSet = CharSet.Auto)]
+        public extern static int DeleteIpForwardEntry(ref MIB_IPFORWARDROW pRoute);
+
+        [DllImport("iphlpapi", CharSet = CharSet.Auto)]
         public extern static int SetIpForwardEntry(IntPtr /*PMIB_IPFORWARDROW*/ pRoute);
 
+        [DllImport("iphlpapi", CharSet = CharSet.Auto)]
+        public extern static int SetIpForwardEntry(ref MIB_IPFORWARDROW pRoute);
     }
 }
