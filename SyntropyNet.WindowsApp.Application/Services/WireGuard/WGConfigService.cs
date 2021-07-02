@@ -270,12 +270,6 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
                                         !_networkService.RouteExists(ip, SDN3Interface.Interface.Address.First())
                                         )
                                     {
-                                        if (ip == "0.0.0.0")
-                                        {
-                                            log.Info($"Add 0.0.0.0 route for IF: {interfaceName}");
-                                            _networkService.AddRoute(interfaceName.ToString(), "0.0.0.0", "0.0.0.0", gateway, metric);
-                                            continue;
-                                        }
                                         _networkService.AddRoute(interfaceName.ToString(), ip, mask, gateway, metric);
                                     }
                                 }
