@@ -1,6 +1,8 @@
 ﻿using CodeCowboy.NetworkRoute;
 using log4net;
+using SyntropyNet.WindowsApp.Application.Constants;
 using SyntropyNet.WindowsApp.Application.Contracts;
+using SyntropyNet.WindowsApp.Application.Domain.Events;
 using SyntropyNet.WindowsApp.Application.Domain.Models.Messages;
 using SyntropyNet.WindowsApp.Application.Exceptions;
 using System;
@@ -14,6 +16,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
+using CCIp4RouteEntry = CodeCowboy.NetworkRoute.Ip4RouteEntry;
+
 namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
 {
     public class NetworkInformationService : INetworkInformationService
@@ -22,7 +26,13 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
 
         private const int START_PORT = 1024;
         private const int MAX_PORT = 65535;
-        public IEnumerable<IfaceBWDataRequestData> GetInformNetworkInterface()
+
+        public NetworkInformationService() {
+            SdnRouter pinger = SdnRouter.Instance;
+            pinger.FastestIpFound += _OnFastestIpFound;
+        }
+
+    public IEnumerable<IfaceBWDataRequestData> GetInformNetworkInterface()
         {
             var ifaceBWDataRequestData = new List<IfaceBWDataRequestData>();
 
@@ -94,6 +104,54 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
                 RxPackets = rxPacketsAfter - rxPackets,
                 Interval = interval
             };
+        }
+
+        private void _OnFastestIpFound(object o, FastestRouteFoundEventArgs args) {
+            if (args == null) {
+                return;
+            }
+
+            string interfaceName = args.InterfaceName.ToString();
+
+            if (RouteExists(args.Ip.ToString(), out CCIp4RouteEntry routeEntry)) {
+                int interfaceIndex = _GetInterfaceIndexHelper(interfaceName);
+
+                if (interfaceIndex == 0) {
+                    throw new NotFoundInterfaceException(interfaceName);
+                }
+
+                IPAddress gateway = IPAddress.Parse(args.Gateway);
+
+                if (routeEntry.InterfaceIndex == interfaceIndex && routeEntry.GatewayIP.Equals(gateway)) {
+                    // ROUTE IS THE SAME => RETURN
+                    return;
+                }
+
+                Ip4RouteEntry updatedEntry = new Ip4RouteEntry {
+                    InterfaceIndex = interfaceIndex,
+                    DestinationIP = routeEntry.DestinationIP,
+                    GatewayIP = gateway,
+                    SubnetMask = args.Mask,
+                    Metric = (uint)args.Metric
+                };
+
+                UpdateRoute(updatedEntry);
+            } else {
+                AddRoute(interfaceName, args.Ip.ToString(), args.Mask.ToString(), args.Gateway, (uint)args.Metric);
+            }
+        }
+
+        private int _GetInterfaceIndexHelper(string IFaceName) {
+            int interfaceIndex = 0;
+            var adaptors = NicInterface.GetAllNetworkAdaptor();
+
+            foreach (var adaptor in adaptors) {
+                if (adaptor.Name == IFaceName) {
+                    interfaceIndex = adaptor.InterfaceIndex;
+                }
+            }
+
+            return interfaceIndex;
         }
 
         public int GetNextFreePort(IEnumerable<int> exceptPort = null)
@@ -248,7 +306,53 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
             {
                 Marshal.FreeHGlobal(ptr);
             }
+        }
 
+        public void UpdateRoute(Ip4RouteEntry routeEntry) {
+            int size = 0;
+            IntPtr table = IntPtr.Zero;
+            IntPtr rowPointer = IntPtr.Zero;
+
+            try {
+                // GET ROUTE TABLE
+                int tableResult = NativeMethods.GetIpForwardTable(table, ref size, true);
+                table = Marshal.AllocHGlobal(size);
+                NativeMethods.IPForwardTable tableTyped = (NativeMethods.IPForwardTable)Marshal.PtrToStructure(table, typeof(NativeMethods.IPForwardTable));
+
+                uint destination = BitConverter.ToUInt32(IPAddress.Parse(routeEntry.DestinationIP.ToString()).GetAddressBytes(), 0);
+
+                // FIND ROUTE
+                for (int i = 0; i < tableTyped.Table.Length; i++) {
+                    if (tableTyped.Table[i].dwForwardDest != destination) {
+                        continue;
+                    }
+
+                    NativeMethods.MIB_IPFORWARDROW targetRow = tableTyped.Table[i];
+
+                    uint newGateway = BitConverter.ToUInt32(IPAddress.Parse(routeEntry.GatewayIP.ToString()).GetAddressBytes(), 0);
+                    uint newMask = BitConverter.ToUInt32(IPAddress.Parse(routeEntry.SubnetMask.ToString()).GetAddressBytes(), 0);
+                    uint newIFaceIndex = Convert.ToUInt32(routeEntry.InterfaceIndex);
+
+                    targetRow.dwForwardIfIndex = newIFaceIndex;
+                    targetRow.dwForwardNextHop = newGateway;
+                    targetRow.dwForwardMask = newMask;
+
+                    // CREATE MODIFIED COPY
+                    rowPointer = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(NativeMethods.MIB_IPFORWARDROW)));
+                    Marshal.StructureToPtr(targetRow, rowPointer, false);
+
+                    // DELETE OLD ROUTE
+                    NativeMethods.DeleteIpForwardEntry(ref tableTyped.Table[i]);
+                    break;
+                }
+
+                // CREATE NEW MODIFIED ROUTE
+                var status = NativeMethods.CreateIpForwardEntry(rowPointer);
+            } catch {
+            } finally {
+                Marshal.FreeHGlobal(table);
+                Marshal.FreeHGlobal(rowPointer);
+            }
         }
 
         public bool RouteExists(string destinationIP, string gateway)
@@ -269,6 +373,20 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
                 }
             }
             return (routeEntry != null);
+        }
+
+        public bool RouteExists(string destinationIP, string gateway, out CodeCowboy.NetworkRoute.Ip4RouteEntry routeEntry) {
+            List<CodeCowboy.NetworkRoute.Ip4RouteEntry> routeTable = Ip4RouteTable.GetRouteTable();
+            routeEntry = routeTable.Find(i => i.DestinationIP.ToString().Equals(destinationIP) && i.GatewayIP.ToString().Equals(gateway));
+            
+            return routeEntry != null;
+        }
+
+        public bool RouteExists(string destinationIP, out CodeCowboy.NetworkRoute.Ip4RouteEntry routeEntry) {
+            List<CodeCowboy.NetworkRoute.Ip4RouteEntry> routeTable = Ip4RouteTable.GetRouteTable();
+            routeEntry = routeTable.Find(i => i.DestinationIP.ToString().Equals(destinationIP));
+
+            return routeEntry != null;
         }
     }
 }

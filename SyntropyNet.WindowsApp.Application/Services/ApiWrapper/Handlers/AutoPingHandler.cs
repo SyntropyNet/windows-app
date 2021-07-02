@@ -58,8 +58,16 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                         var results = new List<AutoPingResponseItem>();
 
                         Parallel.ForEach(request.Data.Ips, x => results.Add(Ping(x)));
+                        IEnumerable<AutoPingResponseItem> orderedResults = results.OrderByDescending(p => p.LatencyMs.HasValue)
+                            .ThenBy(p => p.LatencyMs);
 
-                        results = results.OrderBy(p => p.LatencyMs).Take(5).ToList();
+                        int resultsToTake = request.Data.ResponseLimit > 0 ? request.Data.ResponseLimit : 5; // Assign a default value if missed
+
+                        if (resultsToTake >= orderedResults.Count()) {
+                            results = orderedResults.ToList();
+                        } else {
+                            results = orderedResults.Take(resultsToTake).ToList();
+                        }
 
                         var response = new AutoPingResponse
                         {
