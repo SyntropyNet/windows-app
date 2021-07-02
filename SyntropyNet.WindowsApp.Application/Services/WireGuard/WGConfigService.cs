@@ -258,8 +258,10 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
                             {
                                 foreach (var allowedIp in peer.AllowedIPs)
                                 {
-                                    string ip = allowedIp.Split('/')[0];
-                                    string mask = "255.255.255.255";
+                                    IPNetwork network = IPNetwork.Parse(allowedIp);
+
+                                    string ip = network.Network.ToString();
+                                    string mask = network.Netmask.ToString();
                                     uint metric = 5;
 
                                     if (!_networkService.RouteExists(ip, PublicInterface.Interface.Address.First()) &&

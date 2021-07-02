@@ -113,7 +113,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
 
             string interfaceName = args.InterfaceName.ToString();
 
-            if (RouteExists(args.Ip, out CCIp4RouteEntry routeEntry)) {
+            if (RouteExists(args.Ip.ToString(), out CCIp4RouteEntry routeEntry)) {
                 int interfaceIndex = _GetInterfaceIndexHelper(interfaceName);
 
                 if (interfaceIndex == 0) {
@@ -127,19 +127,17 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
                     return;
                 }
 
-                IPAddress mask = IPAddress.Parse(args.Mask);
-
                 Ip4RouteEntry updatedEntry = new Ip4RouteEntry {
                     InterfaceIndex = interfaceIndex,
                     DestinationIP = routeEntry.DestinationIP,
                     GatewayIP = gateway,
-                    SubnetMask = mask,
+                    SubnetMask = args.Mask,
                     Metric = (uint)args.Metric
                 };
 
                 UpdateRoute(updatedEntry);
             } else {
-                AddRoute(interfaceName, args.Ip, args.Mask, args.Gateway, (uint)args.Metric);
+                AddRoute(interfaceName, args.Ip.ToString(), args.Mask.ToString(), args.Gateway, (uint)args.Metric);
             }
         }
 
@@ -332,10 +330,12 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
                     NativeMethods.MIB_IPFORWARDROW targetRow = tableTyped.Table[i];
 
                     uint newGateway = BitConverter.ToUInt32(IPAddress.Parse(routeEntry.GatewayIP.ToString()).GetAddressBytes(), 0);
+                    uint newMask = BitConverter.ToUInt32(IPAddress.Parse(routeEntry.SubnetMask.ToString()).GetAddressBytes(), 0);
                     uint newIFaceIndex = Convert.ToUInt32(routeEntry.InterfaceIndex);
 
                     targetRow.dwForwardIfIndex = newIFaceIndex;
                     targetRow.dwForwardNextHop = newGateway;
+                    targetRow.dwForwardMask = newMask;
 
                     // CREATE MODIFIED COPY
                     rowPointer = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(NativeMethods.MIB_IPFORWARDROW)));

@@ -150,7 +150,7 @@
     <Reference Include="System.Drawing" />
     <Reference Include="System.Management" />
     <PackageReference Include="System.Memory">
-      <Version>4.0.1.1</Version>
+      <Version>4.5.4</Version>
     </PackageReference>
     <Reference Include="System.Numerics" />
     <PackageReference Include="System.Numerics.Vectors">

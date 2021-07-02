@@ -130,13 +130,13 @@ namespace SyntropyNet.WindowsApp.Application.Services {
 
             if (hasPingedIps) {
                 foreach (string ip in commonIps) {
-                    string strippedIp = IpHelper.StripPortNumber(ip);
+                    IPNetwork network = IPNetwork.Parse(ip);
 
                     _OnFastestIpFound(new FastestRouteFoundEventArgs {
-                        Ip = strippedIp,
+                        Ip = network.Network,
                         Gateway = winnerInterfaceGateway,
                         InterfaceName = winnerInterfaceName,
-                        Mask = RouteTableConstants.Mask,
+                        Mask = network.Netmask,
                         Metric = RouteTableConstants.Metric
                     });
                 }
