@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using log4net;
+using Newtonsoft.Json;
 using SyntropyNet.WindowsApp.Application.Constants;
 using SyntropyNet.WindowsApp.Application.Domain.Enums.WireGuard;
 using SyntropyNet.WindowsApp.Application.Domain.Events;
@@ -20,6 +21,7 @@ namespace SyntropyNet.WindowsApp.Application.Services {
     public class SdnRouter {
         #region [ SINGLETON ]
 
+        private static readonly ILog _log = LogManager.GetLogger(typeof(SdnRouter));
         private static object _locker = new object();
         private static SdnRouter _instance;
 
@@ -48,6 +50,13 @@ namespace SyntropyNet.WindowsApp.Application.Services {
         private int _pingDelayMs = 1000;
         private bool _pingStarted = false;
 
+        // There should be an interface and the IP with the less latency
+        private WGInterfaceName _fastestInterfaceName = WGInterfaceName.SYNTROPY_PUBLIC; // Assign default for now
+        private string _fastestInterfaceGateway = String.Empty;
+        private string _fastestIp = String.Empty;
+        private string _fastestIpPrevious = String.Empty;
+        private string _fastestPeer = String.Empty;
+
         private Thread runnerThread;
         public delegate void FastestIpFoundHandler(object sender, FastestRouteFoundEventArgs eventArgs);
         public event FastestIpFoundHandler FastestIpFound; 
@@ -71,11 +80,6 @@ namespace SyntropyNet.WindowsApp.Application.Services {
             string IInfoJson = JsonConvert.SerializeObject(InterfaceInfos);
 
             IEnumerable<string> commonIps = _GetCommonIps();
-
-            // There should be an interface and the IP with the less latency
-            WGInterfaceName winnerInterfaceName = WGInterfaceName.SYNTROPY_PUBLIC; // Assign default for now
-            string winnerInterfaceGateway = String.Empty;
-            string winnerIp = String.Empty;
 
             long minLatency = long.MaxValue; // Current minimal latency
             bool hasPingedIps = false; // will be "true" if atleast one IP was successfully pinged below
@@ -101,6 +105,7 @@ namespace SyntropyNet.WindowsApp.Application.Services {
                             pingRequests.Add(new LatencyPingRequest {
                                 InterfaceName = entry.Key,
                                 InterfaceGateway = entry.Value.Gateway,
+                                PeerEndpoint = peer.Endpoint,
                                 Ip = strippedIp
                             });
                         }
@@ -108,6 +113,7 @@ namespace SyntropyNet.WindowsApp.Application.Services {
                 }
             }
 
+            _log.Info($"[REROUTING]: ping endpoints");
             Parallel.ForEach(pingRequests, x => pingResponses.Add(PingEndpoint(x)));
 
             foreach (LatencyPingResponse response in pingResponses) {
@@ -122,9 +128,11 @@ namespace SyntropyNet.WindowsApp.Application.Services {
                 hasPingedIps = true;
 
                 if (response.Latency < minLatency) {
-                    winnerInterfaceGateway = response.InterfaceGateway;
-                    winnerIp = response.Ip;
-                    winnerInterfaceName = response.InterfaceName;
+                    _fastestInterfaceGateway = response.InterfaceGateway;
+                    _fastestIp = response.Ip;
+                    _fastestInterfaceName = response.InterfaceName;
+                    _fastestPeer = response.PeerEndpoint;
+                    minLatency = response.Latency;
                 }
             }
 
@@ -134,12 +142,51 @@ namespace SyntropyNet.WindowsApp.Application.Services {
 
                     _OnFastestIpFound(new FastestRouteFoundEventArgs {
                         Ip = network.Network,
-                        Gateway = winnerInterfaceGateway,
-                        InterfaceName = winnerInterfaceName,
+                        Gateway = _fastestInterfaceGateway,
+                        InterfaceName = _fastestInterfaceName,
                         Mask = network.Netmask,
-                        Metric = RouteTableConstants.Metric
+                        Metric = RouteTableConstants.Metric,
+                        FastestIp = _fastestIp,
+                        PrevFastestIp = _fastestIpPrevious,
+                        PeerEndpoint = _fastestPeer
                     });
                 }
+
+                if (!String.IsNullOrEmpty(_fastestIpPrevious) && _fastestIpPrevious != _fastestIp) { // Check latency improvements
+                    List<LatencyPingRequest> checkLatencyRequests = new List<LatencyPingRequest> {
+                        new LatencyPingRequest { Ip = _fastestIpPrevious },
+                        new LatencyPingRequest { Ip = _fastestIp }
+                    };
+                    List<LatencyPingResponse> checkLatencyResponses = new List<LatencyPingResponse>();
+                    Parallel.ForEach(checkLatencyRequests, x => checkLatencyResponses.Add(PingEndpoint(x)));
+
+                    LatencyPingResponse prevIpResponse = checkLatencyResponses.First(x => x.Ip == _fastestIpPrevious);
+                    LatencyPingResponse newIpResponse = checkLatencyResponses.First(x => x.Ip == _fastestIp);
+
+                    long? latencyDiff;
+
+                    if (prevIpResponse.Success && newIpResponse.Success) {
+                        latencyDiff = newIpResponse.Latency - prevIpResponse.Latency;
+                    } else {
+                        latencyDiff = null;
+                    }
+
+                    if (latencyDiff.HasValue) {
+                        foreach (string ip in commonIps) {
+                            var logModel = new {
+                                Interface = _fastestInterfaceName.ToString(),
+                                Destination = IpHelper.StripPortNumber(ip),
+                                Peer = IpHelper.StripPortNumber(_fastestPeer),
+                                FastestPingedIp = _fastestIp,
+                                LatencyDelta = latencyDiff.Value
+                            };
+
+                            _log.Info($"[REROUTING]: reroute {JsonConvert.SerializeObject(logModel)}");
+                        }
+                    }
+                }
+
+                _fastestIpPrevious = _fastestIp;
             }
         }
 

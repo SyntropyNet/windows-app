@@ -6,6 +6,7 @@
         public LatencyPingResponse(LatencyPingRequest request) {
             this.InterfaceName = request.InterfaceName;
             this.InterfaceGateway = request.InterfaceGateway;
+            this.PeerEndpoint = request.PeerEndpoint;
             this.Ip = request.Ip;
         }
     }

@@ -9,5 +9,8 @@ namespace SyntropyNet.WindowsApp.Application.Domain.Events {
         public string Gateway { get; set; }
         public IPAddress Mask { get; set; }
         public int Metric { get; set; }
+        public string PeerEndpoint { get; set; }
+        public string FastestIp { get; set; }
+        public string PrevFastestIp { get; set; }
     }
 }
