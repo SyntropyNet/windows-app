@@ -320,6 +320,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
                 NativeMethods.IPForwardTable tableTyped = (NativeMethods.IPForwardTable)Marshal.PtrToStructure(table, typeof(NativeMethods.IPForwardTable));
 
                 uint destination = BitConverter.ToUInt32(IPAddress.Parse(routeEntry.DestinationIP.ToString()).GetAddressBytes(), 0);
+                bool routeFound = false;
 
                 // FIND ROUTE
                 for (int i = 0; i < tableTyped.Table.Length; i++) {
@@ -327,23 +328,26 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
                         continue;
                     }
 
-                    NativeMethods.MIB_IPFORWARDROW targetRow = tableTyped.Table[i];
+                    if (!routeFound) {
+                        NativeMethods.MIB_IPFORWARDROW targetRow = tableTyped.Table[i];
 
-                    uint newGateway = BitConverter.ToUInt32(IPAddress.Parse(routeEntry.GatewayIP.ToString()).GetAddressBytes(), 0);
-                    uint newMask = BitConverter.ToUInt32(IPAddress.Parse(routeEntry.SubnetMask.ToString()).GetAddressBytes(), 0);
-                    uint newIFaceIndex = Convert.ToUInt32(routeEntry.InterfaceIndex);
+                        uint newGateway = BitConverter.ToUInt32(IPAddress.Parse(routeEntry.GatewayIP.ToString()).GetAddressBytes(), 0);
+                        uint newMask = BitConverter.ToUInt32(IPAddress.Parse(routeEntry.SubnetMask.ToString()).GetAddressBytes(), 0);
+                        uint newIFaceIndex = Convert.ToUInt32(routeEntry.InterfaceIndex);
 
-                    targetRow.dwForwardIfIndex = newIFaceIndex;
-                    targetRow.dwForwardNextHop = newGateway;
-                    targetRow.dwForwardMask = newMask;
+                        targetRow.dwForwardIfIndex = newIFaceIndex;
+                        targetRow.dwForwardNextHop = newGateway;
+                        targetRow.dwForwardMask = newMask;
 
-                    // CREATE MODIFIED COPY
-                    rowPointer = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(NativeMethods.MIB_IPFORWARDROW)));
-                    Marshal.StructureToPtr(targetRow, rowPointer, false);
+                        // CREATE MODIFIED COPY
+                        rowPointer = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(NativeMethods.MIB_IPFORWARDROW)));
+                        Marshal.StructureToPtr(targetRow, rowPointer, false);
+
+                        routeFound = true;
+                    }
 
                     // DELETE OLD ROUTE
                     NativeMethods.DeleteIpForwardEntry(ref tableTyped.Table[i]);
-                    break;
                 }
 
                 // CREATE NEW MODIFIED ROUTE
