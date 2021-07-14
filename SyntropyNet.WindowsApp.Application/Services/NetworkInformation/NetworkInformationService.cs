@@ -113,31 +113,38 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
 
             string interfaceName = args.InterfaceName.ToString();
 
-            if (RouteExists(args.Ip.ToString(), out CCIp4RouteEntry routeEntry)) {
-                int interfaceIndex = _GetInterfaceIndexHelper(interfaceName);
+            try {
+                if (RouteExists(args.Ip.ToString(), out CCIp4RouteEntry routeEntry)) {
+                    int interfaceIndex = _GetInterfaceIndexHelper(interfaceName);
 
-                if (interfaceIndex == 0) {
-                    throw new NotFoundInterfaceException(interfaceName);
+                    if (interfaceIndex == 0) {
+                        log.Error($"Interface not found during reroute process: {interfaceName}");
+                        return;
+                    }
+
+                    IPAddress gateway = IPAddress.Parse(args.Gateway);
+
+                    if (routeEntry.InterfaceIndex == interfaceIndex && routeEntry.GatewayIP.Equals(gateway)) {
+                        // ROUTE IS THE SAME => RETURN
+                        return;
+                    }
+
+                    Ip4RouteEntry updatedEntry = new Ip4RouteEntry {
+                        InterfaceIndex = interfaceIndex,
+                        DestinationIP = routeEntry.DestinationIP,
+                        GatewayIP = gateway,
+                        SubnetMask = args.Mask,
+                        Metric = (uint)args.Metric
+                    };
+
+                    log.Info($"[REROUTING]: update route. Interface: {interfaceName}, Ip: {args.Ip.ToString()}");
+                    UpdateRoute(updatedEntry);
+                } else {
+                    log.Info($"[REROUTING]: add route. Interface: {interfaceName}, Ip: {args.Ip.ToString()}");
+                    AddRoute(interfaceName, args.Ip.ToString(), args.Mask.ToString(), args.Gateway, (uint)args.Metric);
                 }
-
-                IPAddress gateway = IPAddress.Parse(args.Gateway);
-
-                if (routeEntry.InterfaceIndex == interfaceIndex && routeEntry.GatewayIP.Equals(gateway)) {
-                    // ROUTE IS THE SAME => RETURN
-                    return;
-                }
-
-                Ip4RouteEntry updatedEntry = new Ip4RouteEntry {
-                    InterfaceIndex = interfaceIndex,
-                    DestinationIP = routeEntry.DestinationIP,
-                    GatewayIP = gateway,
-                    SubnetMask = args.Mask,
-                    Metric = (uint)args.Metric
-                };
-
-                UpdateRoute(updatedEntry);
-            } else {
-                AddRoute(interfaceName, args.Ip.ToString(), args.Mask.ToString(), args.Gateway, (uint)args.Metric);
+            } catch (Exception ex) {
+                log.Error($"Error during reroute process. {ex.ToString()}");
             }
         }
 
@@ -347,11 +354,11 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
                     }
 
                     // DELETE OLD ROUTE
-                    NativeMethods.DeleteIpForwardEntry(ref tableTyped.Table[i]);
+                    int deleteStatus = NativeMethods.DeleteIpForwardEntry(ref tableTyped.Table[i]);
                 }
 
                 // CREATE NEW MODIFIED ROUTE
-                var status = NativeMethods.CreateIpForwardEntry(rowPointer);
+                int status = NativeMethods.CreateIpForwardEntry(rowPointer);
             } catch {
             } finally {
                 Marshal.FreeHGlobal(table);

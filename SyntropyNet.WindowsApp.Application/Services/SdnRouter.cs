@@ -50,6 +50,10 @@ namespace SyntropyNet.WindowsApp.Application.Services {
         private int _pingDelayMs = 1000;
         private bool _pingStarted = false;
 
+        // STUB for testing
+        private int _rerouteAfterPings = 30;
+        private int _pingCounter = 0;
+
         // There should be an interface and the IP with the less latency
         private WGInterfaceName _fastestInterfaceName = WGInterfaceName.SYNTROPY_PUBLIC; // Assign default for now
         private string _fastestInterfaceGateway = String.Empty;
@@ -117,6 +121,14 @@ namespace SyntropyNet.WindowsApp.Application.Services {
             Parallel.ForEach(pingRequests, x => pingResponses.Add(PingEndpoint(x)));
 
             foreach (LatencyPingResponse response in pingResponses) {
+                // STUB for testing
+                if (_pingCounter == 30) { 
+                    if (response.InterfaceName == WGInterfaceName.SYNTROPY_SDN2) {
+                        response.Success = true;
+                        response.Latency = 10;
+                    }
+                }
+
                 if (response == null) {
                     continue;
                 }
@@ -232,6 +244,12 @@ namespace SyntropyNet.WindowsApp.Application.Services {
 
                     // Cooldown
                     Thread.Sleep(_pingDelayMs);
+
+                    if (_pingCounter < 30) {
+                        _pingCounter++;
+                    } else {
+                        _pingCounter = 0;
+                    }
                 }
             });
 
