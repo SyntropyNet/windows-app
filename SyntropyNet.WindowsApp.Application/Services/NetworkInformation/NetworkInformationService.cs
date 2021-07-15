@@ -129,19 +129,11 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
                         return;
                     }
 
-                    Ip4RouteEntry updatedEntry = new Ip4RouteEntry {
-                        InterfaceIndex = interfaceIndex,
-                        DestinationIP = routeEntry.DestinationIP,
-                        GatewayIP = gateway,
-                        SubnetMask = args.Mask,
-                        Metric = (uint)args.Metric
-                    };
-
                     log.Info($"[REROUTING]: update route. Interface: {interfaceName}, Ip: {args.Ip.ToString()}");
-                    UpdateRoute(updatedEntry);
+                    UpdateRoute(routeEntry, gateway, args.Mask, interfaceIndex);
                 } else {
                     log.Info($"[REROUTING]: add route. Interface: {interfaceName}, Ip: {args.Ip.ToString()}");
-                    AddRoute(interfaceName, args.Ip.ToString(), args.Mask.ToString(), args.Gateway, (uint)args.Metric);
+                    AddRoute(interfaceName, args.Ip.ToString(), args.Mask.ToString(), args.Gateway, RouteTableConstants.Metric);
                 }
             } catch (Exception ex) {
                 log.Error($"Error during reroute process. {ex.ToString()}");
@@ -315,54 +307,20 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
             }
         }
 
-        public void UpdateRoute(Ip4RouteEntry routeEntry) {
-            int size = 0;
-            IntPtr table = IntPtr.Zero;
-            IntPtr rowPointer = IntPtr.Zero;
-
+        public void UpdateRoute(CCIp4RouteEntry routeEntry, IPAddress newGateway, IPAddress newMask, int newInterfaceIndex) {
             try {
-                // GET ROUTE TABLE
-                int tableResult = NativeMethods.GetIpForwardTable(table, ref size, true);
-                table = Marshal.AllocHGlobal(size);
-                NativeMethods.IPForwardTable tableTyped = (NativeMethods.IPForwardTable)Marshal.PtrToStructure(table, typeof(NativeMethods.IPForwardTable));
+                Ip4RouteEntry updatedRoute = new Ip4RouteEntry {
+                    DestinationIP = routeEntry.DestinationIP,
+                    SubnetMask = newMask,
+                    GatewayIP = newGateway,
+                    Metric = RouteTableConstants.Metric,
+                    InterfaceIndex = newInterfaceIndex
+                };
 
-                uint destination = BitConverter.ToUInt32(IPAddress.Parse(routeEntry.DestinationIP.ToString()).GetAddressBytes(), 0);
-                bool routeFound = false;
-
-                // FIND ROUTE
-                for (int i = 0; i < tableTyped.Table.Length; i++) {
-                    if (tableTyped.Table[i].dwForwardDest != destination) {
-                        continue;
-                    }
-
-                    if (!routeFound) {
-                        NativeMethods.MIB_IPFORWARDROW targetRow = tableTyped.Table[i];
-
-                        uint newGateway = BitConverter.ToUInt32(IPAddress.Parse(routeEntry.GatewayIP.ToString()).GetAddressBytes(), 0);
-                        uint newMask = BitConverter.ToUInt32(IPAddress.Parse(routeEntry.SubnetMask.ToString()).GetAddressBytes(), 0);
-                        uint newIFaceIndex = Convert.ToUInt32(routeEntry.InterfaceIndex);
-
-                        targetRow.dwForwardIfIndex = newIFaceIndex;
-                        targetRow.dwForwardNextHop = newGateway;
-                        targetRow.dwForwardMask = newMask;
-
-                        // CREATE MODIFIED COPY
-                        rowPointer = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(NativeMethods.MIB_IPFORWARDROW)));
-                        Marshal.StructureToPtr(targetRow, rowPointer, false);
-
-                        routeFound = true;
-                    }
-
-                    // DELETE OLD ROUTE
-                    int deleteStatus = NativeMethods.DeleteIpForwardEntry(ref tableTyped.Table[i]);
-                }
-
-                // CREATE NEW MODIFIED ROUTE
-                int status = NativeMethods.CreateIpForwardEntry(rowPointer);
-            } catch {
-            } finally {
-                Marshal.FreeHGlobal(table);
-                Marshal.FreeHGlobal(rowPointer);
+                Ip4RouteTable.DeleteRoute(routeEntry);
+                CreateRoute(updatedRoute);
+            } catch (Exception ex) {
+                log.Error($"Error during route update: {ex.ToString()}");
             }
         }
 

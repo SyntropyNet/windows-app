@@ -145,7 +145,6 @@ namespace SyntropyNet.WindowsApp.Application.Services {
                         Gateway = _fastestInterfaceGateway,
                         InterfaceName = _fastestInterfaceName,
                         Mask = network.Netmask,
-                        Metric = RouteTableConstants.Metric,
                         FastestIp = _fastestIp,
                         PrevFastestIp = _fastestIpPrevious,
                         PeerEndpoint = _fastestPeer
