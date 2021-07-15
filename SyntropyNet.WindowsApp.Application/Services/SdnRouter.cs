@@ -46,13 +46,8 @@ namespace SyntropyNet.WindowsApp.Application.Services {
         #endregion
 
         private static object _pingLock = new object();
-        private static object _interfaceInfosLock = new object();
         private int _pingDelayMs = 1000;
         private bool _pingStarted = false;
-
-        // STUB for testing
-        private int _rerouteAfterPings = 30;
-        private int _pingCounter = 0;
 
         // There should be an interface and the IP with the less latency
         private WGInterfaceName _fastestInterfaceName = WGInterfaceName.SYNTROPY_PUBLIC; // Assign default for now
@@ -60,10 +55,11 @@ namespace SyntropyNet.WindowsApp.Application.Services {
         private string _fastestIp = String.Empty;
         private string _fastestIpPrevious = String.Empty;
         private string _fastestPeer = String.Empty;
+        private IEnumerable<WGInterfaceName> _avaialbleInterfaces = Enum.GetValues(typeof(WGInterfaceName)).Cast<WGInterfaceName>();
 
         private Thread runnerThread;
         public delegate void FastestIpFoundHandler(object sender, FastestRouteFoundEventArgs eventArgs);
-        public event FastestIpFoundHandler FastestIpFound; 
+        public event FastestIpFoundHandler FastestIpFound;
         public Dictionary<WGInterfaceName, InterfaceInfo> InterfaceInfos { get; set; }
 
         private IEnumerable<string> _GetCommonIps() {
@@ -92,23 +88,23 @@ namespace SyntropyNet.WindowsApp.Application.Services {
             List<LatencyPingResponse> pingResponses = new List<LatencyPingResponse>();
 
             // Collect requests
-            lock (_interfaceInfosLock) {
-                foreach (var entry in InterfaceInfos) {
+            foreach (var key in _avaialbleInterfaces) {
+                if (InterfaceInfos.TryGetValue(key, out InterfaceInfo entry)) {
                     // Select peers that contain common IPs
-                    foreach (Peer peer in entry.Value.Peers.Where(p => p.AllowedIPs.Any(ip => commonIps.Contains(ip)))) {
+                    foreach (Peer peer in entry.Peers.Where(p => p.AllowedIPs.Any(ip => commonIps.Contains(ip)))) {
                         IEnumerable<string> nonCommonIps = peer.AllowedIPs.Except(commonIps);
 
                         foreach (string ip in nonCommonIps) {
                             string strippedIp = ip.Split('/')[0]; // STRIP PORT NUMBER
 
                             // Skip if we already going to ping this IP in the interface
-                            if (pingRequests.Any(r => r.InterfaceName == entry.Key && r.Ip == strippedIp)) {
+                            if (pingRequests.Any(r => r.InterfaceName == key && r.Ip == strippedIp)) {
                                 continue;
                             }
 
                             pingRequests.Add(new LatencyPingRequest {
-                                InterfaceName = entry.Key,
-                                InterfaceGateway = entry.Value.Gateway,
+                                InterfaceName = key,
+                                InterfaceGateway = entry.Gateway,
                                 PeerEndpoint = peer.Endpoint,
                                 Ip = strippedIp
                             });
@@ -121,14 +117,6 @@ namespace SyntropyNet.WindowsApp.Application.Services {
             Parallel.ForEach(pingRequests, x => pingResponses.Add(PingEndpoint(x)));
 
             foreach (LatencyPingResponse response in pingResponses) {
-                // STUB for testing
-                if (_pingCounter == 30) { 
-                    if (response.InterfaceName == WGInterfaceName.SYNTROPY_SDN2) {
-                        response.Success = true;
-                        response.Latency = 10;
-                    }
-                }
-
                 if (response == null) {
                     continue;
                 }
@@ -244,12 +232,6 @@ namespace SyntropyNet.WindowsApp.Application.Services {
 
                     // Cooldown
                     Thread.Sleep(_pingDelayMs);
-
-                    if (_pingCounter < 30) {
-                        _pingCounter++;
-                    } else {
-                        _pingCounter = 0;
-                    }
                 }
             });
 
@@ -257,14 +239,12 @@ namespace SyntropyNet.WindowsApp.Application.Services {
         }
 
         public void SetPeers(WGInterfaceName interfaceName, string interfaceGateway, IEnumerable<Peer> peers) {
-            lock (_interfaceInfosLock) {
-                if (!InterfaceInfos.ContainsKey(interfaceName)) {
-                    InterfaceInfos.Add(interfaceName, new InterfaceInfo());
-                }
-
-                InterfaceInfos[interfaceName].Gateway = interfaceGateway;
-                InterfaceInfos[interfaceName].Peers = peers?.ToList();
+            if (!InterfaceInfos.ContainsKey(interfaceName)) {
+                InterfaceInfos.Add(interfaceName, new InterfaceInfo());
             }
+
+            InterfaceInfos[interfaceName].Gateway = interfaceGateway;
+            InterfaceInfos[interfaceName].Peers = peers?.ToList();
         }
 
         public void StartPing() {
