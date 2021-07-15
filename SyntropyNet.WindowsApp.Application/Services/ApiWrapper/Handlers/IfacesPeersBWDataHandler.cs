@@ -164,7 +164,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                     }
 
                     peerForRequest.Status = IfacesPeersBWDataRequestStatus.OFFLINE;
-                    peerForRequest.LatencyMs = roundtripTime;
+                    peerForRequest.LatencyMs = null;
                     peerForRequest.PacketLoss = 1;
                     continue;
                 }
