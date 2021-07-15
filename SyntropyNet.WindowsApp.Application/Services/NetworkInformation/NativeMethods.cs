@@ -18,7 +18,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
         {
             public uint Size;
 
-            [MarshalAs(UnmanagedType.ByValArray)]
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 30)]
             public MIB_IPFORWARDROW[] Table;
         };
 
