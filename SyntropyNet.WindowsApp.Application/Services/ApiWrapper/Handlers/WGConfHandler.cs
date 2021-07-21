@@ -190,7 +190,8 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
             {
                 PublicKey = data.Args.PublicKey,
                 AllowedIPs = data.Args.AllowedIps,
-                Endpoint = data.Args.EndpointIpv4 != null ? $"{data.Args.EndpointIpv4}:{data.Args.EndpointPort}" : null
+                Endpoint = data.Args.EndpointIpv4 != null ? $"{data.Args.EndpointIpv4}:{data.Args.EndpointPort}" : null,
+                ConnectionId = data.Metadata.ConnectionId
             };
 
             foreach (var WgPeer in WgPeers)

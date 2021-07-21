@@ -11,5 +11,6 @@ namespace SyntropyNet.WindowsApp.Application.Domain.Events {
         public string PeerEndpoint { get; set; }
         public string FastestIp { get; set; }
         public string PrevFastestIp { get; set; }
+        public int ConnectionId { get; set; }
     }
 }

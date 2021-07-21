@@ -83,6 +83,7 @@ namespace SyntropyNet.WindowsApp.Application.Services {
 
             long minLatency = long.MaxValue; // Current minimal latency
             bool hasPingedIps = false; // will be "true" if atleast one IP was successfully pinged below
+            int connectionId = 0;
 
             List<LatencyPingRequest> pingRequests = new List<LatencyPingRequest>();
             List<LatencyPingResponse> pingResponses = new List<LatencyPingResponse>();
@@ -106,7 +107,8 @@ namespace SyntropyNet.WindowsApp.Application.Services {
                                 InterfaceName = key,
                                 InterfaceGateway = entry.Gateway,
                                 PeerEndpoint = peer.Endpoint,
-                                Ip = strippedIp
+                                Ip = strippedIp,
+                                ConnectionId = peer.ConnectionId
                             });
                         }
                     }
@@ -133,6 +135,7 @@ namespace SyntropyNet.WindowsApp.Application.Services {
                     _fastestInterfaceName = response.InterfaceName;
                     _fastestPeer = response.PeerEndpoint;
                     minLatency = response.Latency;
+                    connectionId = response.ConnectionId;
                 }
             }
 
@@ -147,7 +150,8 @@ namespace SyntropyNet.WindowsApp.Application.Services {
                         Mask = network.Netmask,
                         FastestIp = _fastestIp,
                         PrevFastestIp = _fastestIpPrevious,
-                        PeerEndpoint = _fastestPeer
+                        PeerEndpoint = _fastestPeer,
+                        ConnectionId = connectionId
                     });
                 }
 

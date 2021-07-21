@@ -56,6 +56,9 @@ namespace SyntropyNet.WindowsApp.Application.Domain.Models.Messages
         public IfacesPeersBWDataRequestStatus Status { get; set; }
         public long RxBytes { get; set; }
         public long TxBytes { get; set; }
+        public double TxSpeedMbps { get; set; }
+        public double RxSpeedMbps { get; set; }
+        public int ConnectionId { get; set; }
         [JsonIgnore]
         public string Endpoint { get; set; }
     }

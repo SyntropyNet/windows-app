@@ -61,6 +61,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
         private ContainerInfoHandler containerInfoHandler;
         private IfaceBWDataHandler ifaceBWDataHandler;
         private IfacesPeersBWDataHandler ifacesPeersBWDataHandler;
+        private IfacesPeersActiveDataHandler ifacesPeersActiveDataHandler;
 
         public ApiWrapperService(
             IAppSettings appSettings, 
@@ -562,6 +563,9 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
 
                         ifacesPeersBWDataHandler = new IfacesPeersBWDataHandler(client, _WGConfigService, _appSettings, _httpRequestService);
                         ifacesPeersBWDataHandler.Start();
+
+                        ifacesPeersActiveDataHandler = new IfacesPeersActiveDataHandler(client, _networkInformationService, _appSettings);
+                        ifacesPeersActiveDataHandler.Start();
                     }
                     catch (Exception ex)
                     {
@@ -627,6 +631,10 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
             {
                 ifaceBWDataHandler.Interrupt();
                 ifaceBWDataHandler = null;
+            }
+
+            if (ifacesPeersActiveDataHandler != null) {
+                ifacesPeersActiveDataHandler.Stop();
             }
 
             if (exitEvent != null)

@@ -1,12 +1,10 @@
-﻿using SyntropyNet.WindowsApp.Application.Domain.Models.Messages;
-using System;
+﻿using SyntropyNet.WindowsApp.Application.Domain.Events;
+using SyntropyNet.WindowsApp.Application.Domain.Models.Messages;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace SyntropyNet.WindowsApp.Application.Contracts
-{
+namespace SyntropyNet.WindowsApp.Application.Contracts {
+    public delegate void RerouteHandler(object sender, RerouteEventArgs eventArgs);
+
     public interface INetworkInformationService
     {
         IEnumerable<IfaceBWDataRequestData> GetInformNetworkInterface();
@@ -16,5 +14,6 @@ namespace SyntropyNet.WindowsApp.Application.Contracts
         bool IsLocalIpAddress(string host);
         void DeleteRoute(string interfaceName, string ip, string mask, string gateway, int metric);
         bool RouteExists(string destinationIP, string gateway);
+        event RerouteHandler RerouteEvent;
     }
 }
