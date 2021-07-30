@@ -3,12 +3,15 @@ using SyntropyNet.WindowsApp.Enums;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
+using Windows.UI.ViewManagement;
+using Windows.UI.Xaml;
 
 namespace SyntropyNet.WindowsApp.Helpers
 {
@@ -37,7 +40,7 @@ namespace SyntropyNet.WindowsApp.Helpers
             return taskBarLocation;
         }
 
-        public static (int,int) GetWindowPosition(Window widnow, bool useCursor = false)
+        public static (int,int) GetWindowPosition(System.Windows.Window widnow, bool useCursor = false)
         {
             int left = 0;
             int top = 0;
@@ -77,6 +80,19 @@ namespace SyntropyNet.WindowsApp.Helpers
             }
 
             return (left, top);
+        }
+
+        public static bool IsDarkTheme() {
+            var settings = new UISettings();
+            Windows.UI.Color foreground = settings.GetColorValue(UIColorType.Foreground);
+            Windows.UI.Color background = settings.GetColorValue(UIColorType.Background);
+
+            if (foreground.A == 255 && foreground.R == 255 && foreground.G == 255 && foreground.B == 255 
+             && background.A == 255 && background.R == 0 && background.G == 0 && background.B == 0) {
+                return true;
+            } else {
+                return false;
+            }
         }
     }
 }

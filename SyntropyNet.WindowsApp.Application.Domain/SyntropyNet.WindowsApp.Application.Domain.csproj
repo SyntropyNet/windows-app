@@ -65,6 +65,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Enums\AppStatus.cs" />
     <Compile Include="Enums\WireGuard\WGInterfaceName.cs" />
     <Compile Include="Enums\WSConnectionState.cs" />
     <Compile Include="Events\FastestRouteFoundEventArgs.cs" />
