@@ -46,6 +46,7 @@ namespace SyntropyNet.WindowsApp.Application.Services {
         #endregion
 
         private static object _pingLock = new object();
+        private static object _interfaceInfosLock = new object();
         private int _pingDelayMs = 1000;
         private bool _pingStarted = false;
 
@@ -60,10 +61,14 @@ namespace SyntropyNet.WindowsApp.Application.Services {
         private Thread runnerThread;
         public delegate void FastestIpFoundHandler(object sender, FastestRouteFoundEventArgs eventArgs);
         public event FastestIpFoundHandler FastestIpFound;
-        public Dictionary<WGInterfaceName, InterfaceInfo> InterfaceInfos { get; set; }
+        private Dictionary<WGInterfaceName, InterfaceInfo> InterfaceInfos { get; set; }
 
         private IEnumerable<string> _GetCommonIps() {
-            IEnumerable<IEnumerable<string>> allAllowedIps = InterfaceInfos.SelectMany(x => x.Value.Peers.Select(p => p.AllowedIPs));
+            IEnumerable<IEnumerable<string>> allAllowedIps;
+
+            lock (_interfaceInfosLock) {
+                allAllowedIps = InterfaceInfos.SelectMany(x => x.Value.Peers.Select(p => p.AllowedIPs));
+            }
 
             return allAllowedIps.Skip(1)
                                 .Aggregate(
@@ -76,8 +81,6 @@ namespace SyntropyNet.WindowsApp.Application.Services {
             if (InterfaceInfos == null || !InterfaceInfos.Any()) {
                 return;
             }
-
-            string IInfoJson = JsonConvert.SerializeObject(InterfaceInfos);
 
             IEnumerable<string> commonIps = _GetCommonIps();
 
@@ -242,12 +245,14 @@ namespace SyntropyNet.WindowsApp.Application.Services {
         }
 
         public void SetPeers(WGInterfaceName interfaceName, string interfaceGateway, IEnumerable<Peer> peers) {
-            if (!InterfaceInfos.ContainsKey(interfaceName)) {
-                InterfaceInfos.Add(interfaceName, new InterfaceInfo());
-            }
+            lock (_interfaceInfosLock) {
+                if (!InterfaceInfos.ContainsKey(interfaceName)) {
+                    InterfaceInfos.Add(interfaceName, new InterfaceInfo());
+                }
 
-            InterfaceInfos[interfaceName].Gateway = interfaceGateway;
-            InterfaceInfos[interfaceName].Peers = peers?.ToList();
+                InterfaceInfos[interfaceName].Gateway = interfaceGateway;
+                InterfaceInfos[interfaceName].Peers = peers?.ToList();
+            }
         }
 
         public void StartPing() {

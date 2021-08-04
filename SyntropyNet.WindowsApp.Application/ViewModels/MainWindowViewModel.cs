@@ -427,6 +427,7 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
             SetDisconnected();
             StopLoading();
             ShowError($"Error creating {arg2.Interface.Name} interface");
+            _appContext.UpdateIcon(AppStatus.Error);
         }
 
         private void _WGConfigService_CreateInterfaceEvent(object arg1, Services.WireGuard.WGConfigServiceEventArgs arg2)
