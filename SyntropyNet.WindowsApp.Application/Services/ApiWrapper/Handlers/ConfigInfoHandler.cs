@@ -237,7 +237,8 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
             {
                 PublicKey = peer.Args.PublicKey,
                 AllowedIPs = peer.Args.AllowedIps,
-                Endpoint = peer.Args.EndpointIpv4 != null ? $"{peer.Args.EndpointIpv4}:{peer.Args.EndpointPort}" : null
+                Endpoint = peer.Args.EndpointIpv4 != null ? $"{peer.Args.EndpointIpv4}:{peer.Args.EndpointPort}" : null,
+                ConnectionId = peer.Metadata.ConnectionId
             };
 
             if (!isReconnect)

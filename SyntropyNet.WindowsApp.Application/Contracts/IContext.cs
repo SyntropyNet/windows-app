@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SyntropyNet.WindowsApp.Application.Domain.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,5 +15,6 @@ namespace SyntropyNet.WindowsApp.Application.Contracts
         void BeginInvoke<T>(Action<T> action, T e);
         void BeginInvoke(Delegate action, params object[] args);
         void ShowBalloonTip(string text);
+        void UpdateIcon(AppStatus status);
     }
 }

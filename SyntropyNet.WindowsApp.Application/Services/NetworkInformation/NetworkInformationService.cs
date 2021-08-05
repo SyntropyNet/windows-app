@@ -27,6 +27,8 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
         private const int START_PORT = 1024;
         private const int MAX_PORT = 65535;
 
+        public event RerouteHandler RerouteEvent;
+
         public NetworkInformationService() {
             SdnRouter pinger = SdnRouter.Instance;
             pinger.FastestIpFound += _OnFastestIpFound;
@@ -91,7 +93,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
             long rxErrorsAfter = ni.GetIPStatistics().IncomingPacketsWithErrors;
             long rxPacketsAfter = ni.GetIPStatistics().UnicastPacketsReceived;
 
-            return new IfaceBWDataRequestData
+            var data = new IfaceBWDataRequestData
             {
                 Iface = ni.Name,
                 TxSpeedMbsps = Math.Round((txBytesAfter - txBytes) / 10000000.0, 4),
@@ -104,6 +106,8 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
                 RxPackets = rxPacketsAfter - rxPackets,
                 Interval = interval
             };
+
+            return data;
         }
 
         private void _OnFastestIpFound(object o, FastestRouteFoundEventArgs args) {
@@ -135,9 +139,19 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
                     log.Info($"[REROUTING]: add route. Interface: {interfaceName}, Ip: {args.Ip.ToString()}");
                     AddRoute(interfaceName, args.Ip.ToString(), args.Mask.ToString(), args.Gateway, RouteTableConstants.Metric);
                 }
+
+                _OnReroute(args.ConnectionId);
             } catch (Exception ex) {
                 log.Error($"Error during reroute process. {ex.ToString()}");
             }
+        }
+
+        private void _OnReroute(int connectionId) {
+            RerouteEventArgs eventArgs = new RerouteEventArgs {
+                ConnectionId = connectionId
+            };
+
+            RerouteEvent?.Invoke(this, eventArgs);
         }
 
         private int _GetInterfaceIndexHelper(string IFaceName) {

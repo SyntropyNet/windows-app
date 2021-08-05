@@ -93,6 +93,7 @@
     <PackageReference Include="System.ValueTuple">
       <Version>4.5.0</Version>
     </PackageReference>
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Web" />
     <Reference Include="System.Windows" />
     <Reference Include="System.Windows.Forms" />
@@ -146,6 +147,7 @@
     <Compile Include="Services\ApiWrapper\Handlers\BaseHandler.cs" />
     <Compile Include="Services\ApiWrapper\Handlers\ConfigInfoHandler.cs" />
     <Compile Include="Services\ApiWrapper\Handlers\ContainerInfoHandler.cs" />
+    <Compile Include="Services\ApiWrapper\Handlers\IfacesPeersActiveDataHandler.cs" />
     <Compile Include="Services\ApiWrapper\Handlers\IfacesPeersBWDataHandler.cs" />
     <Compile Include="Services\ApiWrapper\Handlers\GetInfoHandler.cs" />
     <Compile Include="Services\ApiWrapper\Handlers\IfaceBWDataHandler.cs" />

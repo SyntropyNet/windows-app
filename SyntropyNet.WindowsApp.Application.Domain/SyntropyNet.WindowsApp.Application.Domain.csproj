@@ -65,9 +65,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Enums\AppStatus.cs" />
     <Compile Include="Enums\WireGuard\WGInterfaceName.cs" />
     <Compile Include="Enums\WSConnectionState.cs" />
     <Compile Include="Events\FastestRouteFoundEventArgs.cs" />
+    <Compile Include="Events\RerouteEventArgs.cs" />
     <Compile Include="Models\DockerApi\DataFromInspectCommand.cs" />
     <Compile Include="Models\InterfaceInfo.cs" />
     <Compile Include="Models\Messages\AutoPingRequest.cs" />
@@ -80,6 +82,7 @@
     <Compile Include="Models\Messages\GetInfoRequest.cs" />
     <Compile Include="Models\Messages\GetInfoResponse.cs" />
     <Compile Include="Models\Messages\IfaceBWDataRequest.cs" />
+    <Compile Include="Models\Messages\IfacesPeersActiveDataRequest.cs" />
     <Compile Include="Models\Messages\IfacesPeersBWDataRequest.cs" />
     <Compile Include="Models\Messages\LatencyPingRequest.cs" />
     <Compile Include="Models\Messages\LatencyPingResponse.cs" />

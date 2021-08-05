@@ -6,5 +6,6 @@ namespace SyntropyNet.WindowsApp.Application.Domain.Models.Messages {
         public string Ip { get; set; }
         public string InterfaceGateway { get; set; }
         public string PeerEndpoint { get; set; }
+        public int ConnectionId { get; set; }
     }
 }

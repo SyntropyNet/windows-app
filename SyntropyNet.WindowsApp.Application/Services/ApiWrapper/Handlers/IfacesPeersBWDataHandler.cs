@@ -56,36 +56,10 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                     while (true)
                     {
                         var data = new List<IfacesPeersBWDataRequestData>();
+                        IEnumerable<WGInterfaceName> interfaces = Enum.GetValues(typeof(WGInterfaceName)).Cast<WGInterfaceName>();
 
-                        foreach (WGInterfaceName interfaceName in Enum.GetValues(typeof(WGInterfaceName)))
-                        {
-                            IEnumerable<Peer> peersInConfig = _WGConfigService.GetPeerSections(interfaceName);
-                            List<IfacesPeersBWDataRequestPeer> peersForRequest = new List<IfacesPeersBWDataRequestPeer>();
-
-                            if (peersInConfig != null && peersInConfig.Count() > 0)
-                            {
-                                foreach (var peer in peersInConfig)
-                                {
-                                    peersForRequest.Add(new IfacesPeersBWDataRequestPeer
-                                    {
-                                        PublicKey = peer.PublicKey,
-                                        AllowedIps = peer.AllowedIPs,
-                                        Endpoint = peer.Endpoint,
-                                        InternalIp = GetInternalIp(interfaceName, peer.AllowedIPs),
-                                    });
-                                }
-
-                                peersForRequest = JuxtaposeData(peersForRequest, _WGConfigService.GetPeersDataFromPipe(interfaceName));
-                                peersForRequest = SetStatus(peersForRequest);
-                            }
-
-                            data.Add(new IfacesPeersBWDataRequestData
-                            {
-                                Iface = _WGConfigService.GetInterfaceName(interfaceName),
-                                IfacePublicKey = _WGConfigService.GetPublicKey(interfaceName),
-                                Peers = peersForRequest
-                            });
-                        }
+                        // Collect data
+                        Parallel.ForEach(interfaces, i => data.Add(_GetPeerBWDataHelper(i)));
 
                         var ifacesPeersBWDataRequest = new IfacesPeersBWDataRequest
                         {
@@ -201,25 +175,62 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
             return "";
         }
 
-        private List<IfacesPeersBWDataRequestPeer> JuxtaposeData(List<IfacesPeersBWDataRequestPeer> peersForRequest, 
-            IEnumerable<PeerDataFromPipe> peersDataFromPipe)
+        private List<IfacesPeersBWDataRequestPeer> JuxtaposeData(List<IfacesPeersBWDataRequestPeer> peersForRequest, WGInterfaceName interfaceName)
         {
+            var peersDataFromPipe = _WGConfigService.GetPeersDataFromPipe(interfaceName);
+
+            Thread.Sleep(1000);
+
+            var peersDataFromPipeDelta = _WGConfigService.GetPeersDataFromPipe(interfaceName);
+
             foreach (var peerForRequest in peersForRequest)
             {
-                foreach (var peerDataFromPipe in peersDataFromPipe)
-                {
-                    if(peerForRequest.Endpoint == peerDataFromPipe.Endpoint)
-                    {
-                        peerForRequest.KeepAliveInterval = peerDataFromPipe.KeepAliveInterval;
-                        peerForRequest.LastHandshake = DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt32(peerDataFromPipe.LastHandshake)).DateTime.ToString("yyyy-MM-ddTHH:mm:ss");
-                        peerForRequest.RxBytes = peerDataFromPipe.RxBytes;
-                        peerForRequest.TxBytes = peerDataFromPipe.TxBytes;
-                        break;
-                    }
+                var peerDataDelta = peersDataFromPipeDelta.FirstOrDefault(x => x.Endpoint == peerForRequest.Endpoint);
+                if (peerDataDelta == null) {
+                    continue;
+                }
+
+                peerForRequest.KeepAliveInterval = peerDataDelta.KeepAliveInterval;
+                peerForRequest.LastHandshake = DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt32(peerDataDelta.LastHandshake)).DateTime.ToString("yyyy-MM-ddTHH:mm:ss");
+                peerForRequest.RxBytes = peerDataDelta.RxBytes;
+                peerForRequest.TxBytes = peerDataDelta.TxBytes;
+
+                var peerDataInitial = peersDataFromPipe.FirstOrDefault(x => x.Endpoint == peerForRequest.Endpoint);
+                if (peerDataInitial != null) {
+                    // Calculate speed
+
+                    peerForRequest.TxSpeedMbps = Math.Round((peerDataDelta.TxBytes - peerDataInitial.TxBytes) / 1000000.0, 4);
+                    peerForRequest.RxSpeedMbps = - Math.Round((peerDataDelta.RxBytes - peerDataInitial.RxBytes) / 1000000.0, 4);
                 }
             }
 
             return peersForRequest;
+        }
+
+        private IfacesPeersBWDataRequestData _GetPeerBWDataHelper(WGInterfaceName interfaceName) {
+            IEnumerable<Peer> peersInConfig = _WGConfigService.GetPeerSections(interfaceName);
+            List<IfacesPeersBWDataRequestPeer> peersForRequest = new List<IfacesPeersBWDataRequestPeer>();
+
+            if (peersInConfig != null && peersInConfig.Count() > 0) {
+                foreach (var peer in peersInConfig) {
+                    peersForRequest.Add(new IfacesPeersBWDataRequestPeer {
+                        PublicKey = peer.PublicKey,
+                        AllowedIps = peer.AllowedIPs,
+                        Endpoint = peer.Endpoint,
+                        ConnectionId = peer.ConnectionId,
+                        InternalIp = GetInternalIp(interfaceName, peer.AllowedIPs),
+                    });
+                }
+
+                peersForRequest = JuxtaposeData(peersForRequest, interfaceName);
+                peersForRequest = SetStatus(peersForRequest);
+            }
+
+            return new IfacesPeersBWDataRequestData {
+                Iface = _WGConfigService.GetInterfaceName(interfaceName),
+                IfacePublicKey = _WGConfigService.GetPublicKey(interfaceName),
+                Peers = peersForRequest
+            };
         }
 
         public void Interrupt()

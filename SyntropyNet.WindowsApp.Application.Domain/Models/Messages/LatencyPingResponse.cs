@@ -7,6 +7,7 @@
             this.InterfaceName = request.InterfaceName;
             this.InterfaceGateway = request.InterfaceGateway;
             this.PeerEndpoint = request.PeerEndpoint;
+            this.ConnectionId = request.ConnectionId;
             this.Ip = request.Ip;
         }
     }

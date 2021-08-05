@@ -3,10 +3,12 @@ using Microsoft.Win32;
 using Prism.Commands;
 using Prism.Mvvm;
 using SyntropyNet.WindowsApp.Application.Contracts;
+using SyntropyNet.WindowsApp.Application.Domain.Enums;
 using SyntropyNet.WindowsApp.Application.Domain.Enums.WireGuard;
 using SyntropyNet.WindowsApp.Application.Domain.Models;
 using SyntropyNet.WindowsApp.Application.Exceptions;
 using SyntropyNet.WindowsApp.Application.Models;
+using SyntropyNet.WindowsApp.Application.Services;
 using SyntropyNet.WindowsApp.Application.Services.ApiWrapper;
 using System;
 using System.Collections.Generic;
@@ -91,6 +93,7 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
             }
 
             _appContext.ShowBalloonTip("The connection has been lost.");
+            _appContext.UpdateIcon(AppStatus.Error);
         }
 
         public void Disconnected(DisconnectionType type, string error)
@@ -108,11 +111,15 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
             Started = false;
             if (type == DisconnectionType.Error)
             {
+                _appContext.UpdateIcon(AppStatus.Error);
                 ShowError(error);
+            } else {
+                _appContext.UpdateIcon(AppStatus.Idle);
             }
         }
         public void Reconnecting(DisconnectionType type, string error)
         {
+            _appContext.UpdateIcon(AppStatus.Idle);
             SetReconnecting();
         }
 
@@ -125,7 +132,8 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
             }
 
             // Check if WireGuard interfaces were loaded;
-            if (_interfacesLoaded) { 
+            if (_interfacesLoaded) {
+                _appContext.UpdateIcon(AppStatus.Connected);
                 Status = "Connected";
                 Loading = false;
             }
@@ -160,6 +168,8 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
                 _appContext.BeginInvoke(SetDisconnected);
                 return;
             }
+
+            _appContext.UpdateIcon(AppStatus.Idle);
             _autoDisconnection = true;
             Started = false;
         }
@@ -171,6 +181,8 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
                 _appContext.BeginInvoke(SetConnected);
                 return;
             }
+
+            _appContext.UpdateIcon(AppStatus.Connected);
             Status = "Connected";
             Started = true;
         }
@@ -182,6 +194,8 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
                 _appContext.BeginInvoke(SetReconnecting);
                 return;
             }
+
+            _appContext.UpdateIcon(AppStatus.Idle);
             Status = "Reconnecting";
             Loading = true;
         }
@@ -413,6 +427,7 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
             SetDisconnected();
             StopLoading();
             ShowError($"Error creating {arg2.Interface.Name} interface");
+            _appContext.UpdateIcon(AppStatus.Error);
         }
 
         private void _WGConfigService_CreateInterfaceEvent(object arg1, Services.WireGuard.WGConfigServiceEventArgs arg2)

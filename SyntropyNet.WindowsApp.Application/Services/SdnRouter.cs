@@ -46,6 +46,7 @@ namespace SyntropyNet.WindowsApp.Application.Services {
         #endregion
 
         private static object _pingLock = new object();
+        private static object _interfaceInfosLock = new object();
         private int _pingDelayMs = 1000;
         private bool _pingStarted = false;
 
@@ -60,10 +61,14 @@ namespace SyntropyNet.WindowsApp.Application.Services {
         private Thread runnerThread;
         public delegate void FastestIpFoundHandler(object sender, FastestRouteFoundEventArgs eventArgs);
         public event FastestIpFoundHandler FastestIpFound;
-        public Dictionary<WGInterfaceName, InterfaceInfo> InterfaceInfos { get; set; }
+        private Dictionary<WGInterfaceName, InterfaceInfo> InterfaceInfos { get; set; }
 
         private IEnumerable<string> _GetCommonIps() {
-            IEnumerable<IEnumerable<string>> allAllowedIps = InterfaceInfos.SelectMany(x => x.Value.Peers.Select(p => p.AllowedIPs));
+            IEnumerable<IEnumerable<string>> allAllowedIps;
+
+            lock (_interfaceInfosLock) {
+                allAllowedIps = InterfaceInfos.SelectMany(x => x.Value.Peers.Select(p => p.AllowedIPs));
+            }
 
             return allAllowedIps.Skip(1)
                                 .Aggregate(
@@ -77,12 +82,11 @@ namespace SyntropyNet.WindowsApp.Application.Services {
                 return;
             }
 
-            string IInfoJson = JsonConvert.SerializeObject(InterfaceInfos);
-
             IEnumerable<string> commonIps = _GetCommonIps();
 
             long minLatency = long.MaxValue; // Current minimal latency
             bool hasPingedIps = false; // will be "true" if atleast one IP was successfully pinged below
+            int connectionId = 0;
 
             List<LatencyPingRequest> pingRequests = new List<LatencyPingRequest>();
             List<LatencyPingResponse> pingResponses = new List<LatencyPingResponse>();
@@ -106,7 +110,8 @@ namespace SyntropyNet.WindowsApp.Application.Services {
                                 InterfaceName = key,
                                 InterfaceGateway = entry.Gateway,
                                 PeerEndpoint = peer.Endpoint,
-                                Ip = strippedIp
+                                Ip = strippedIp,
+                                ConnectionId = peer.ConnectionId
                             });
                         }
                     }
@@ -133,6 +138,7 @@ namespace SyntropyNet.WindowsApp.Application.Services {
                     _fastestInterfaceName = response.InterfaceName;
                     _fastestPeer = response.PeerEndpoint;
                     minLatency = response.Latency;
+                    connectionId = response.ConnectionId;
                 }
             }
 
@@ -147,7 +153,8 @@ namespace SyntropyNet.WindowsApp.Application.Services {
                         Mask = network.Netmask,
                         FastestIp = _fastestIp,
                         PrevFastestIp = _fastestIpPrevious,
-                        PeerEndpoint = _fastestPeer
+                        PeerEndpoint = _fastestPeer,
+                        ConnectionId = connectionId
                     });
                 }
 
@@ -238,12 +245,14 @@ namespace SyntropyNet.WindowsApp.Application.Services {
         }
 
         public void SetPeers(WGInterfaceName interfaceName, string interfaceGateway, IEnumerable<Peer> peers) {
-            if (!InterfaceInfos.ContainsKey(interfaceName)) {
-                InterfaceInfos.Add(interfaceName, new InterfaceInfo());
-            }
+            lock (_interfaceInfosLock) {
+                if (!InterfaceInfos.ContainsKey(interfaceName)) {
+                    InterfaceInfos.Add(interfaceName, new InterfaceInfo());
+                }
 
-            InterfaceInfos[interfaceName].Gateway = interfaceGateway;
-            InterfaceInfos[interfaceName].Peers = peers?.ToList();
+                InterfaceInfos[interfaceName].Gateway = interfaceGateway;
+                InterfaceInfos[interfaceName].Peers = peers?.ToList();
+            }
         }
 
         public void StartPing() {
