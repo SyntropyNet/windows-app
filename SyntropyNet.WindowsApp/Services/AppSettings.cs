@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Management;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -38,7 +39,7 @@ namespace SyntropyNet.WindowsApp.Services
         }
 
         public string ControllerUrl => ConfigurationManager.AppSettings["ControllerUrl"];
-        public string AgentVersion => ConfigurationManager.AppSettings["AgentVersion"];
+        public string AgentVersion => Assembly.GetExecutingAssembly().GetName().Version.ToString();
         public string DeviceIp { get; set; }
 
         private string _deviceId = string.Empty;
