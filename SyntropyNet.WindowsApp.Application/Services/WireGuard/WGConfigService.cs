@@ -37,9 +37,13 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
         private TunnelConfig SDN2Interface { get; set; }
         private TunnelConfig SDN3Interface { get; set; }
 
+        //Interface keys
+        private static Dictionary<WGInterfaceName, Keypair> _interfaceKeys;
+
         public WGConfigService(INetworkInformationService networkService)
         {
             _networkService = networkService;
+            _interfaceKeys = new Dictionary<WGInterfaceName, Keypair>();
         }
 
         public bool ActivityState
@@ -83,12 +87,12 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
             }
         }
 
-        public void CreateInterfaces()
+        public void CreateInterfaces(bool updateKeys = false)
         {
-            CreateInterface(WGInterfaceName.SYNTROPY_PUBLIC);
-            CreateInterface(WGInterfaceName.SYNTROPY_SDN1);
-            CreateInterface(WGInterfaceName.SYNTROPY_SDN2);
-            CreateInterface(WGInterfaceName.SYNTROPY_SDN3);
+            CreateInterface(WGInterfaceName.SYNTROPY_PUBLIC, updateKeys);
+            CreateInterface(WGInterfaceName.SYNTROPY_SDN1, updateKeys);
+            CreateInterface(WGInterfaceName.SYNTROPY_SDN2, updateKeys);
+            CreateInterface(WGInterfaceName.SYNTROPY_SDN3, updateKeys);
         }
 
         public void StopWG()
@@ -368,10 +372,23 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
                     stream.Close();
             }
         }
-        private void CreateInterface(WGInterfaceName interfaces)
+        private void CreateInterface(WGInterfaceName interfaces, bool updateKeys = false)
         {
             var expectPort = GetUsedPorts();
-            Keypair keypair = Keypair.Generate();
+            Keypair keypair;
+
+            if (_interfaceKeys.ContainsKey(interfaces)) {
+                if (updateKeys) {
+                    keypair = Keypair.Generate();
+                    _interfaceKeys[interfaces] = keypair;
+                } else {
+                    keypair = _interfaceKeys[interfaces];
+                }
+            } else {
+                keypair = Keypair.Generate();
+                _interfaceKeys.Add(interfaces, keypair);
+            }
+
             int listenPort = _networkService.GetNextFreePort(expectPort);
 
             var tunnelConfig = new TunnelConfig
