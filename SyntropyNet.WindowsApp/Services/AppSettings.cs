@@ -39,7 +39,19 @@ namespace SyntropyNet.WindowsApp.Services
         }
 
         public string ControllerUrl => ConfigurationManager.AppSettings["ControllerUrl"];
-        public string AgentVersion => Assembly.GetExecutingAssembly().GetName().Version.ToString();
+        public string AgentVersion {
+            get {
+                string unformattedVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+                string[] versionParts = unformattedVersion.Split('.');
+
+                // Agent version format: 1.0.0 (Major.Minor.Patch)
+                if (versionParts.Length < 3) {
+                    throw new KeyNotFoundException("App version");
+                }
+
+                return $"{versionParts[0]}.{versionParts[1]}.{versionParts[2]}";
+            }
+        }
         public string DeviceIp { get; set; }
 
         private string _deviceId = string.Empty;
