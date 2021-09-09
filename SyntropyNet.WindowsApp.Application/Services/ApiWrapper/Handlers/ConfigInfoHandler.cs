@@ -328,10 +328,10 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                 request.Data.Network.Sdn3.PublicKey != _WGConfigService.GetPublicKey(WGInterfaceName.SYNTROPY_SDN3))
                 check = false;
 
-            if (request.Data.Network.Public.ListenPort != _WGConfigService.GetListenPort(WGInterfaceName.SYNTROPY_PUBLIC) ||
-                request.Data.Network.Sdn1.ListenPort != _WGConfigService.GetListenPort(WGInterfaceName.SYNTROPY_SDN1) ||
-                request.Data.Network.Sdn2.ListenPort != _WGConfigService.GetListenPort(WGInterfaceName.SYNTROPY_SDN2) ||
-                request.Data.Network.Sdn3.ListenPort != _WGConfigService.GetListenPort(WGInterfaceName.SYNTROPY_SDN3))
+            if ((request.Data.Network.Public.ListenPort != 0 && request.Data.Network.Public.ListenPort != _WGConfigService.GetListenPort(WGInterfaceName.SYNTROPY_PUBLIC)) ||
+                (request.Data.Network.Sdn1.ListenPort  != 0 && request.Data.Network.Sdn1.ListenPort != _WGConfigService.GetListenPort(WGInterfaceName.SYNTROPY_SDN1)) ||
+                (request.Data.Network.Sdn2.ListenPort != 0 && request.Data.Network.Sdn2.ListenPort != _WGConfigService.GetListenPort(WGInterfaceName.SYNTROPY_SDN2)) ||
+                (request.Data.Network.Sdn3.ListenPort != 0 && request.Data.Network.Sdn3.ListenPort != _WGConfigService.GetListenPort(WGInterfaceName.SYNTROPY_SDN3)) )
                 check = false;
 
             return check;

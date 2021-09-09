@@ -89,14 +89,17 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
 
         public void CreateInterfaces(bool updateKeys = false)
         {
+            log.Info($"CreateInterfaces: Started, {DateTime.UtcNow}");
             CreateInterface(WGInterfaceName.SYNTROPY_PUBLIC, updateKeys);
             CreateInterface(WGInterfaceName.SYNTROPY_SDN1, updateKeys);
             CreateInterface(WGInterfaceName.SYNTROPY_SDN2, updateKeys);
             CreateInterface(WGInterfaceName.SYNTROPY_SDN3, updateKeys);
+            log.Info($"CreateInterfaces: Finished, {DateTime.UtcNow}");
         }
 
         public void StopWG()
         {
+            log.Info($"StopWG: Started, {DateTime.UtcNow}");
             SdnRouter.Instance.StopPing();
 
             var t1 = new Task(() =>
@@ -118,6 +121,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
             t4.Start();
 
             Task.WaitAll(t1, t2, t3, t4);
+            log.Info($"StopWG: Finished, {DateTime.UtcNow}");
         }
 
         public string GetPublicKey(WGInterfaceName interfaceName)

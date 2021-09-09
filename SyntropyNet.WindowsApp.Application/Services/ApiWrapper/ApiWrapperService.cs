@@ -99,7 +99,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
             ConnectionLost = false;
             _WGConfigService.StopWG();
             _WGConfigService.CreateInterfaces();
-            SdnRouter.Instance.StartPing();
+            
 
             new Thread(async () =>
             {
@@ -135,6 +135,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                     client.ReconnectTimeout = new TimeSpan(1000, 1000, 1000);
                     client.ReconnectionHappened.Subscribe(info =>
                     {
+                        SdnRouter.Instance.StartPing();
                         Debug.WriteLine($"Reconnection happened, type: {info.Type}");
                         WaitReconnect = 0;
                         ConnectionLost = false;
@@ -429,6 +430,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
 
                     client.DisconnectionHappened.Subscribe(x =>
                     {
+                        SdnRouter.Instance.StopPing();
                         Debug.WriteLine($"Disconnect: {x.Type}");
                         log.Info($"Disconnected: {x.Type}. Status: {x.CloseStatus}, Description: {x.CloseStatusDescription}. {x.Exception?.Message ?? string.Empty}");
 
