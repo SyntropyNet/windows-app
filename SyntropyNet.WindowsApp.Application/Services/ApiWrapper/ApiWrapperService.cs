@@ -430,11 +430,12 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
 
                     client.DisconnectionHappened.Subscribe(x =>
                     {
-                        SdnRouter.Instance.StopPing();
+                        
                         Debug.WriteLine($"Disconnect: {x.Type}");
                         log.Info($"Disconnected: {x.Type}. Status: {x.CloseStatus}, Description: {x.CloseStatusDescription}. {x.Exception?.Message ?? string.Empty}");
+                        SdnRouter.Instance.StopPing();
 
-                        if(x.Type == DisconnectionType.Lost && x.CloseStatus == null)
+                        if (x.Type == DisconnectionType.Lost && x.CloseStatus == null)
                         {
                             ConnectionLostEvent?.Invoke();
                             ConnectionLost = true;
@@ -469,30 +470,34 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
 
                         if (Running)
                         {
-                            log.Info($"Attempt to reconnect via {WaitReconnect}ms");
-                            ReconnectingEvent?.Invoke(x.Type, x.Exception?.Message);
-                            Thread.Sleep(WaitReconnect);
-                            try
+                            if (!Stopping)
                             {
-                                checked
+                                log.Info($"Attempt to reconnect via {WaitReconnect}ms");
+                                ReconnectingEvent?.Invoke(x.Type, x.Exception?.Message);
+                                Thread.Sleep(WaitReconnect);
+                                try
                                 {
-                                    if(!ConnectionLost || WaitReconnect < 20000)
+                                    checked
                                     {
-                                        // If connection was lost, try to re-connect every 20 secs, 
-                                        // if no then increase timeout by 5sec every iteration
-                                        WaitReconnect += 5000;
+                                        if (!ConnectionLost || WaitReconnect < 20000)
+                                        {
+                                            // If connection was lost, try to re-connect every 20 secs, 
+                                            // if no then increase timeout by 5sec every iteration
+                                            WaitReconnect += 5000;
+                                        }
                                     }
+
+                                    IsRecconect = true;
                                 }
-
-                                IsRecconect = true;
+                                catch (OverflowException ex)
+                                {
+                                    Running = false;
+                                    IsRecconect = false;
+                                    WaitReconnect = 0;
+                                }
                             }
-                            catch (OverflowException ex)
-                            {
-                                Running = false;
-                                IsRecconect = false;
-                                WaitReconnect = 0;
-                            }
-
+                            
+                            
                             return;
                         }
                         else
@@ -638,14 +643,14 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
             if (ifacesPeersActiveDataHandler != null) {
                 ifacesPeersActiveDataHandler.Stop();
             }
-
+            
+            
             if (exitEvent != null)
             {
                 // set ManualResetEvent to stop the Thread
                 // client will be disposed in using
                 exitEvent.Set();
             }
-
             _WGConfigService.StopWG();
             Running = false;
         }

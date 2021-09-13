@@ -121,6 +121,12 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
             t4.Start();
 
             Task.WaitAll(t1, t2, t3, t4);
+            // Clear existing IF data, so after reconnection the data will be re-poulated
+            _interfaceKeys.Clear();
+            PublicInterface = null;
+            SDN1Interface = null;
+            SDN2Interface = null;
+            SDN3Interface = null;
             log.Info($"StopWG: Finished, {DateTime.UtcNow}");
         }
 

@@ -268,7 +268,7 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
                     {
                         log.Info($"--- Started");
                         OnoffEnabled = false;
-                        Status = string.Empty;
+                        Status = "Connecting";
                         Loading = true;
                         Connect();
                     }
