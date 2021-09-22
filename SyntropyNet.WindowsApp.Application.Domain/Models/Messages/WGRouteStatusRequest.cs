@@ -16,13 +16,40 @@ namespace SyntropyNet.WindowsApp.Application.Domain.Models.Messages
         }
 
         public List<WGRouteStatusData> Data { get; set; }
+
+        /// <summary>
+        /// Adds route status data. Will check if the ConnectionGroupId is unique, if not, will add Statuses collection to an existing data with such ConnectionGroupId.
+        /// </summary>
+        public void AddRouteStatusData(WGRouteStatusData data) {
+            if (this.Data == null) {
+                this.Data = new List<WGRouteStatusData> {
+                    data
+                };
+            } else {
+                WGRouteStatusData existingData = this.Data.FirstOrDefault(x => x.ConnectionGroupId == data.ConnectionGroupId);
+
+                if (existingData != null) {
+                    if (existingData.Statuses == null) {
+                        existingData.Statuses = data.Statuses; 
+                    } else {
+                        existingData.Statuses.AddRange(data.Statuses);
+                    }
+                } else {
+                    if (this.Data == null) {
+                        this.Data = new List<WGRouteStatusData>();
+                    }
+
+                    this.Data.Add(data);
+                }
+            }
+        }
     }
 
     public class WGRouteStatusData
     {
+        public int ConnectionGroupId { get; set; }
         public int ConnectionId { get; set; }
-        public string PublicKey { get; set; }
-        public IEnumerable<WGRouteStatus> Statuses { get; set; }
+        public List<WGRouteStatus> Statuses { get; set; }
     }
 
     public class WGRouteStatus

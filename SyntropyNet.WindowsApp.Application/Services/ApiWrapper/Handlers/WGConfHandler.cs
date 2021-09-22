@@ -4,6 +4,7 @@ using SyntropyNet.WindowsApp.Application.Comparers;
 using SyntropyNet.WindowsApp.Application.Constants;
 using SyntropyNet.WindowsApp.Application.Contracts;
 using SyntropyNet.WindowsApp.Application.Domain.Enums.WireGuard;
+using SyntropyNet.WindowsApp.Application.Domain.Helpers;
 using SyntropyNet.WindowsApp.Application.Domain.Models.Messages;
 using SyntropyNet.WindowsApp.Application.Domain.Models.WireGuard;
 using SyntropyNet.WindowsApp.Application.Helpers;
@@ -52,7 +53,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                 {
                     if (request.Data.Count() > 0)
                     {
-                        List<WGRouteStatusData> WGRouteStatusDataResponse = new List<WGRouteStatusData>();
+                        WGRouteStatusRequest controllerRequest = new WGRouteStatusRequest();
 
                         foreach (var item in request.Data.OrderBy(x => x, new WGConfRequestDataComparer()))
                         {
@@ -65,7 +66,8 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                                     RemoveInterace(item);
                                     break;
                                 case "add_peer":
-                                    WGRouteStatusDataResponse.Add(AddPeer(item));
+                                    WGRouteStatusData dataToAdd = AddPeer(item);
+                                    controllerRequest.AddRouteStatusData(dataToAdd);
                                     break;
                                 case "remove_peer":
                                     RemovePeer(item);
@@ -73,12 +75,9 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                             }
                         }
 
-                        if(WGRouteStatusDataResponse.Count > 0)
+                        if (controllerRequest.Data.NotEmpty()) 
                         {
-                            var message = JsonConvert.SerializeObject(new WGRouteStatusRequest
-                            {
-                                Data = WGRouteStatusDataResponse
-                            }, JsonSettings.GetSnakeCaseNamingStrategy());
+                            var message = JsonConvert.SerializeObject(controllerRequest, JsonSettings.GetSnakeCaseNamingStrategy());
                             Client.Send(message);
 
                             if (DebugLogger)
@@ -188,10 +187,10 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
 
             var requestPeer = new Peer
             {
-                PublicKey = data.Args.PublicKey,
                 AllowedIPs = data.Args.AllowedIps,
                 Endpoint = data.Args.EndpointIpv4 != null ? $"{data.Args.EndpointIpv4}:{data.Args.EndpointPort}" : null,
-                ConnectionId = data.Metadata.ConnectionId
+                ConnectionId = data.Metadata.ConnectionId,
+                ConnectionGroupId = data.Metadata.ConnectionGroupId
             };
 
             foreach (var WgPeer in WgPeers)
@@ -229,7 +228,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                     return new WGRouteStatusData
                     {
                         ConnectionId = data.Metadata.ConnectionId,
-                        PublicKey = data.Args.PublicKey,
+                        ConnectionGroupId = data.Metadata.ConnectionGroupId,
                         Statuses = wGRouteStatuses
                     };
                 }
@@ -253,7 +252,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
             return new WGRouteStatusData
             {
                 ConnectionId = data.Metadata.ConnectionId,
-                PublicKey = data.Args.PublicKey,
+                ConnectionGroupId = data.Metadata.ConnectionGroupId,
                 Statuses = wGRouteStatuses
             };
         }
