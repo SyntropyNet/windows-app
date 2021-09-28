@@ -397,7 +397,7 @@
     <Copy Condition="Exists('$(DeployedConfig)')" SourceFiles="$(IntermediateOutputPath)$(TargetFileName).config" DestinationFiles="$(DeployedConfig)" />
   </Target>
   <PropertyGroup>
-    <PostBuildEvent>if $(ConfigurationName) == Release ( $(SignTool) sign /f $(CertPath) /p $(PackageCertificatePassword) $(TargetPath) )
+    <PostBuildEvent>if $(ConfigurationName) == Debug ( $(SignTool) sign /f $(CertPath) /p $(PackageCertificatePassword) $(TargetPath) )
 
 </PostBuildEvent>
   </PropertyGroup>
