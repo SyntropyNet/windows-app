@@ -304,19 +304,27 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
             }
         }
 
-        public void DeletePeersThroughPipe(WGInterfaceName interfaceName, Peer peer)
+        public void DeletePeersThroughPipe(WGInterfaceName interfaceName, Peer peer, IEnumerable<string> allowedIps = null)
         {
             TunnelConfig interfaceConfig = GetHowName(interfaceName);
             StringBuilder set = new StringBuilder("set=1\n");
+            IEnumerable<string> ips;
+
+            if (allowedIps != null) {
+                ips = allowedIps;
+            } else {
+                ips = peer.AllowedIPs;
+            }
 
             if (peer != null)
             {
                 set.Append($"public_key={Base64ToHex(peer.PublicKey)}\n");
                 set.Append("replace_allowed_ips=true\n");
-                foreach (var allowedIp in peer.AllowedIPs)
-                {
+
+                foreach (string allowedIp in ips) {
                     set.Append($"allowed_ip={allowedIp}\n");
                 }
+
                 set.Append($"persistent_keepalive_interval=15\n");
 
                 if (peer.Endpoint != null)

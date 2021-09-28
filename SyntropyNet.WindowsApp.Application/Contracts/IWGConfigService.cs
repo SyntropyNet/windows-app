@@ -20,7 +20,7 @@ namespace SyntropyNet.WindowsApp.Application.Contracts
         void StopWG();
         void ApplyModifiedConfigs();
         void SetPeersThroughPipe(WGInterfaceName interfaceName, IEnumerable<Peer> peers);
-        void DeletePeersThroughPipe(WGInterfaceName interfaceName, Peer peer);
+        void DeletePeersThroughPipe(WGInterfaceName interfaceName, Peer peer, IEnumerable<string> allowedIps = null);
 
         string GetPublicKey(WGInterfaceName interfaceName);
         string GetInterfaceName(WGInterfaceName interfaceName);
