@@ -232,7 +232,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
 
             List<WGRouteStatus> wGRouteStatuses = new List<WGRouteStatus>();
             List<Peer> newPeers = new List<Peer>();
-            List<Tuple<Peer, IEnumerable<string>>> peersToRemove = new List<Tuple<Peer, IEnumerable<string>>>();
+            List<Peer> peersToRemove = new List<Peer>();
 
             var requestPeer = new Peer
             {
@@ -284,7 +284,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                         };
                     } else if (requestPeer.Endpoint == WgPeer.Endpoint) {
                         // If peers have the same endpoint we need to remove the old one
-                        peersToRemove.Add(new Tuple<Peer, IEnumerable<string>>(WgPeer, requestPeer.AllowedIPs));
+                        peersToRemove.Add(WgPeer);
                     }
                 }
             }
@@ -307,7 +307,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
 
             if (peersToRemove.Any()) {
                 foreach (var peerToRemove in peersToRemove) {
-                    _WGConfigService.DeletePeersThroughPipe(nameInterfce, peerToRemove.Item1, allowedIps: peerToRemove.Item2);
+                    _WGConfigService.DeletePeersThroughPipe(nameInterfce, peerToRemove, false);
                 }
             }
 
