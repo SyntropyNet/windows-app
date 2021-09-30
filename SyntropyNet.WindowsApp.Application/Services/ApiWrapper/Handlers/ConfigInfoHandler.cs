@@ -307,7 +307,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
 
             if (peersToRemove.Any()) {
                 foreach (var peerToRemove in peersToRemove) {
-                    _WGConfigService.DeletePeersThroughPipe(nameInterfce, peerToRemove, false);
+                    _WGConfigService.DeletePeersThroughPipe(nameInterfce, peerToRemove, deleteDuplicate: true);
                 }
             }
 

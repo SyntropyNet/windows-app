@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net.WebSockets;
 using System.Threading;
-using System.Threading.Tasks;
 using Websocket.Client;
 using Websocket.Client.Exceptions;
 using Newtonsoft.Json;
@@ -11,17 +10,12 @@ using SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers;
 using SyntropyNet.WindowsApp.Application.Domain.Models.Messages;
 using SyntropyNet.WindowsApp.Application.Contracts;
 using SyntropyNet.WindowsApp.Application.Domain.Models;
-using System.Windows.Controls;
 using SyntropyNet.WindowsApp.Application.Helpers;
 using SyntropyNet.WindowsApp.Application.Models;
-using System.Web.Configuration;
 using log4net;
-using SyntropyNet.WindowsApp.Application.Constants;
 using System.Net;
-using System.Linq;
 
-namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
-{
+namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper {
     public class ApiWrapperService: IApiWrapperService
     {
         private static readonly ILog log = LogManager.GetLogger(typeof(ApiWrapperService));
@@ -160,6 +154,8 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                             case "AUTO_PING":
                                 var autoPingRequest = JsonConvert.DeserializeObject<AutoPingRequest>(msg.Text);
 
+                                //log.Info($"[ AUTO_PING ]: {msg.Text}");
+
                                 try
                                 {
                                     if (autoPingHandler != null)
@@ -191,12 +187,16 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
 
                                 break;
                             case "CONFIG_INFO":
+                                //log.Info($"[ CONFIG_INFO ]: {msg.Text}");
+
                                 ConfigInfoRequest configInfoRequest = JsonConvert.DeserializeObject<ConfigInfoRequest>(
                                     msg.Text, JsonSettings.GetSnakeCaseNamingStrategy());
 
                                 _ProcessConfigInfo(client, configInfoRequest);
                                 break;
                             case "GET_INFO":
+                                //log.Info($"[ GET_INFO ]: {msg.Text}");
+
                                 var getInfoRequest = JsonConvert.DeserializeObject<GetInfoRequest>(
                                     msg.Text, JsonSettings.GetSnakeCaseNamingStrategy());
 
@@ -230,6 +230,8 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
 
                                 break;
                            case "WG_CONF":
+                                //log.Info($"[ WG_CONF ]: {msg.Text}");
+
                                 var WGConfRequest = JsonConvert.DeserializeObject<WGConfRequest>(
                                     msg.Text, JsonSettings.GetSnakeCaseNamingStrategy());
 

@@ -20,7 +20,14 @@ namespace SyntropyNet.WindowsApp.Application.Contracts
         void StopWG();
         void ApplyModifiedConfigs();
         void SetPeersThroughPipe(WGInterfaceName interfaceName, IEnumerable<Peer> peers);
-        void DeletePeersThroughPipe(WGInterfaceName interfaceName, Peer peer, bool replaceAllowedIps = true);
+        /// <summary>
+        /// Deletes peers. See parameter descriptions for more details.
+        /// </summary>
+        /// <param name="interfaceName"></param>
+        /// <param name="peer"></param>
+        /// <param name="deleteDuplicate">Means we just want to change a peer public key. In this case we create a new peer with new public key and delete the old one,
+        /// preserving all allowed IPs and routes in the route table</param>
+        void DeletePeersThroughPipe(WGInterfaceName interfaceName, Peer peer, bool deleteDuplicate = false);
 
         string GetPublicKey(WGInterfaceName interfaceName);
         string GetInterfaceName(WGInterfaceName interfaceName);
