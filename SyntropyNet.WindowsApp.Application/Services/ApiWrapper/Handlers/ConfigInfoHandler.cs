@@ -227,11 +227,12 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
 
         private WGRouteStatusData SetPeers(VpnConfig peer)
         {
-            var nameInterfce = _WGConfigService.GetWGInterfaceNameFromString(peer.Args.Ifname);
+            WGInterfaceName nameInterfce = _WGConfigService.GetWGInterfaceNameFromString(peer.Args.Ifname);
             List<Peer> WgPeers = _WGConfigService.GetPeerSections(nameInterfce).ToList();
 
             List<WGRouteStatus> wGRouteStatuses = new List<WGRouteStatus>();
             List<Peer> newPeers = new List<Peer>();
+            List<Peer> peersToRemove = new List<Peer>();
 
             var requestPeer = new Peer
             {
@@ -281,6 +282,9 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                             PublicKey = peer.Args.PublicKey,
                             Statuses = wGRouteStatuses
                         };
+                    } else if (requestPeer.Endpoint == WgPeer.Endpoint) {
+                        // If peers have the same endpoint we need to remove the old one
+                        peersToRemove.Add(WgPeer);
                     }
                 }
             }
@@ -300,13 +304,19 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
             _WGConfigService.SetPeerSections(nameInterfce, WgPeers);
             if (!isReconnect && newPeers.Count > 0)
                 _WGConfigService.SetPeersThroughPipe(nameInterfce, newPeers);
+
+            if (peersToRemove.Any()) {
+                foreach (var peerToRemove in peersToRemove) {
+                    _WGConfigService.DeletePeersThroughPipe(nameInterfce, peerToRemove, deleteDuplicate: true);
+                }
+            }
+
             return new WGRouteStatusData
             {
                 ConnectionId = peer.Metadata.ConnectionId,
                 PublicKey = peer.Args.PublicKey,
                 Statuses = wGRouteStatuses
             };
-
         }
 
         private bool EqualPeer(Peer peer1, Peer peer2)

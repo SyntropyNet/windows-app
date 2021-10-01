@@ -304,7 +304,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
             }
         }
 
-        public void DeletePeersThroughPipe(WGInterfaceName interfaceName, Peer peer)
+        public void DeletePeersThroughPipe(WGInterfaceName interfaceName, Peer peer, bool deleteDuplicate = false)
         {
             TunnelConfig interfaceConfig = GetHowName(interfaceName);
             StringBuilder set = new StringBuilder("set=1\n");
@@ -312,11 +312,14 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
             if (peer != null)
             {
                 set.Append($"public_key={Base64ToHex(peer.PublicKey)}\n");
-                set.Append("replace_allowed_ips=true\n");
-                foreach (var allowedIp in peer.AllowedIPs)
-                {
-                    set.Append($"allowed_ip={allowedIp}\n");
+
+                if (!deleteDuplicate) {
+                    set.Append("replace_allowed_ips=true\n");
+                    foreach (var allowedIp in peer.AllowedIPs) {
+                        set.Append($"allowed_ip={allowedIp}\n");
+                    }
                 }
+
                 set.Append($"persistent_keepalive_interval=15\n");
 
                 if (peer.Endpoint != null)
@@ -341,43 +344,36 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
             }
             catch { }
 
-            try
-            {
+            try {
                 var pipe = Encoding.UTF8.GetBytes(set.ToString());
                 stream.Write(pipe, 0, pipe.Length);
 
-                while (true)
-                {
-                    var line = reader.ReadLine();
-                    if (line == "")
-                        break;
-
-                    if (line.StartsWith("errno="))
-                    {
-                        var error = line.Substring(6);
-                        if (error == "0")
-                        {
-
-                            foreach (var allowedIp in peer.AllowedIPs)
-                            {
-                                string ip = allowedIp.Split('/')[0];
-                                string mask = ip == "0.0.0.0" ? "0.0.0.0" : "255.255.255.255";
-                                string gateway = interfaceConfig.Interface.Address.ToList()[0];
-                                int metric = 5;
-
-                                _networkService.DeleteRoute(interfaceName.ToString(), ip, mask, gateway, metric);
-                            }
-
+                if (!deleteDuplicate) {
+                    while (true) {
+                        var line = reader.ReadLine();
+                        if (line == "")
                             break;
+
+                        if (line.StartsWith("errno=")) {
+                            var error = line.Substring(6);
+                            if (error == "0") {
+
+                                foreach (var allowedIp in peer.AllowedIPs) {
+                                    string ip = allowedIp.Split('/')[0];
+                                    string mask = ip == "0.0.0.0" ? "0.0.0.0" : "255.255.255.255";
+                                    string gateway = interfaceConfig.Interface.Address.ToList()[0];
+                                    int metric = 5;
+
+                                    _networkService.DeleteRoute(interfaceName.ToString(), ip, mask, gateway, metric);
+                                }
+
+                                break;
+                            } else
+                                new Exception("Update error wg interface");
                         }
-                        else
-                            new Exception("Update error wg interface");
                     }
                 }
-            }
-            catch { }
-            finally
-            {
+            } catch { } finally {
                 if (stream != null && stream.IsConnected)
                     stream.Close();
             }

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net.WebSockets;
 using System.Threading;
-using System.Threading.Tasks;
 using Websocket.Client;
 using Websocket.Client.Exceptions;
 using Newtonsoft.Json;
@@ -11,16 +10,12 @@ using SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers;
 using SyntropyNet.WindowsApp.Application.Domain.Models.Messages;
 using SyntropyNet.WindowsApp.Application.Contracts;
 using SyntropyNet.WindowsApp.Application.Domain.Models;
-using System.Windows.Controls;
 using SyntropyNet.WindowsApp.Application.Helpers;
 using SyntropyNet.WindowsApp.Application.Models;
-using System.Web.Configuration;
 using log4net;
-using SyntropyNet.WindowsApp.Application.Constants;
 using System.Net;
 
-namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
-{
+namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper {
     public class ApiWrapperService: IApiWrapperService
     {
         private static readonly ILog log = LogManager.GetLogger(typeof(ApiWrapperService));
@@ -159,6 +154,8 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
                             case "AUTO_PING":
                                 var autoPingRequest = JsonConvert.DeserializeObject<AutoPingRequest>(msg.Text);
 
+                                //log.Info($"[ AUTO_PING ]: {msg.Text}");
+
                                 try
                                 {
                                     if (autoPingHandler != null)
@@ -190,97 +187,16 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
 
                                 break;
                             case "CONFIG_INFO":
-                                var configInfoRequest = JsonConvert.DeserializeObject<ConfigInfoRequest>(
+                                //log.Info($"[ CONFIG_INFO ]: {msg.Text}");
+
+                                ConfigInfoRequest configInfoRequest = JsonConvert.DeserializeObject<ConfigInfoRequest>(
                                     msg.Text, JsonSettings.GetSnakeCaseNamingStrategy());
 
-                                try
-                                {
-                                    if (configInfoHandler != null)
-                                    {
-                                        configInfoHandler.Interrupt();
-                                        configInfoHandler = null;
-                                    }
-
-                                    configInfoHandler = new ConfigInfoHandler(client, _WGConfigService, _networkInformationService, _appSettings, _httpRequestService);
-                                    configInfoHandler.Start(configInfoRequest, IsRecconect);
-                                    IsRecconect = false;
-                                    ConnectionLost = false;
-                                }
-                                catch(Exception ex)
-                                {
-                                    try
-                                    {
-                                        LoggerRequestHelper.Send(
-                                            client,
-                                            log4net.Core.Level.Error,
-                                            _appSettings.DeviceId,
-                                            _appSettings.DeviceName,
-                                            _appSettings.DeviceIp,
-                                            $"[Message: {ex.Message}, stacktrace: {ex.StackTrace}]");
-                                    }
-                                    catch (Exception ex2)
-                                    {
-                                        log.Error($"[Message: {ex2.Message}, stacktrace: {ex2.StackTrace}]",ex);
-                                    }
-                                }
-
-                                // prepare Services Liset
-                                var newServices = new List<ServiceModel>();
-                                foreach(var vpnData in configInfoRequest.Data.Vpn)
-                                {
-                                    if(vpnData.Metadata != null)
-                                    {
-                                        foreach(var service in vpnData.Metadata.AllowedIpsInfo)
-                                        {
-                                            var serviceAdded = false;
-                                            if(service.AgentServiceTcpPorts != null)
-                                            {
-                                                foreach (var tcpPort in service.AgentServiceTcpPorts)
-                                                {
-                                                    newServices.Add(new ServiceModel
-                                                    {
-                                                        PeerUid = vpnData.Args.PublicKey,
-                                                        Name = service.AgentServiceName,
-                                                        Ip = service.AgentServiceSubnetIp,
-                                                        Port = tcpPort.ToString()
-                                                    });
-                                                    serviceAdded = true;
-                                                }
-                                            }
-
-                                            if(service.AgentServiceUdpPorts != null)
-                                            {
-                                                foreach (var udpPort in service.AgentServiceUdpPorts)
-                                                {
-                                                    newServices.Add(new ServiceModel
-                                                    {
-                                                        PeerUid = vpnData.Args.PublicKey,
-                                                        Name = service.AgentServiceName,
-                                                        Ip = service.AgentServiceSubnetIp,
-                                                        Port = udpPort.ToString()
-                                                    });
-                                                    serviceAdded = true;
-                                                }
-                                            }
-
-                                            if (!serviceAdded)
-                                            {
-                                                newServices.Add(new ServiceModel
-                                                {
-                                                    PeerUid = vpnData.Args.PublicKey,
-                                                    Name = service.AgentServiceName,
-                                                    Ip = service.AgentServiceSubnetIp,
-                                                    Port = string.Empty
-                                                });
-                                            }
-                                        }
-                                    }
-                                }
-
-                                ServicesUpdatedEvent?.Invoke(newServices);
-
+                                _ProcessConfigInfo(client, configInfoRequest);
                                 break;
                             case "GET_INFO":
+                                //log.Info($"[ GET_INFO ]: {msg.Text}");
+
                                 var getInfoRequest = JsonConvert.DeserializeObject<GetInfoRequest>(
                                     msg.Text, JsonSettings.GetSnakeCaseNamingStrategy());
 
@@ -314,6 +230,8 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
 
                                 break;
                            case "WG_CONF":
+                                //log.Info($"[ WG_CONF ]: {msg.Text}");
+
                                 var WGConfRequest = JsonConvert.DeserializeObject<WGConfRequest>(
                                     msg.Text, JsonSettings.GetSnakeCaseNamingStrategy());
 
@@ -654,5 +572,79 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper
             _WGConfigService.StopWG();
             Running = false;
         }
+
+        #region [ HELPERS ]
+
+        private void _ProcessConfigInfo(WebsocketClient client, ConfigInfoRequest configInfoRequest) {
+            try {
+                if (configInfoHandler != null) {
+                    configInfoHandler.Interrupt();
+                    configInfoHandler = null;
+                }
+
+                configInfoHandler = new ConfigInfoHandler(client, _WGConfigService, _networkInformationService, _appSettings, _httpRequestService);
+                configInfoHandler.Start(configInfoRequest, IsRecconect);
+                IsRecconect = false;
+                ConnectionLost = false;
+            } catch (Exception ex) {
+                try {
+                    LoggerRequestHelper.Send(
+                        client,
+                        log4net.Core.Level.Error,
+                        _appSettings.DeviceId,
+                        _appSettings.DeviceName,
+                        _appSettings.DeviceIp,
+                        $"[Message: {ex.Message}, stacktrace: {ex.StackTrace}]");
+                } catch (Exception ex2) {
+                    log.Error($"[Message: {ex2.Message}, stacktrace: {ex2.StackTrace}]", ex);
+                }
+            }
+
+            // prepare Services Liset
+            var newServices = new List<ServiceModel>();
+            foreach (var vpnData in configInfoRequest.Data.Vpn) {
+                if (vpnData.Metadata != null) {
+                    foreach (var service in vpnData.Metadata.AllowedIpsInfo) {
+                        var serviceAdded = false;
+                        if (service.AgentServiceTcpPorts != null) {
+                            foreach (var tcpPort in service.AgentServiceTcpPorts) {
+                                newServices.Add(new ServiceModel {
+                                    PeerUid = vpnData.Args.PublicKey,
+                                    Name = service.AgentServiceName,
+                                    Ip = service.AgentServiceSubnetIp,
+                                    Port = tcpPort.ToString()
+                                });
+                                serviceAdded = true;
+                            }
+                        }
+
+                        if (service.AgentServiceUdpPorts != null) {
+                            foreach (var udpPort in service.AgentServiceUdpPorts) {
+                                newServices.Add(new ServiceModel {
+                                    PeerUid = vpnData.Args.PublicKey,
+                                    Name = service.AgentServiceName,
+                                    Ip = service.AgentServiceSubnetIp,
+                                    Port = udpPort.ToString()
+                                });
+                                serviceAdded = true;
+                            }
+                        }
+
+                        if (!serviceAdded) {
+                            newServices.Add(new ServiceModel {
+                                PeerUid = vpnData.Args.PublicKey,
+                                Name = service.AgentServiceName,
+                                Ip = service.AgentServiceSubnetIp,
+                                Port = string.Empty
+                            });
+                        }
+                    }
+                }
+            }
+
+            ServicesUpdatedEvent?.Invoke(newServices);
+        }
+
+        #endregion
     }
 }
