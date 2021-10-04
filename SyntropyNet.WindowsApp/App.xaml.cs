@@ -200,7 +200,7 @@ namespace SyntropyNet.WindowsApp
                 }
 
                 string name = "Syntropy_IMCP_Inbound";
-                string appPath = Assembly.GetEntryAssembly().Location;
+                //string appPath = Assembly.GetEntryAssembly().Location;
                 INetFwRule firewallRule = null;
                 bool exist = false;
 
@@ -227,7 +227,7 @@ namespace SyntropyNet.WindowsApp
                 firewallRule.InterfaceTypes = "All";
                 firewallRule.Name = name;
                 firewallRule.Protocol = 1;
-                firewallRule.ApplicationName = appPath;
+                //firewallRule.ApplicationName = appPath;
 
                 //NOTE: Must do this after setting the Protocol!
                 //firewallRule.LocalPorts = port.ToString();
