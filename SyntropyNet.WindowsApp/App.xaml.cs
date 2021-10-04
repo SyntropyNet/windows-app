@@ -1,6 +1,7 @@
 ﻿using log4net;
 using log4net.Appender;
 using log4net.Repository.Hierarchy;
+using NetFwTypeLib;
 using Prism.Ioc;
 using Prism.Mvvm;
 using Prism.Unity;
@@ -53,6 +54,7 @@ namespace SyntropyNet.WindowsApp
             try {
                 SetupProgramDataDirs();
                 SetupLoggerAppenders();
+                _SetFirewallRules();
 
                 var startingAsAService = e.Args.Any() && e.Args.Contains("/service");
                 log4net.Config.XmlConfigurator.Configure();
@@ -185,6 +187,60 @@ namespace SyntropyNet.WindowsApp
             if (!Directory.Exists(logsDir))
             {
                 Directory.CreateDirectory(logsDir);
+            }
+        }
+
+        private void _SetFirewallRules() {
+            try {
+                INetFwPolicy2 firewallPolicy = Activator.CreateInstance(Type.GetTypeFromProgID("HNetCfg.FwPolicy2")) as INetFwPolicy2;
+
+                if (firewallPolicy == null) {
+                    log.Error("Unable to create Syntropy_IMCP_Inbound firewall rule. Unable to access FW policy");
+                    return;
+                }
+
+                string name = "Syntropy_IMCP_Inbound";
+                string appPath = Assembly.GetEntryAssembly().Location;
+                INetFwRule firewallRule = null;
+                bool exist = false;
+
+                foreach (INetFwRule2 rule in firewallPolicy.Rules) {
+                    if (rule.Name == name) {
+                        firewallRule = rule;
+                        exist = true;
+                    }
+                }
+
+                if (firewallRule == null) {
+                    firewallRule = Activator.CreateInstance(Type.GetTypeFromProgID("HNetCfg.FWRule")) as INetFwRule;
+                }
+
+                if (firewallRule == null) {
+                    log.Error("Unable to create Syntropy_IMCP_Inbound firewall rule");
+                    return;
+                }
+
+
+                firewallRule.Action = NET_FW_ACTION_.NET_FW_ACTION_ALLOW;
+                firewallRule.Direction = NET_FW_RULE_DIRECTION_.NET_FW_RULE_DIR_IN;
+                firewallRule.Enabled = true;
+                firewallRule.InterfaceTypes = "All";
+                firewallRule.Name = name;
+                firewallRule.Protocol = 1;
+                firewallRule.ApplicationName = appPath;
+
+                //NOTE: Must do this after setting the Protocol!
+                //firewallRule.LocalPorts = port.ToString();
+
+                log.DebugFormat("Adding Windows Firewall Rule {0}...", firewallRule.Name);
+
+                if (!exist) { 
+                    firewallPolicy.Rules.Add(firewallRule);
+                }
+
+                log.InfoFormat("Windows Firewall Rule {0} added.", firewallRule.Name);
+            } catch (Exception ex) {
+                log.Error("Windows Firewall Rule for Syntropy could not be added", ex);
             }
         }
 
