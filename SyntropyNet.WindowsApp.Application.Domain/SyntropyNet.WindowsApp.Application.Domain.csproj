@@ -93,6 +93,7 @@
     <Compile Include="Models\Messages\WGConfRequest.cs" />
     <Compile Include="Models\Messages\WGConfResponse.cs" />
     <Compile Include="Models\Messages\WGRouteStatusRequest.cs" />
+    <Compile Include="Models\SdnRouterPingResult.cs" />
     <Compile Include="Models\WireGuard\Keypair.cs" />
     <Compile Include="Models\WireGuard\PeerDataFromPipe.cs" />
     <Compile Include="Models\WireGuard\TunnelConfig.cs" />
