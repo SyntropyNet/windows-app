@@ -45,7 +45,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper {
         private bool Running { get; set; }
         private bool ConnectionLost { get; set; }
         private bool Stopping { get; set; }
-        private int WaitReconnect { get; set; } = 0;
+        private int WaitReconnect = 1000;
         private string UserError { get; set; }
         private bool IsRecconect { get; set; } = false;
 
@@ -132,7 +132,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper {
                     {
                         SdnRouter.Instance.StartPing();
                         Debug.WriteLine($"Reconnection happened, type: {info.Type}");
-                        WaitReconnect = 0;
+                        WaitReconnect = 1000;
                         ConnectionLost = false;
                         ReconnectedEvent?.Invoke();
                     });
@@ -393,26 +393,16 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper {
                                 log.Info($"Attempt to reconnect via {WaitReconnect}ms");
                                 ReconnectingEvent?.Invoke(x.Type, x.Exception?.Message);
                                 Thread.Sleep(WaitReconnect);
-                                try
+                                if (ConnectionLost)
                                 {
-                                    checked
-                                    {
-                                        if (!ConnectionLost || WaitReconnect < 20000)
-                                        {
-                                            // If connection was lost, try to re-connect every 20 secs, 
-                                            // if no then increase timeout by 5sec every iteration
-                                            WaitReconnect += 5000;
-                                        }
+                                    if (WaitReconnect > (Int32.MaxValue / 2)) {
+                                        WaitReconnect = Int32.MaxValue;
+                                    } else {
+                                        WaitReconnect *= 2;
                                     }
+                                }
 
-                                    IsRecconect = true;
-                                }
-                                catch (OverflowException ex)
-                                {
-                                    Running = false;
-                                    IsRecconect = false;
-                                    WaitReconnect = 0;
-                                }
+                                IsRecconect = true;
                             }
                             
                             
