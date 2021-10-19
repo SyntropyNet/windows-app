@@ -322,19 +322,46 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
         }
 
         public void UpdateRoute(CCIp4RouteEntry routeEntry, IPAddress newGateway, IPAddress newMask, int newInterfaceIndex) {
-            try {
-                Ip4RouteEntry updatedRoute = new Ip4RouteEntry {
-                    DestinationIP = routeEntry.DestinationIP,
-                    SubnetMask = newMask,
-                    GatewayIP = newGateway,
-                    Metric = RouteTableConstants.Metric,
-                    InterfaceIndex = newInterfaceIndex
-                };
+            // GET route table
+            IntPtr fwdTable = IntPtr.Zero;
+            int size = 0;
+            int result = NativeMethods.GetIpForwardTable(fwdTable, ref size, true);
+            fwdTable = Marshal.AllocHGlobal(size);
+            result = NativeMethods.GetIpForwardTable(fwdTable, ref size, true); // Array dimensions exceeded exception without this line
 
-                Ip4RouteTable.DeleteRoute(routeEntry);
-                CreateRoute(updatedRoute);
-            } catch (Exception ex) {
-                log.Error($"Error during route update: {ex.ToString()}");
+            // Read route table
+            var table = NativeMethods.ReadIPForwardTable(fwdTable);
+            Marshal.FreeHGlobal(fwdTable);
+
+            // GET target route IP uint
+            uint ipCodeToModify = BitConverter.ToUInt32(routeEntry.DestinationIP.GetAddressBytes(), 0);
+            NativeMethods.MIB_IPFORWARDROW routeToRemove = new NativeMethods.MIB_IPFORWARDROW();
+            bool routeFound = false;
+
+            foreach (var route in table.Table) {
+                if (route.dwForwardDest == ipCodeToModify) { // target route found
+
+                    // Create a new, modified route, then delete the old one
+                    // Reason: On Windows Vista and Windows Server 2008, the SetIpForwardEntry function only works on interfaces with a single sub-interface
+                    // (where the interface LUID and subinterface LUID are the same). The dwForwardIfIndex member of the MIB_IPFORWARDROW structure specifies the interface.
+                    // https://docs.microsoft.com/en-us/windows/win32/api/iphlpapi/nf-iphlpapi-setipforwardentry
+                    Ip4RouteEntry newRouteEntry = new Ip4RouteEntry {
+                        DestinationIP = routeEntry.DestinationIP,
+                        GatewayIP = newGateway,
+                        SubnetMask = newMask,
+                        InterfaceIndex = newInterfaceIndex,
+                        Metric = RouteTableConstants.Metric
+                    };
+
+                    this.CreateRoute(newRouteEntry);
+                    routeToRemove = route;
+                    routeFound = true;
+                    break;
+                }
+            }
+
+            if (routeFound) {
+                NativeMethods.DeleteIpForwardEntry(ref routeToRemove);
             }
         }
 

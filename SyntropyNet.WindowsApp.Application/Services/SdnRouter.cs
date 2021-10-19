@@ -280,6 +280,8 @@ namespace SyntropyNet.WindowsApp.Application.Services {
                     InterfaceInfos.Add(interfaceName, new InterfaceInfo());
                 }
 
+                _log.Info($"[ Pinger peers ] iface: {interfaceName.ToString()} / peers: {String.Join(" / ", peers.Select(x => String.Join(", ", x.AllowedIPs)))}");
+
                 InterfaceInfos[interfaceName].Gateway = interfaceGateway;
                 InterfaceInfos[interfaceName].Peers = peers?.ToList();
 
