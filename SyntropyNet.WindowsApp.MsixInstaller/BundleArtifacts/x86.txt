@@ -1,0 +1,2 @@
+MainPackage=C:\Users\Kirill\source\repos\syntropy-client-net\SyntropyNet.WindowsApp.MsixInstaller\bin\x86\Debug\SyntropyNet.WindowsApp.MsixInstaller_1.34.51.0_x86_Debug.appx
+SymbolPackage=C:\Users\Kirill\source\repos\syntropy-client-net\SyntropyNet.WindowsApp.MsixInstaller\obj\x86\Debug\Symbols\SyntropyNet.WindowsApp.MsixInstaller_1.34.51.0_x86_Debug.appxsym
