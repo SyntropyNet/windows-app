@@ -4,6 +4,7 @@ using SyntropyNet.WindowsApp.Application.Comparers;
 using SyntropyNet.WindowsApp.Application.Constants;
 using SyntropyNet.WindowsApp.Application.Contracts;
 using SyntropyNet.WindowsApp.Application.Domain.Enums.WireGuard;
+using SyntropyNet.WindowsApp.Application.Domain.Helpers;
 using SyntropyNet.WindowsApp.Application.Domain.Models.Messages;
 using SyntropyNet.WindowsApp.Application.Domain.Models.WireGuard;
 using SyntropyNet.WindowsApp.Application.Exceptions;
@@ -98,19 +99,16 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
 
                         if (peers.Count > 0)
                         {
-                            List<WGRouteStatusData> WGRouteStatusDataResponse = new List<WGRouteStatusData>();
+                            WGRouteStatusRequest controllerRequest = new WGRouteStatusRequest();
 
-                            foreach (var peer in peers.OrderBy(x => x, new VpnConfigComparer()))
-                            {
-                                WGRouteStatusDataResponse.Add(SetPeers(peer));
+                            foreach (var peer in peers.OrderBy(x => x, new VpnConfigComparer())) {
+                                WGRouteStatusData dataToAdd = SetPeers(peer);
+                                controllerRequest.AddRouteStatusData(dataToAdd);
                             }
 
-                            if (WGRouteStatusDataResponse.Count > 0)
+                            if (controllerRequest.Data.NotEmpty())
                             {
-                                var message = JsonConvert.SerializeObject(new WGRouteStatusRequest
-                                {
-                                    Data = WGRouteStatusDataResponse
-                                }, JsonSettings.GetSnakeCaseNamingStrategy());
+                                var message = JsonConvert.SerializeObject(controllerRequest, JsonSettings.GetSnakeCaseNamingStrategy());
                                 Client.Send(message);
 
                                 if (DebugLogger)
@@ -239,7 +237,8 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                 PublicKey = peer.Args.PublicKey,
                 AllowedIPs = peer.Args.AllowedIps,
                 Endpoint = peer.Args.EndpointIpv4 != null ? $"{peer.Args.EndpointIpv4}:{peer.Args.EndpointPort}" : null,
-                ConnectionId = peer.Metadata.ConnectionId
+                ConnectionId = peer.Metadata.ConnectionId,
+                ConnectionGroupId = peer.Metadata.ConnectionGroupId
             };
 
             if (!isReconnect)
@@ -279,7 +278,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                         return new WGRouteStatusData
                         {
                             ConnectionId = peer.Metadata.ConnectionId,
-                            PublicKey = peer.Args.PublicKey,
+                            ConnectionGroupId = peer.Metadata.ConnectionGroupId,
                             Statuses = wGRouteStatuses
                         };
                     } else if (requestPeer.Endpoint == WgPeer.Endpoint) {
@@ -314,7 +313,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
             return new WGRouteStatusData
             {
                 ConnectionId = peer.Metadata.ConnectionId,
-                PublicKey = peer.Args.PublicKey,
+                ConnectionGroupId = peer.Metadata.ConnectionGroupId,
                 Statuses = wGRouteStatuses
             };
         }

@@ -53,6 +53,7 @@ namespace SyntropyNet.WindowsApp.Application.Domain.Models.Messages
         public string DeviceName { get; set; }
         public string DevicePublicIpv4 { get; set; }
         public int ConnectionId { get; set; }
+        public int ConnectionGroupId { get; set; }
 
         public IEnumerable<AllowedIpsInfo> AllowedIpsInfo { get; set; }
     }
