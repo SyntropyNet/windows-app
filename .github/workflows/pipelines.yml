@@ -40,7 +40,7 @@ name: Create Installer
 
 on:
   push:
-    branches: [ feature_wgroutestatus_update ]
+    branches: [ AG-1_ICMP_permissions ]
   #pull_request:
   #  branches: [ master ]
 
