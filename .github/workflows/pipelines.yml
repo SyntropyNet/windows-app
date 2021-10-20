@@ -40,7 +40,7 @@ name: Create Installer
 
 on:
   push:
-    branches: [ feature/update-route ]
+    branches: [ develop ]
   #pull_request:
   #  branches: [ master ]
 

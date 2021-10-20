@@ -9,7 +9,7 @@
   <Identity
     Name="661fc5c1-7366-4617-a076-8f00dc1b8d4e"
     Publisher="CN=shalamov"
-    Version="1.0.2.0" />
+    Version="1.0.1.0" />
 
   <Properties>
     <DisplayName>Syntropy</DisplayName>
