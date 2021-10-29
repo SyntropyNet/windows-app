@@ -233,7 +233,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
                     Metric = metric,
                 };
 
-                CreateRoute(ip4RouteEntry);
+                _CreateRoute(ip4RouteEntry);
                 return;
             }
 
@@ -295,7 +295,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
             return false;
         }
 
-        private void CreateRoute(Ip4RouteEntry routeEntry)
+        private void _CreateRoute(Ip4RouteEntry routeEntry)
         {
             var route = new NativeMethods.MIB_IPFORWARDROW
             {
@@ -353,7 +353,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
                         Metric = RouteTableConstants.Metric
                     };
 
-                    this.CreateRoute(newRouteEntry);
+                    this._CreateRoute(newRouteEntry);
                     routeToRemove = route;
                     routeFound = true;
                     break;

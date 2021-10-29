@@ -14,6 +14,7 @@ using SyntropyNet.WindowsApp.Application.Helpers;
 using SyntropyNet.WindowsApp.Application.Models;
 using log4net;
 using System.Net;
+using System.Linq;
 
 namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper {
     public class ApiWrapperService: IApiWrapperService
@@ -235,111 +236,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper {
                                 var WGConfRequest = JsonConvert.DeserializeObject<WGConfRequest>(
                                     msg.Text, JsonSettings.GetSnakeCaseNamingStrategy());
 
-                                try
-                                {
-                                    if (WGConfHandler != null)
-                                    {
-                                        for (int i = 1; i <= 60; i++)
-                                        {
-                                            if(i == 60)
-                                            {
-                                                throw new Exception("Runtime exceeded");
-                                            }
-                                            if (!WGConfHandler.IsAlive())
-                                            {
-                                                WGConfHandler.Interrupt();
-                                                WGConfHandler = null;
-                                                break;
-                                            }
-
-                                            Thread.Sleep(1000);
-                                        }
-                                    }
-
-                                    WGConfHandler = new WGConfHandler(client, _WGConfigService, _appSettings, _httpRequestService);
-                                    WGConfHandler.Start(WGConfRequest);
-                                }
-                                catch (Exception ex)
-                                {
-                                    try
-                                    {
-                                        LoggerRequestHelper.Send(
-                                            client,
-                                            log4net.Core.Level.Error,
-                                            _appSettings.DeviceId,
-                                            _appSettings.DeviceName,
-                                            _appSettings.DeviceIp,
-                                            $"[Message: {ex.Message}, stacktrace: {ex.StackTrace}]");
-                                    }
-                                    catch (Exception ex2)
-                                    {
-                                        log.Error($"[Message: {ex2.Message}, stacktrace: {ex2.StackTrace}]", ex);
-                                    }
-
-                                    break;
-                                }
-                                
-                                var addedServices = new List<ServiceModel>();
-                                var removedPeers = new List<string>();
-                                foreach (var item in WGConfRequest.Data)
-                                {
-                                    switch (item.Fn)
-                                    {
-                                        case "add_peer":
-                                            foreach (var service in item.Metadata.AllowedIpsInfo)
-                                            {
-                                                var serviceAdded = false;
-                                                if(service.AgentServiceTcpPorts != null)
-                                                {
-                                                    foreach (var tcpPort in service.AgentServiceTcpPorts)
-                                                    {
-                                                        addedServices.Add(new ServiceModel
-                                                        {
-                                                            PeerUid = item.Args.PublicKey,
-                                                            Name = service.AgentServiceName,
-                                                            Ip = service.AgentServiceSubnetIp,
-                                                            Port = tcpPort.ToString()
-                                                        });
-                                                        serviceAdded = true;
-                                                    }
-                                                }
-
-                                                if(service.AgentServiceUdpPorts != null)
-                                                {
-                                                    foreach (var udpPort in service.AgentServiceUdpPorts)
-                                                    {
-                                                        addedServices.Add(new ServiceModel
-                                                        {
-                                                            PeerUid = item.Args.PublicKey,
-                                                            Name = service.AgentServiceName,
-                                                            Ip = service.AgentServiceSubnetIp,
-                                                            Port = udpPort.ToString()
-                                                        });
-                                                        serviceAdded = true;
-                                                    }
-                                                }
-
-                                                if (!serviceAdded)
-                                                {
-                                                    addedServices.Add(new ServiceModel
-                                                    {
-                                                        PeerUid = item.Args.PublicKey,
-                                                        Name = service.AgentServiceName,
-                                                        Ip = service.AgentServiceSubnetIp,
-                                                        Port = string.Empty
-                                                    });
-                                                }
-
-                                            }
-                                            break;
-                                        case "remove_peer":
-                                            removedPeers.Add(item.Args.PublicKey);
-                                            break;
-                                    }
-                                }
-
-                                PeersServicesUpdatedEvent?.Invoke(addedServices,removedPeers);
-
+                                _WG_Conf_Handler(client, WGConfRequest);
                                 break;
                             default:
                                 return;
@@ -564,6 +461,92 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper {
         }
 
         #region [ HELPERS ]
+
+        private void _WG_Conf_Handler(WebsocketClient client, WGConfRequest WGConfRequest) {
+            try {
+                if (WGConfHandler != null) {
+                    for (int i = 1; i <= 60; i++) {
+                        if (i == 60) {
+                            throw new Exception("Runtime exceeded");
+                        }
+                        if (!WGConfHandler.IsAlive()) {
+                            WGConfHandler.Interrupt();
+                            WGConfHandler = null;
+                            break;
+                        }
+
+                        Thread.Sleep(1000);
+                    }
+                }
+
+                WGConfHandler = new WGConfHandler(client, _WGConfigService, _appSettings, _httpRequestService);
+                WGConfHandler.Start(WGConfRequest);
+            } catch (Exception ex) {
+                try {
+                    LoggerRequestHelper.Send(
+                        client,
+                        log4net.Core.Level.Error,
+                        _appSettings.DeviceId,
+                        _appSettings.DeviceName,
+                        _appSettings.DeviceIp,
+                        $"[Message: {ex.Message}, stacktrace: {ex.StackTrace}]");
+                } catch (Exception ex2) {
+                    log.Error($"[Message: {ex2.Message}, stacktrace: {ex2.StackTrace}]", ex);
+                }
+
+                return;
+            }
+
+            var addedServices = new List<ServiceModel>();
+            var removedPeers = new List<string>();
+            foreach (var item in WGConfRequest.Data) {
+                switch (item.Fn) {
+                    case "add_peer":
+                        foreach (var service in item.Metadata.AllowedIpsInfo) {
+                            var serviceAdded = false;
+                            if (service.AgentServiceTcpPorts != null) {
+                                foreach (var tcpPort in service.AgentServiceTcpPorts) {
+                                    addedServices.Add(new ServiceModel {
+                                        PeerUid = item.Args.PublicKey,
+                                        Name = service.AgentServiceName,
+                                        Ip = service.AgentServiceSubnetIp,
+                                        Port = tcpPort.ToString()
+                                    });
+                                    serviceAdded = true;
+                                }
+                            }
+
+                            if (service.AgentServiceUdpPorts != null) {
+                                foreach (var udpPort in service.AgentServiceUdpPorts) {
+                                    addedServices.Add(new ServiceModel {
+                                        PeerUid = item.Args.PublicKey,
+                                        Name = service.AgentServiceName,
+                                        Ip = service.AgentServiceSubnetIp,
+                                        Port = udpPort.ToString()
+                                    });
+                                    serviceAdded = true;
+                                }
+                            }
+
+                            if (!serviceAdded) {
+                                addedServices.Add(new ServiceModel {
+                                    PeerUid = item.Args.PublicKey,
+                                    Name = service.AgentServiceName,
+                                    Ip = service.AgentServiceSubnetIp,
+                                    Port = string.Empty
+                                });
+                            }
+
+                        }
+                        break;
+                    case "remove_peer":
+                        removedPeers.Add(item.Args.PublicKey);
+                        break;
+                }
+            }
+
+            PeersServicesUpdatedEvent?.Invoke(addedServices, removedPeers);
+        }
 
         private void _ProcessConfigInfo(WebsocketClient client, ConfigInfoRequest configInfoRequest) {
             try {

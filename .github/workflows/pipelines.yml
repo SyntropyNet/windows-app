@@ -40,7 +40,7 @@ name: Create Installer
 
 on:
   push:
-    branches: [ develop ]
+    branches: [ feature/wireguard_nt ]
   #pull_request:
   #  branches: [ master ]
 

@@ -17,6 +17,8 @@
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
     <Copy64Files>false</Copy64Files>
+    <Copy86Files>false</Copy86Files>
+    <CopyARMFiles>false</CopyARMFiles>
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
@@ -39,7 +41,10 @@
     <Copy64Files>true</Copy64Files>
   </PropertyGroup>
   <PropertyGroup Condition="$(Platform) == 'x86'">
-    <Copy64Files>false</Copy64Files>
+    <Copy86Files>true</Copy86Files>
+  </PropertyGroup>
+  <PropertyGroup Condition="$(Platform) == 'ARM64'">
+    <CopyARMFiles>true</CopyARMFiles>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>syntropy-icon.ico</ApplicationIcon>
@@ -296,6 +301,36 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
   </ItemGroup>
+  <ItemGroup Condition="$(Copy64Files)==true">
+    <ContentWithTargetPath Include="wireguard\x64\tunnel.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>tunnel.dll</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="wireguard\x64\wireguard.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>wireguard.dll</TargetPath>
+    </ContentWithTargetPath>
+  </ItemGroup>
+  <ItemGroup Condition="$(CopyARMFiles)==true">
+    <ContentWithTargetPath Include="wireguard\arm64\tunnel.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>tunnel.dll</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="wireguard\arm64\wireguard.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>wireguard.dll</TargetPath>
+    </ContentWithTargetPath>
+  </ItemGroup>
+  <ItemGroup Condition="$(Copy86Files)==true">
+    <ContentWithTargetPath Include="wireguard\x86\tunnel.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>tunnel.dll</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="wireguard\x86\wireguard.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>wireguard.dll</TargetPath>
+    </ContentWithTargetPath>
+  </ItemGroup>
   <ItemGroup>
     <None Include="App.config">
       <SubType>Designer</SubType>
@@ -329,32 +364,6 @@
     <Content Include="syntropy-icon.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-  </ItemGroup>
-  <ItemGroup Condition="$(Copy64Files)==true">
-    <ContentWithTargetPath Include="x64\tunnel.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <TargetPath>tunnel.dll</TargetPath>
-    </ContentWithTargetPath>
-    <ContentWithTargetPath Include="x64\wintun.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <TargetPath>wintun.dll</TargetPath>
-    </ContentWithTargetPath>
-  </ItemGroup>
-  <ItemGroup Condition="$(Copy64Files)==false">
-    <!--<Content Include="x86\tunnel.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>-->
-    <ContentWithTargetPath Include="x86\tunnel.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <TargetPath>tunnel.dll</TargetPath>
-    </ContentWithTargetPath>
-    <!--<Content Include="x86\wintun.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>-->
-    <ContentWithTargetPath Include="x86\wintun.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <TargetPath>wintun.dll</TargetPath>
-    </ContentWithTargetPath>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.7">
@@ -407,8 +416,7 @@
     <Copy Condition="Exists('$(DeployedConfig)')" SourceFiles="$(IntermediateOutputPath)$(TargetFileName).config" DestinationFiles="$(DeployedConfig)" />
   </Target>
   <PropertyGroup>
-    <PostBuildEvent>if $(ConfigurationName) == Debug ( $(SignTool) sign /f $(CertPath) /p $(PackageCertificatePassword) $(TargetPath) )
-
-</PostBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
   </PropertyGroup>
 </Project>
