@@ -25,6 +25,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
         private readonly IAppSettings _appSettings;
         private readonly IHttpRequestService _httpRequestService;
         private readonly bool DebugLogger;
+        private Stopwatch _pingTimer;
 
         private Thread mainTask;
         public AutoPingHandler(
@@ -41,7 +42,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
 
         public void Start(AutoPingRequest request)
         {
-            mainTask?.Abort();
+            Interrupt();
 
             if (!request.Data.Ips.Any())
             {
@@ -52,43 +53,56 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
             {
                 try
                 {
-                    while (true)
-                    {
-                        var responseData = new AutoPingResponseData();
-                        var results = new List<AutoPingResponseItem>();
+                    while (true) {
+                        bool processPing = false;
 
-                        Parallel.ForEach(request.Data.Ips, x => results.Add(Ping(x)));
-                        IEnumerable<AutoPingResponseItem> orderedResults = results.OrderByDescending(p => p.LatencyMs.HasValue)
-                            .ThenBy(p => p.LatencyMs);
-
-                        int resultsToTake = request.Data.ResponseLimit > 0 ? request.Data.ResponseLimit : 5; // Assign a default value if missed
-
-                        if (resultsToTake >= orderedResults.Count()) {
-                            results = orderedResults.ToList();
-                        } else {
-                            results = orderedResults.Take(resultsToTake).ToList();
+                        if (_pingTimer == null) {
+                            _pingTimer = new Stopwatch();
+                            _pingTimer.Start();
+                            processPing = true;
+                        } else if (!_pingTimer.IsRunning) {
+                            _pingTimer.Start();
                         }
 
-                        var response = new AutoPingResponse
-                        {
-                            Id = $"ID:{DateTime.UtcNow.Ticks / TimeSpan.TicksPerMillisecond}",
-                            Data = new AutoPingResponseData { Pings = results }
-                        };
+                        if (_pingTimer.ElapsedMilliseconds >= (request.Data.Interval * 1000)) {
+                            _pingTimer.Restart();
+                            processPing = true;
+                        }
 
-                        var message = JsonConvert.SerializeObject(response,
-                            JsonSettings.GetSnakeCaseNamingStrategy());
-                        Client.Send(message);
+                        if (processPing) {
+                            var responseData = new AutoPingResponseData();
+                            var results = new List<AutoPingResponseItem>();
 
-                        if (DebugLogger)
-                            LoggerRequestHelper.Send(
-                                Client,
-                                log4net.Core.Level.Debug,
-                                _appSettings.DeviceId,
-                                _appSettings.DeviceName,
-                                _appSettings.DeviceIp,
-                                message);
+                            Parallel.ForEach(request.Data.Ips, x => results.Add(Ping(x)));
+                            IEnumerable<AutoPingResponseItem> orderedResults = results.OrderByDescending(p => p.LatencyMs.HasValue)
+                                .ThenBy(p => p.LatencyMs);
 
-                        Thread.Sleep(TimeSpan.FromSeconds(request.Data.Interval));
+                            int resultsToTake = request.Data.ResponseLimit > 0 ? request.Data.ResponseLimit : 5; // Assign a default value if missed
+
+                            if (resultsToTake >= orderedResults.Count()) {
+                                results = orderedResults.ToList();
+                            } else {
+                                results = orderedResults.Take(resultsToTake).ToList();
+                            }
+
+                            var response = new AutoPingResponse {
+                                Id = $"ID:{DateTime.UtcNow.Ticks / TimeSpan.TicksPerMillisecond}",
+                                Data = new AutoPingResponseData { Pings = results }
+                            };
+
+                            var message = JsonConvert.SerializeObject(response,
+                                JsonSettings.GetSnakeCaseNamingStrategy());
+                            Client.Send(message);
+
+                            if (DebugLogger)
+                                LoggerRequestHelper.Send(
+                                    Client,
+                                    log4net.Core.Level.Debug,
+                                    _appSettings.DeviceId,
+                                    _appSettings.DeviceName,
+                                    _appSettings.DeviceIp,
+                                    message);
+                        }
                     }
                 } 
                 catch(Exception ex)
@@ -119,6 +133,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
         public void Interrupt()
         {
             mainTask?.Abort();
+            _pingTimer.Reset();
         }
 
         private AutoPingResponseItem Ping(string ip)
