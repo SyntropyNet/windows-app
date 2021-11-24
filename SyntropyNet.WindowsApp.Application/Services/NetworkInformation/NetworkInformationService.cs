@@ -2,6 +2,7 @@
 using log4net;
 using SyntropyNet.WindowsApp.Application.Constants;
 using SyntropyNet.WindowsApp.Application.Contracts;
+using SyntropyNet.WindowsApp.Application.Domain.Enums.WireGuard;
 using SyntropyNet.WindowsApp.Application.Domain.Events;
 using SyntropyNet.WindowsApp.Application.Domain.Models.Messages;
 using SyntropyNet.WindowsApp.Application.Exceptions;
@@ -41,6 +42,8 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
             if (!NetworkInterface.GetIsNetworkAvailable())
                 return ifaceBWDataRequestData;
 
+            IEnumerable<string> allowedNames = Enum.GetValues(typeof(WGInterfaceName)).Cast<WGInterfaceName>().Select(x => x.ToString());
+
             try
             {
                 NetworkInterface[] interfaces
@@ -48,6 +51,10 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
 
                 foreach (NetworkInterface ni in interfaces)
                 {
+                    if (!allowedNames.Contains(ni.Name)) {
+                        continue;
+                    }
+
                     try { 
                         ifaceBWDataRequestData.Add(IfaceBWDataRequestData(ni));
                     }

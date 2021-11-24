@@ -133,7 +133,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
         public void Interrupt()
         {
             mainTask?.Abort();
-            _pingTimer.Reset();
+            _pingTimer?.Reset();
         }
 
         private AutoPingResponseItem Ping(string ip)
