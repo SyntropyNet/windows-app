@@ -65,6 +65,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Constants\MessageTypes.cs" />
     <Compile Include="Enums\AppStatus.cs" />
     <Compile Include="Enums\WireGuard\WGInterfaceName.cs" />
     <Compile Include="Enums\WSConnectionState.cs" />
@@ -88,6 +89,7 @@
     <Compile Include="Models\Messages\LatencyPingRequest.cs" />
     <Compile Include="Models\Messages\LatencyPingResponse.cs" />
     <Compile Include="Models\Messages\LoggerRequest.cs" />
+    <Compile Include="Models\Messages\SetSettingsRequest.cs" />
     <Compile Include="Models\Messages\UpdateAgentConfigError.cs" />
     <Compile Include="Models\Messages\UpdateAgentConfigRequest.cs" />
     <Compile Include="Models\Messages\WGConfError.cs" />

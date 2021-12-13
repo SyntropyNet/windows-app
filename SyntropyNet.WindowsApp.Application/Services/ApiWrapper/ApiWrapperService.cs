@@ -14,6 +14,7 @@ using SyntropyNet.WindowsApp.Application.Helpers;
 using SyntropyNet.WindowsApp.Application.Models;
 using log4net;
 using System.Net;
+using SyntropyNet.WindowsApp.Application.Domain.Constants;
 
 namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper {
     public class ApiWrapperService: IApiWrapperService
@@ -151,7 +152,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper {
 
                         switch (obj.Type)
                         {
-                            case "AUTO_PING":
+                            case MessageTypes.AutoPing:
                                 var autoPingRequest = JsonConvert.DeserializeObject<AutoPingRequest>(msg.Text, JsonSettings.GetSnakeCaseNamingStrategy());
 
                                 //log.Info($"[ AUTO_PING ]: {msg.Text}");
@@ -186,7 +187,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper {
                                 }
 
                                 break;
-                            case "CONFIG_INFO":
+                            case MessageTypes.ConfigInfo:
                                 //log.Info($"[ CONFIG_INFO ]: {msg.Text}");
 
                                 ConfigInfoRequest configInfoRequest = JsonConvert.DeserializeObject<ConfigInfoRequest>(
@@ -194,7 +195,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper {
 
                                 _ProcessConfigInfo(client, configInfoRequest);
                                 break;
-                            case "GET_INFO":
+                            case MessageTypes.GetInfo:
                                 //log.Info($"[ GET_INFO ]: {msg.Text}");
 
                                 var getInfoRequest = JsonConvert.DeserializeObject<GetInfoRequest>(
@@ -229,7 +230,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper {
                                 }
 
                                 break;
-                           case "WG_CONF":
+                            case MessageTypes.WgConf:
                                 //log.Info($"[ WG_CONF ]: {msg.Text}");
 
                                 var WGConfRequest = JsonConvert.DeserializeObject<WGConfRequest>(
@@ -339,6 +340,14 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper {
                                 }
 
                                 PeersServicesUpdatedEvent?.Invoke(addedServices,removedPeers);
+
+                                break;
+                            case MessageTypes.SetSettings:
+
+                                var setSettingsRequest = JsonConvert.DeserializeObject<SetSettingsRequest>(
+                                    msg.Text, JsonSettings.GetSnakeCaseNamingStrategy());
+
+                                SdnRouter.Instance.SetSettings(setSettingsRequest);
 
                                 break;
                             default:

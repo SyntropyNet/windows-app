@@ -4,6 +4,7 @@ namespace SyntropyNet.WindowsApp.Application.Domain.Models {
     public class SdnRouterPingResult {
         private int _hashCode = 0;
 
+        public bool PacketLoss { get; set; }
         public long Latency { get; set; }
         public string Ip { get; set; }
         public string Peer { get; set; }
