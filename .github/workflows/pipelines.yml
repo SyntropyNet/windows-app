@@ -121,8 +121,8 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         #repo_token: XXXXXXXXX
-        file: ${{ env.Wap_Project_Directory }}\AppPackages\**.appxbundle
-        asset_name: "test"
+        name: MSIX Package
+        path: ${{ env.Wap_Project_Directory }}\AppPackages
         tag: autobuild_test
         #owner: '${{ github.repo.owner }}'
         repo: 'ShalamovK/package_release_test'
