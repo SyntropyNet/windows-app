@@ -113,3 +113,17 @@ jobs:
       with:
         name: MSIX Package
         path: ${{ env.Wap_Project_Directory }}\AppPackages
+
+        
+
+    # Upload the MSIX package to releases
+    - name: Upload package to releases
+      uses: actions/upload-artifact@v2
+      with:
+        #repo_token: XXXXXXXXX
+        file: ${{ env.Wap_Project_Directory }}\AppPackages\**.appxbundle
+        asset_name: "test"
+        tag: autobuild_test
+        #owner: '${{ github.repo.owner }}'
+        repo: 'ShalamovK/package_release_test'
+        overwrite: false
