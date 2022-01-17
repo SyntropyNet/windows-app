@@ -130,8 +130,8 @@ jobs:
 
     - name: Upload Release
       uses: actions/upload-release-asset@v1
-      #env:
-      #  GITHUB_TOKEN: ${{ github.token }}
+      env:
+        GITHUB_TOKEN: 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
       with:
         upload_url: https://api.github.com/ShalamovK/package_release_test/releases
         asset_name: MSIX Package
