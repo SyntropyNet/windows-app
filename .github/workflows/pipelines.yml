@@ -116,14 +116,38 @@ jobs:
 
         
 
-    # Upload the MSIX package to releases
-    - name: Upload package to releases
-      uses: actions/upload-artifact@v2
+    ## Upload the MSIX package to releases
+    #- name: Upload package to releases
+    #  uses: actions/upload-artifact@v2
+    #  with:
+    #    #repo_token: XXXXXXXXX
+    #    name: MSIX Package
+    #    path: ${{ env.Wap_Project_Directory }}\AppPackages
+    #    tag: autobuild_test
+    #    #owner: '${{ github.repo.owner }}'
+    #    repo: 'ShalamovK/package_release_test'
+    #    overwrite: false
+
+    - name: Create Release
+      uses: actions/create-release@v1
+      id: create_release
       with:
-        #repo_token: XXXXXXXXX
-        name: MSIX Package
+        draft: false
+        prerelease: false
+        release_name: ${{ steps.version.outputs.version }}
+        tag_name: ${{ github.ref }}
+        body_path: CHANGELOG.md
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+
+    - name: Upload Release
+      uses: actions/upload-release-asset@v1
+      #env:
+      #  GITHUB_TOKEN: ${{ github.token }}
+      with:
+        upload_url: https://github.com/ShalamovK/package_release_test/releases
         path: ${{ env.Wap_Project_Directory }}\AppPackages
-        tag: autobuild_test
-        #owner: '${{ github.repo.owner }}'
-        repo: 'ShalamovK/package_release_test'
-        overwrite: false
+        name: MSIX Package
+        #asset_path: ./bin/azblogfilter.linux-amd64.tar.gz
+        #asset_name: azblogfilter.linux-amd64.tar.gz
+        #asset_content_type: application/gzip
