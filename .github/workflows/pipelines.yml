@@ -134,7 +134,7 @@ jobs:
       #  GITHUB_TOKEN: ${{ github.token }}
       with:
         upload_url: https://github.com/ShalamovK/package_release_test/releases
-        asset_path: ${{ env.Wap_Project_Directory }}\AppPackages
+        asset_path: ${{ env.Wap_Project_Directory }}\AppPackages\SyntropyNet.WindowsApp.MsixInstaller_1.0.4.0_x86_x64_Debug.appxbundle
         asset_name: MSIX Package
         asset_content_type: application/appxbundle
         tag: release_test_2
