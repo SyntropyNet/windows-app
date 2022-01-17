@@ -136,7 +136,6 @@ jobs:
         prerelease: false
         release_name: ${{ steps.version.outputs.version }}
         tag_name: ${{ github.ref }}
-        path: ${{ env.Wap_Project_Directory }}\AppPackages
       env:
         GITHUB_TOKEN: ${{ github.token }}
 
