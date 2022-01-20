@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using SyntropyNet.WindowsApp.Application.Constants;
 using SyntropyNet.WindowsApp.Application.Domain.Enums.WireGuard;
 using SyntropyNet.WindowsApp.Application.Domain.Events;
+using SyntropyNet.WindowsApp.Application.Domain.Helpers;
 using SyntropyNet.WindowsApp.Application.Domain.Models;
 using SyntropyNet.WindowsApp.Application.Domain.Models.Messages;
 using SyntropyNet.WindowsApp.Application.Domain.Models.WireGuard;
@@ -74,11 +75,7 @@ namespace SyntropyNet.WindowsApp.Application.Services {
                 allAllowedIps = InterfaceInfos.SelectMany(x => x.Value.Peers.Select(p => p.AllowedIPs));
             }
 
-            return allAllowedIps.Skip(1)
-                                .Aggregate(
-                                    new HashSet<string>(allAllowedIps.First()),
-                                    (h, e) => { h.IntersectWith(e); return h; }
-                                );
+            return IpHelpers.GetCommonIps(allAllowedIps);
         }
 
         private void _PingInterfaces() {

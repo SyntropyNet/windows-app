@@ -71,6 +71,7 @@
     <Compile Include="Events\FastestRouteFoundEventArgs.cs" />
     <Compile Include="Events\RerouteEventArgs.cs" />
     <Compile Include="Helpers\IEnumerableHelpers.cs" />
+    <Compile Include="Helpers\IpHelpers.cs" />
     <Compile Include="Models\DockerApi\DataFromInspectCommand.cs" />
     <Compile Include="Models\InterfaceInfo.cs" />
     <Compile Include="Models\Messages\AutoPingRequest.cs" />

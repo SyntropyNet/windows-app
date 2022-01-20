@@ -1,8 +1,10 @@
 ﻿using CodeCowboy.NetworkRoute;
 using log4net;
+using SyntropyNet.WindowsApp.Application.Constants;
 using SyntropyNet.WindowsApp.Application.Constants.WireGuard;
 using SyntropyNet.WindowsApp.Application.Contracts;
 using SyntropyNet.WindowsApp.Application.Domain.Enums.WireGuard;
+using SyntropyNet.WindowsApp.Application.Domain.Helpers;
 using SyntropyNet.WindowsApp.Application.Domain.Models.WireGuard;
 using SyntropyNet.WindowsApp.Application.Exceptions;
 using System;
@@ -268,10 +270,16 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
                             string gateway = interfaceConfig.Interface.Address.ToList()[0];
                             SdnRouter.Instance.SetPeers(interfaceName, gateway, peers);
 
+                            IEnumerable<string> commonIps = IpHelpers.GetCommonIps(peers.Select(p => p.AllowedIPs));
+
                             foreach (var peer in peers)
                             {
                                 foreach (var allowedIp in peer.AllowedIPs)
                                 {
+                                    if (allowedIp == RouteTableConstants.DefaultIp) {
+                                        continue;
+                                    }
+
                                     IPNetwork network = IPNetwork.Parse(allowedIp);
 
                                     string ip = network.Network.ToString();
@@ -281,8 +289,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
                                     if (!_networkService.RouteExists(ip, PublicInterface.Interface.Address.First()) &&
                                         !_networkService.RouteExists(ip, SDN1Interface.Interface.Address.First()) &&
                                         !_networkService.RouteExists(ip, SDN2Interface.Interface.Address.First()) &&
-                                        !_networkService.RouteExists(ip, SDN3Interface.Interface.Address.First())
-                                        )
+                                        !_networkService.RouteExists(ip, SDN3Interface.Interface.Address.First()))
                                     {
                                         _networkService.AddRoute(interfaceName.ToString(), ip, mask, gateway, metric);
                                     }
