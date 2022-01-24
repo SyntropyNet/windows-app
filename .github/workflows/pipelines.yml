@@ -133,7 +133,7 @@ jobs:
       env:
         GITHUB_TOKEN: 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
       with:
-        upload_url: https://api.github.com/ShalamovK/package_release_test
+        upload_url: https://api.github.com/repos/ShalamovK/package_release_test/releases
         asset_name: MSIX Package
         asset_path: ${{ env.Wap_Project_Directory }}\AppPackages\SyntropyNet.WindowsApp.MsixInstaller_1.0.4.0_Debug_Test\SyntropyNet.WindowsApp.MsixInstaller_1.0.4.0_x86_x64_Debug.appxbundle
         asset_content_type: application/appxbundle
