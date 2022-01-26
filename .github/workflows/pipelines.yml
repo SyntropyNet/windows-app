@@ -118,19 +118,19 @@ jobs:
       uses: actions/create-release@v1
       id: create_release
       env:
-        GITHUB_TOKEN: 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
+        GITHUB_TOKEN: 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
       with:
         repo: https://api.github.com/repos/ShalamovK/package_release_test/releases
         draft: false
         prerelease: false
-        release_name: test1
-        tag_name: test1
-        body_path: README.md
+        release_name: test2
+        tag_name: test2
+        body: this is a test release
         
     - name: Upload Release
       uses: actions/upload-release-asset@v1
       env:
-        GITHUB_TOKEN: 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
+        GITHUB_TOKEN: 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
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_name: MSIX Package
