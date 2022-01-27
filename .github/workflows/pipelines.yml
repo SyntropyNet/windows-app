@@ -124,8 +124,8 @@ jobs:
         owner: ShalamovK
         draft: false
         prerelease: false
-        release_name: v1.0.0
-        tag_name: v1.0.0
+        release_name: v1.1.1
+        tag_name: v1.1.1
         body: this is a test release
         
     - name: Upload Release
