@@ -120,7 +120,8 @@ jobs:
       env:
         GITHUB_TOKEN: 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
       with:
-        repo: https://api.github.com/repos/ShalamovK/package_release_test/releases
+        repo: package_release_test
+        owner: ShalamovK
         draft: false
         prerelease: false
         release_name: test2
