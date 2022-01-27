@@ -40,7 +40,7 @@ name: Create Installer
 
 on:
   push:
-    branches: [ feature/artifacts_release_upload_tests ]
+    branches: [ feature/release_flow ]
   #pull_request:
   #  branches: [ master ]
 

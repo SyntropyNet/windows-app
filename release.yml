@@ -4,7 +4,7 @@ on:
   workflow_run:
     workflows: [ Create Installer ]
     types: [ completed ]
-    branches: [ feature/artifacts_release_upload_tests ]
+    branches: [ feature/release_flow ]
 
 jobs:
   on-success:
