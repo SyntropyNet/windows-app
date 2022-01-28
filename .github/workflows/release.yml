@@ -21,6 +21,6 @@ jobs:
           owner: ShalamovK
           draft: false
           prerelease: false
-          release_name: v1.2.3
-          tag_name: v1.2.3
+          release_name: 1.0.2
+          tag_name: 1.0.2
           body: this is a test release
