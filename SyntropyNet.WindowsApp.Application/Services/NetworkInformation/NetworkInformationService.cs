@@ -2,6 +2,7 @@
 using log4net;
 using SyntropyNet.WindowsApp.Application.Constants;
 using SyntropyNet.WindowsApp.Application.Contracts;
+using SyntropyNet.WindowsApp.Application.Domain.Enums.WireGuard;
 using SyntropyNet.WindowsApp.Application.Domain.Events;
 using SyntropyNet.WindowsApp.Application.Domain.Models.Messages;
 using SyntropyNet.WindowsApp.Application.Exceptions;
@@ -41,6 +42,8 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
             if (!NetworkInterface.GetIsNetworkAvailable())
                 return ifaceBWDataRequestData;
 
+            IEnumerable<string> allowedNames = Enum.GetValues(typeof(WGInterfaceName)).Cast<WGInterfaceName>().Select(x => x.ToString());
+
             try
             {
                 NetworkInterface[] interfaces
@@ -48,6 +51,10 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
 
                 foreach (NetworkInterface ni in interfaces)
                 {
+                    if (!allowedNames.Contains(ni.Name)) {
+                        continue;
+                    }
+
                     try { 
                         ifaceBWDataRequestData.Add(IfaceBWDataRequestData(ni));
                     }
@@ -119,13 +126,14 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
 
             try {
                 if (RouteExists(args.Ip.ToString(), out CCIp4RouteEntry routeEntry)) {
-                    int interfaceIndex = _GetInterfaceIndexHelper(interfaceName);
+                    int interfaceIndex = _GetInterfaceIndexHelper(interfaceName, out bool exist);
 
-                    if (interfaceIndex == 0) {
+                    if (!exist) {
                         log.Error($"Interface not found during reroute process: {interfaceName}");
                         return;
                     }
 
+                    //IPAddress gateway = IPAddress.Parse("34.101.180.66");
                     IPAddress gateway = IPAddress.Parse(args.Gateway);
 
                     if (routeEntry.InterfaceIndex == interfaceIndex && routeEntry.GatewayIP.Equals(gateway)) {
@@ -154,17 +162,34 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
             RerouteEvent?.Invoke(this, eventArgs);
         }
 
-        private int _GetInterfaceIndexHelper(string IFaceName) {
+        private int _GetInterfaceIndexHelper(string IFaceName, out bool exist) {
             int interfaceIndex = 0;
+            exist = false;
             var adaptors = NicInterface.GetAllNetworkAdaptor();
 
             foreach (var adaptor in adaptors) {
                 if (adaptor.Name == IFaceName) {
+                    exist = true;
                     interfaceIndex = adaptor.InterfaceIndex;
                 }
             }
 
             return interfaceIndex;
+        }
+
+        private List<int> _GetSyntropyInterfaces() {
+            IEnumerable<string> interfaceNames = Enum.GetValues(typeof(WGInterfaceName)).Cast<WGInterfaceName>().Select(x => x.ToString());
+            List<int> result = new List<int>();
+
+            foreach (string name in interfaceNames) {
+                int index = _GetInterfaceIndexHelper(name, out bool exist);
+
+                if (exist) {
+                    result.Add(index);
+                }
+            }
+
+            return result;
         }
 
         public int GetNextFreePort(IEnumerable<int> exceptPort = null)
@@ -392,11 +417,31 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
             return routeEntry != null;
         }
 
+        /// <summary>
+        /// Checks for Ip's with syntropy interfaces
+        /// </summary>
+        /// <param name="destinationIP"></param>
+        /// <param name="routeEntry"></param>
+        /// <returns></returns>
         public bool RouteExists(string destinationIP, out CodeCowboy.NetworkRoute.Ip4RouteEntry routeEntry) {
             List<CodeCowboy.NetworkRoute.Ip4RouteEntry> routeTable = Ip4RouteTable.GetRouteTable();
-            routeEntry = routeTable.Find(i => i.DestinationIP.ToString().Equals(destinationIP));
+            List<CodeCowboy.NetworkRoute.Ip4RouteEntry> matchedRoutes = routeTable.FindAll(i => i.DestinationIP.ToString().Equals(destinationIP));
+            routeEntry = new CCIp4RouteEntry();
 
-            return routeEntry != null;
+            if (!matchedRoutes.Any()) {
+                return false;
+            }
+
+            List<int> syntropyIFaceIndexes = _GetSyntropyInterfaces();
+
+            foreach (var route in matchedRoutes) {
+                if (syntropyIFaceIndexes.Contains(route.InterfaceIndex)) {
+                    routeEntry = route;
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

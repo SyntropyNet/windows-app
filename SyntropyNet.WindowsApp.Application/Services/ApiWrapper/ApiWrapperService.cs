@@ -152,7 +152,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper {
                         switch (obj.Type)
                         {
                             case "AUTO_PING":
-                                var autoPingRequest = JsonConvert.DeserializeObject<AutoPingRequest>(msg.Text);
+                                var autoPingRequest = JsonConvert.DeserializeObject<AutoPingRequest>(msg.Text, JsonSettings.GetSnakeCaseNamingStrategy());
 
                                 //log.Info($"[ AUTO_PING ]: {msg.Text}");
 
