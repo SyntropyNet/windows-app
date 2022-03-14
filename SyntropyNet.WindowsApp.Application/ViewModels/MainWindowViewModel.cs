@@ -38,6 +38,8 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
 
         private bool _autoDisconnection = false;
         private bool _interfacesLoaded = false;
+        private bool _changingIp = false;
+        private bool _initiateReconnection = false;
 
         public MainWindowViewModel(IApiWrapperService apiService,
                                    Prism.Services.Dialogs.IDialogService prismDialogs,
@@ -59,6 +61,7 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
             _apiService.ReconnectingEvent += Reconnecting;
             _apiService.ConnectionLostEvent += ConnectionLost;
             _apiService.ReconnectedEvent += Reconnected;
+            _apiService.IPChangeEvent += IPChanged;
             _WGConfigService.CreateInterfaceEvent += _WGConfigService_CreateInterfaceEvent;
             _WGConfigService.ErrorCreateInterfaceEvent += _WGConfigService_ErrorCreateInterfaceEvent;
 
@@ -104,18 +107,29 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
                 _appContext.BeginInvoke(methodDelegate, type, error);
                 return;
             }
-            OnoffEnabled = true;
-            Loading = false;
-            Status = "Disconnected";
-            _autoDisconnection = true;
-            Started = false;
-            if (type == DisconnectionType.Error)
+            if (!_changingIp)
             {
-                _appContext.UpdateIcon(AppStatus.Error);
-                ShowError(error);
-            } else {
-                _appContext.UpdateIcon(AppStatus.Idle);
+                OnoffEnabled = true;
+                Loading = false;
+                Status = "Disconnected";
+                _autoDisconnection = true;
+                Started = false;
+                if (type == DisconnectionType.Error)
+                {
+                    _appContext.UpdateIcon(AppStatus.Error);
+                    ShowError(error);
+                }
+                else
+                {
+                    _appContext.UpdateIcon(AppStatus.Idle);
+                }
             }
+            else if(!_initiateReconnection)
+            {
+                _initiateReconnection = true;
+                Connect();
+            }
+            
         }
         public void Reconnecting(DisconnectionType type, string error)
         {
@@ -137,6 +151,28 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
                 Status = "Connected";
                 Loading = false;
             }
+        }
+
+        public void IPChanged()
+        {
+            if (!_started)
+            {
+                return;
+            }
+
+            _changingIp = true;
+
+            if (!_appContext.IsSynchronized)
+            {
+                _appContext.BeginInvoke(IPChanged);
+                return;
+            }
+
+            SetReconnecting();
+
+            Task.Run(() => {
+                _apiService.Stop();
+            });
         }
 
         private void ShowError(string error)
@@ -395,28 +431,63 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
             }
         }
 
+        private const int MaxReconnectionAttemptsAfterIPChange = 20;
+        private int ReconnectionTimeoutAfterIPChange = 2000;
+        private int ReconnectionAttemptAfterIPChange = 0;
         private void Connect()
         {
             ErrorVisible = false;
             Task.Run(() => {
+
+                if (_changingIp)
+                {
+                    Thread.Sleep(ReconnectionTimeoutAfterIPChange);
+                }
+
                 try
                 {
                     _apiService.Run((WSConnectionResponse response) =>
                     {
+                            
                         if (response.State == Domain.Enums.WSConnectionState.Failed)
                         {
+                            if (_changingIp && ReconnectionAttemptAfterIPChange < MaxReconnectionAttemptsAfterIPChange)
+                            {
+                                ReconnectionAttemptAfterIPChange++;
+                                if (ReconnectionTimeoutAfterIPChange > (Int32.MaxValue / 2))
+                                {
+                                    ReconnectionTimeoutAfterIPChange = Int32.MaxValue;
+                                }
+                                else
+                                {
+                                    ReconnectionTimeoutAfterIPChange += 5000;
+                                }
+                                Connect();
+                                return;
+                            }
+
                             SetDisconnected();
                             ShowError(response.Error);
                             StopLoading();
                         }
+                        ReconnectionTimeoutAfterIPChange = 2000;
+                        ReconnectionAttemptAfterIPChange = 0;
+                        _changingIp = false;
+                        _initiateReconnection = false;
                     });
                 }
                 catch (NoFreePortException ex)
                 {
+                    _changingIp = false;
+                    _initiateReconnection = false;
+                    ReconnectionTimeoutAfterIPChange = 2000;
+                    ReconnectionAttemptAfterIPChange = 0;
                     SetDisconnected();
                     ShowError(ex.Message);
                     StopLoading();
                 }
+                
+                
             });
         }
 

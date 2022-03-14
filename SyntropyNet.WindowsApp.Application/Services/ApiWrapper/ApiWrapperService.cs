@@ -14,6 +14,7 @@ using SyntropyNet.WindowsApp.Application.Helpers;
 using SyntropyNet.WindowsApp.Application.Models;
 using log4net;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper {
     public class ApiWrapperService: IApiWrapperService
@@ -26,6 +27,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper {
         private readonly IWGConfigService _WGConfigService;
         private readonly IDockerApiService _dockerApiService;
         private readonly INetworkInformationService _networkInformationService;
+        private readonly IPublicIPChecker _ipChecker;
 
         public delegate void ServicesUpdated(IEnumerable<ServiceModel> services);
         public event ServicesUpdated ServicesUpdatedEvent;
@@ -41,10 +43,14 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper {
         public delegate void ConnectionLostDelegate();
         public event ConnectionLostDelegate ConnectionLostEvent;
 
+        public delegate void IpChangeDelegate();
+        public event IpChangeDelegate IPChangeEvent;
+
         private ManualResetEvent exitEvent { get; set;}
         private bool Running { get; set; }
         private bool ConnectionLost { get; set; }
         private bool Stopping { get; set; }
+        private bool ChangingIp { get; set; }
         private int WaitReconnect = 1000;
         private string UserError { get; set; }
         private bool IsRecconect { get; set; } = false;
@@ -64,7 +70,8 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper {
             IHttpRequestService httpRequestService,
             IWGConfigService WGConfigService,
             IDockerApiService dockerApiService,
-            INetworkInformationService networkInformationService)
+            INetworkInformationService networkInformationService,
+            IPublicIPChecker ipChecker)
         {
             _appSettings = appSettings;
             _userConfig = userConfig;
@@ -72,6 +79,8 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper {
             _WGConfigService = WGConfigService;
             _dockerApiService = dockerApiService;
             _networkInformationService = networkInformationService;
+            _ipChecker = ipChecker;
+            _ipChecker.IpChangedEvent += IpChangedHandler;
         }
 
         public void Run(Action<WSConnectionResponse> callback)
@@ -131,6 +140,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper {
                     client.ReconnectionHappened.Subscribe(info =>
                     {
                         SdnRouter.Instance.StartPing();
+                        _ipChecker.StartIPCheker();
                         Debug.WriteLine($"Reconnection happened, type: {info.Type}");
                         WaitReconnect = 1000;
                         ConnectionLost = false;
@@ -348,11 +358,8 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper {
 
                     client.DisconnectionHappened.Subscribe(x =>
                     {
-                        
-                        Debug.WriteLine($"Disconnect: {x.Type}");
                         log.Info($"Disconnected: {x.Type}. Status: {x.CloseStatus}, Description: {x.CloseStatusDescription}. {x.Exception?.Message ?? string.Empty}");
                         SdnRouter.Instance.StopPing();
-
                         if (x.Type == DisconnectionType.Lost && x.CloseStatus == null)
                         {
                             ConnectionLostEvent?.Invoke();
@@ -563,7 +570,14 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper {
             Running = false;
         }
 
+
+
         #region [ HELPERS ]
+
+        private void IpChangedHandler(string newIp)
+        {
+            IPChangeEvent?.Invoke();
+        }
 
         private void _ProcessConfigInfo(WebsocketClient client, ConfigInfoRequest configInfoRequest) {
             try {

@@ -13,7 +13,21 @@ namespace SyntropyNet.WindowsApp.Application.Services.HttpRequest
     {
         public string GetResponse(string url)
         {
+            return _GetResponse(url);
+        }
+
+        public string GetResponse(string url, int timeout)
+        {
+            return _GetResponse(url,timeout);
+        }
+
+        private string _GetResponse(string url, int? timeout = null)
+        {
             var request = WebRequest.CreateHttp(url);
+            if (timeout.HasValue)
+            {
+                request.Timeout = timeout.Value;
+            }
             var response = request.GetResponseAsync().GetAwaiter().GetResult();
 
             string data = "";

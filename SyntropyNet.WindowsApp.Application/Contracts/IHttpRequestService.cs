@@ -9,5 +9,6 @@ namespace SyntropyNet.WindowsApp.Application.Contracts
     public interface IHttpRequestService
     {
         string GetResponse(string url);
+        string GetResponse(string url, int timeout);
     }
 }
