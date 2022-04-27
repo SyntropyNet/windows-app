@@ -14,6 +14,7 @@ namespace SyntropyNet.WindowsApp.Application.Contracts {
         bool IsLocalIpAddress(string host);
         void DeleteRoute(string interfaceName, string ip, string mask, string gateway, int metric);
         bool RouteExists(string destinationIP, string gateway);
+        void GetDefaultInterface();
         event RerouteHandler RerouteEvent;
     }
 }

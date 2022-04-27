@@ -142,10 +142,30 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
                     }
 
                     log.Info($"[REROUTING]: update route. Interface: {interfaceName}, Ip: {args.Ip.ToString()}");
-                    UpdateRoute(routeEntry, gateway, args.Mask, interfaceIndex);
+                    var isVpn = args.Ip.ToString() == "0.0.0.0";
+                    var mask = isVpn ? IPAddress.Parse(RouteTableConstants.VPNMask) : args.Mask;
+                    UpdateRoute(routeEntry, gateway, mask, interfaceIndex);
+                    if (isVpn)
+                    {
+                        if(RouteExists(RouteTableConstants.VPNIp, out CCIp4RouteEntry vpnRouteEntry))
+                        {
+                            UpdateRoute(vpnRouteEntry, gateway, mask, interfaceIndex);
+                        }
+                        else
+                        {
+                            AddRoute(interfaceName, RouteTableConstants.VPNIp, RouteTableConstants.VPNMask, args.Gateway, RouteTableConstants.Metric);
+                        }
+                        
+                    }
                 } else {
                     log.Info($"[REROUTING]: add route. Interface: {interfaceName}, Ip: {args.Ip.ToString()}");
-                    AddRoute(interfaceName, args.Ip.ToString(), args.Mask.ToString(), args.Gateway, RouteTableConstants.Metric);
+                    var isVpn = args.Ip.ToString() == "0.0.0.0";
+                    var mask = isVpn ? RouteTableConstants.VPNMask : args.Mask.ToString();
+                    AddRoute(interfaceName, args.Ip.ToString(), mask, args.Gateway, RouteTableConstants.Metric);
+                    if (isVpn)
+                    {
+                        AddRoute(interfaceName, RouteTableConstants.VPNIp, RouteTableConstants.VPNMask, args.Gateway, RouteTableConstants.Metric);
+                    }
                 }
 
                 _OnReroute(args.ConnectionId);
@@ -233,6 +253,36 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
             }
 
             return false;
+        }
+
+        public void GetDefaultInterface()
+        {
+            List<NetworkInterface> Interfaces = new List<NetworkInterface>();
+            foreach (var nic in NetworkInterface.GetAllNetworkInterfaces())
+            {
+                if (nic.OperationalStatus == OperationalStatus.Up && nic.NetworkInterfaceType != NetworkInterfaceType.Loopback && nic.NetworkInterfaceType != NetworkInterfaceType.Tunnel)
+                {
+                    Interfaces.Add(nic);
+                }
+            }
+
+
+            NetworkInterface result = null;
+            foreach (NetworkInterface nic in Interfaces)
+            {
+                if (result == null)
+                {
+                    result = nic;
+                }
+                else
+                {
+                    if (nic.GetIPProperties().GetIPv4Properties() != null)
+                    {
+                        if (nic.GetIPProperties().GetIPv4Properties().Index < result.GetIPProperties().GetIPv4Properties().Index)
+                            result = nic;
+                    }
+                }
+            }
         }
 
         public void AddRoute(string interfaceName, string ip, string mask, string gateway, uint metric)

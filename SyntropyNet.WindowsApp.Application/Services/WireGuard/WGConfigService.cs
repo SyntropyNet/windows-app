@@ -283,7 +283,8 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
                                     IPNetwork network = IPNetwork.Parse(allowedIp);
 
                                     string ip = network.Network.ToString();
-                                    string mask = network.Netmask.ToString();
+                                    var isVpn = ip == "0.0.0.0";
+                                    string mask = isVpn ? RouteTableConstants.VPNMask : network.Netmask.ToString();
                                     uint metric = 5;
 
                                     if (!_networkService.RouteExists(ip, PublicInterface.Interface.Address.First()) &&
@@ -292,6 +293,10 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
                                         !_networkService.RouteExists(ip, SDN3Interface.Interface.Address.First()))
                                     {
                                         _networkService.AddRoute(interfaceName.ToString(), ip, mask, gateway, metric);
+                                        if (isVpn)
+                                        {
+                                            _networkService.AddRoute(interfaceName.ToString(), RouteTableConstants.VPNIp, RouteTableConstants.VPNMask, gateway, metric);
+                                        }
                                     }
                                 }
                             }
@@ -367,11 +372,17 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
 
                                 foreach (var allowedIp in peer.AllowedIPs) {
                                     string ip = allowedIp.Split('/')[0];
-                                    string mask = ip == "0.0.0.0" ? "0.0.0.0" : "255.255.255.255";
+                                    var isVpn = ip == "0.0.0.0";
+                                    string mask = isVpn ? RouteTableConstants.VPNMask : "255.255.255.255";
                                     string gateway = interfaceConfig.Interface.Address.ToList()[0];
                                     int metric = 5;
 
                                     _networkService.DeleteRoute(interfaceName.ToString(), ip, mask, gateway, metric);
+                                    if (isVpn)
+                                    {
+                                        // delete extra 128.0.0.0 route
+                                        _networkService.DeleteRoute(interfaceName.ToString(), RouteTableConstants.VPNIp, RouteTableConstants.VPNMask, gateway, metric);
+                                    }
                                 }
 
                                 break;
