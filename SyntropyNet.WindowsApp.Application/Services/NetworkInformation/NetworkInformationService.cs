@@ -144,6 +144,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
                     log.Info($"[REROUTING]: update route. Interface: {interfaceName}, Ip: {args.Ip.ToString()}");
                     var isVpn = args.Ip.ToString() == "0.0.0.0";
                     var mask = isVpn ? IPAddress.Parse(RouteTableConstants.VPNMask) : args.Mask;
+                    uint metric = isVpn ? RouteTableConstants.VpnMetric : RouteTableConstants.Metric;
                     UpdateRoute(routeEntry, gateway, mask, interfaceIndex);
                     if (isVpn)
                     {
@@ -153,7 +154,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
                         }
                         else
                         {
-                            AddRoute(interfaceName, RouteTableConstants.VPNIp, RouteTableConstants.VPNMask, args.Gateway, RouteTableConstants.Metric);
+                            AddRoute(interfaceName, RouteTableConstants.VPNIp, RouteTableConstants.VPNMask, args.Gateway, metric);
                         }
                         
                     }
@@ -161,10 +162,11 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
                     log.Info($"[REROUTING]: add route. Interface: {interfaceName}, Ip: {args.Ip.ToString()}");
                     var isVpn = args.Ip.ToString() == "0.0.0.0";
                     var mask = isVpn ? RouteTableConstants.VPNMask : args.Mask.ToString();
-                    AddRoute(interfaceName, args.Ip.ToString(), mask, args.Gateway, RouteTableConstants.Metric);
+                    uint metric = isVpn ? RouteTableConstants.VpnMetric : RouteTableConstants.Metric;
+                    AddRoute(interfaceName, args.Ip.ToString(), mask, args.Gateway, metric);
                     if (isVpn)
                     {
-                        AddRoute(interfaceName, RouteTableConstants.VPNIp, RouteTableConstants.VPNMask, args.Gateway, RouteTableConstants.Metric);
+                        AddRoute(interfaceName, RouteTableConstants.VPNIp, RouteTableConstants.VPNMask, args.Gateway, metric);
                     }
                 }
 

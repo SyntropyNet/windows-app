@@ -285,7 +285,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
                                     string ip = network.Network.ToString();
                                     var isVpn = ip == "0.0.0.0";
                                     string mask = isVpn ? RouteTableConstants.VPNMask : network.Netmask.ToString();
-                                    uint metric = 5;
+                                    uint metric = isVpn ? RouteTableConstants.VpnMetric : RouteTableConstants.Metric;
 
                                     if (!_networkService.RouteExists(ip, PublicInterface.Interface.Address.First()) &&
                                         !_networkService.RouteExists(ip, SDN1Interface.Interface.Address.First()) &&
@@ -375,7 +375,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
                                     var isVpn = ip == "0.0.0.0";
                                     string mask = isVpn ? RouteTableConstants.VPNMask : "255.255.255.255";
                                     string gateway = interfaceConfig.Interface.Address.ToList()[0];
-                                    int metric = 5;
+                                    int metric = isVpn ? (int)RouteTableConstants.VpnMetric : (int)RouteTableConstants.Metric;
 
                                     _networkService.DeleteRoute(interfaceName.ToString(), ip, mask, gateway, metric);
                                     if (isVpn)

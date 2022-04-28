@@ -4,6 +4,7 @@
         public static string DefaultIp = "0.0.0.0";
         public static string VPNIp = "128.0.0.0";
         public static string VPNMask = "128.0.0.0";
-        public static uint Metric = 5; 
+        public static uint Metric = 5;
+        public static uint VpnMetric = 6;
     }
 }
