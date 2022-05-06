@@ -454,9 +454,9 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
                             if (_changingIp && ReconnectionAttemptAfterIPChange < MaxReconnectionAttemptsAfterIPChange)
                             {
                                 ReconnectionAttemptAfterIPChange++;
-                                if (ReconnectionTimeoutAfterIPChange > (Int32.MaxValue / 2))
+                                if (ReconnectionTimeoutAfterIPChange > 15000)
                                 {
-                                    ReconnectionTimeoutAfterIPChange = Int32.MaxValue;
+                                    ReconnectionTimeoutAfterIPChange = 2000;
                                 }
                                 else
                                 {

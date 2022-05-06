@@ -417,7 +417,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper {
                         }
                         else
                         {
-                            if (!ConnectionLost) { 
+                            if (!ConnectionLost || Stopping) { 
                                 _WGConfigService.StopWG();
                                 DisconnectedEvent?.Invoke(x.Type, x.Exception?.Message);
                                 Running = false;
