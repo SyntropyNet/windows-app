@@ -123,9 +123,11 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
             }
 
             string interfaceName = args.InterfaceName.ToString();
+            var isVpn = args.Ip.ToString() == "0.0.0.0";
+            var maskDef = isVpn ? RouteTableConstants.VPNMask : args.Mask.ToString();
 
             try {
-                if (RouteExists(args.Ip.ToString(), out CCIp4RouteEntry routeEntry)) {
+                if (RouteExists(args.Ip.ToString(), maskDef, out CCIp4RouteEntry routeEntry)) {
                     int interfaceIndex = _GetInterfaceIndexHelper(interfaceName, out bool exist);
 
                     if (!exist) {
@@ -142,15 +144,16 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
                     }
 
                     log.Info($"[REROUTING]: update route. Interface: {interfaceName}, Ip: {args.Ip.ToString()}");
-                    var isVpn = args.Ip.ToString() == "0.0.0.0";
+
                     var mask = isVpn ? IPAddress.Parse(RouteTableConstants.VPNMask) : args.Mask;
                     uint metric = isVpn ? RouteTableConstants.VpnMetric : RouteTableConstants.Metric;
-                    UpdateRoute(routeEntry, gateway, mask, interfaceIndex);
+
+                    UpdateRoute(routeEntry, gateway, mask, interfaceIndex, isVpn);
                     if (isVpn)
                     {
-                        if(RouteExists(RouteTableConstants.VPNIp, out CCIp4RouteEntry vpnRouteEntry))
+                        if(RouteExists(RouteTableConstants.VPNIp, maskDef, out CCIp4RouteEntry vpnRouteEntry))
                         {
-                            UpdateRoute(vpnRouteEntry, gateway, mask, interfaceIndex);
+                            UpdateRoute(vpnRouteEntry, gateway, mask, interfaceIndex, isVpn);
                         }
                         else
                         {
@@ -160,7 +163,6 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
                     }
                 } else {
                     log.Info($"[REROUTING]: add route. Interface: {interfaceName}, Ip: {args.Ip.ToString()}");
-                    var isVpn = args.Ip.ToString() == "0.0.0.0";
                     var mask = isVpn ? RouteTableConstants.VPNMask : args.Mask.ToString();
                     uint metric = isVpn ? RouteTableConstants.VpnMetric : RouteTableConstants.Metric;
                     AddRoute(interfaceName, args.Ip.ToString(), mask, args.Gateway, metric);
@@ -398,7 +400,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
             }
         }
 
-        public void UpdateRoute(CCIp4RouteEntry routeEntry, IPAddress newGateway, IPAddress newMask, int newInterfaceIndex) {
+        public void UpdateRoute(CCIp4RouteEntry routeEntry, IPAddress newGateway, IPAddress newMask, int newInterfaceIndex, bool isVpn) {
             // GET route table
             IntPtr fwdTable = IntPtr.Zero;
             int size = 0;
@@ -412,11 +414,12 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
 
             // GET target route IP uint
             uint ipCodeToModify = BitConverter.ToUInt32(routeEntry.DestinationIP.GetAddressBytes(), 0);
+            var initialMask = BitConverter.ToUInt32(routeEntry.SubnetMask.GetAddressBytes(), 0);
             NativeMethods.MIB_IPFORWARDROW routeToRemove = new NativeMethods.MIB_IPFORWARDROW();
             bool routeFound = false;
 
             foreach (var route in table.Table) {
-                if (route.dwForwardDest == ipCodeToModify) { // target route found
+                if (route.dwForwardDest == ipCodeToModify && (!isVpn || route.dwForwardMask == initialMask)) { // target route found
 
                     // Create a new, modified route, then delete the old one
                     // Reason: On Windows Vista and Windows Server 2008, the SetIpForwardEntry function only works on interfaces with a single sub-interface
@@ -427,7 +430,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
                         GatewayIP = newGateway,
                         SubnetMask = newMask,
                         InterfaceIndex = newInterfaceIndex,
-                        Metric = RouteTableConstants.Metric
+                        Metric = isVpn ? RouteTableConstants.VpnMetric : RouteTableConstants.Metric
                     };
 
                     this.CreateRoute(newRouteEntry);
@@ -462,7 +465,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
             return (routeEntry != null);
         }
 
-        public bool RouteExists(string destinationIP, string gateway, out CodeCowboy.NetworkRoute.Ip4RouteEntry routeEntry) {
+        public bool RouteGatewayExists(string destinationIP, string gateway, out CodeCowboy.NetworkRoute.Ip4RouteEntry routeEntry) {
             List<CodeCowboy.NetworkRoute.Ip4RouteEntry> routeTable = Ip4RouteTable.GetRouteTable();
             routeEntry = routeTable.Find(i => i.DestinationIP.ToString().Equals(destinationIP) && i.GatewayIP.ToString().Equals(gateway));
             
@@ -475,9 +478,9 @@ namespace SyntropyNet.WindowsApp.Application.Services.NetworkInformation
         /// <param name="destinationIP"></param>
         /// <param name="routeEntry"></param>
         /// <returns></returns>
-        public bool RouteExists(string destinationIP, out CodeCowboy.NetworkRoute.Ip4RouteEntry routeEntry) {
+        public bool RouteExists(string destinationIP, string mask, out CodeCowboy.NetworkRoute.Ip4RouteEntry routeEntry) {
             List<CodeCowboy.NetworkRoute.Ip4RouteEntry> routeTable = Ip4RouteTable.GetRouteTable();
-            List<CodeCowboy.NetworkRoute.Ip4RouteEntry> matchedRoutes = routeTable.FindAll(i => i.DestinationIP.ToString().Equals(destinationIP));
+            List<CodeCowboy.NetworkRoute.Ip4RouteEntry> matchedRoutes = routeTable.FindAll(i => i.DestinationIP.ToString().Equals(destinationIP) && i.SubnetMask.ToString().Equals(mask));
             routeEntry = new CCIp4RouteEntry();
 
             if (!matchedRoutes.Any()) {
