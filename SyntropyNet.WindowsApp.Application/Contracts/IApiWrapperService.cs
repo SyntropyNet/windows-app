@@ -16,6 +16,7 @@ namespace SyntropyNet.WindowsApp.Application.Contracts
         event Disconnected ReconnectingEvent;
         event Reconnected ReconnectedEvent;
         event ConnectionLostDelegate ConnectionLostEvent;
+        event IpChangeDelegate IPChangeEvent;
         void Run(Action<WSConnectionResponse> callback);
         void Stop();
     }

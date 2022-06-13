@@ -137,6 +137,7 @@ namespace SyntropyNet.WindowsApp
             containerRegistry.RegisterSingleton<IUserConfig, UserConfig>();
             containerRegistry.RegisterSingleton<IApiWrapperService, ApiWrapperService>();
             containerRegistry.RegisterSingleton<IHttpRequestService, HttpRequestService>();
+            containerRegistry.RegisterSingleton<IPublicIPChecker, PublicIPChecker>();
             containerRegistry.RegisterSingleton<IDockerApiService, DockerApiService>();
             containerRegistry.RegisterSingleton<IWGConfigService, WGConfigService>();
             containerRegistry.RegisterSingleton<INetworkInformationService, NetworkInformationService>();
@@ -247,7 +248,9 @@ namespace SyntropyNet.WindowsApp
         private void Application_Exit(object sender, ExitEventArgs e)
         {
             var apiService = Container.Resolve<IApiWrapperService>();
+            var ipChecker = Container.Resolve<IPublicIPChecker>();
             apiService.Stop();
+            ipChecker.StopIPCheker();
         }
     }
 }

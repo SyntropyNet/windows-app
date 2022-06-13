@@ -127,6 +127,7 @@
     <Compile Include="Contracts\IDockerApiService.cs" />
     <Compile Include="Contracts\IHttpRequestService.cs" />
     <Compile Include="Contracts\INetworkInformationService.cs" />
+    <Compile Include="Contracts\IPublicIPChecker.cs" />
     <Compile Include="Contracts\IUserConfig.cs" />
     <Compile Include="Contracts\IWGConfigService.cs" />
     <Compile Include="Exceptions\InvalidIpFormatException.cs" />
@@ -154,6 +155,7 @@
     <Compile Include="Services\ApiWrapper\Handlers\WGConfHandler.cs" />
     <Compile Include="Services\DockerApi\DockerApiService.cs" />
     <Compile Include="Services\HttpRequest\HttpRequestService.cs" />
+    <Compile Include="Services\NetworkInformation\PublicIPChecker.cs" />
     <Compile Include="Services\SdnRouter.cs" />
     <Compile Include="Services\NetworkInformation\Ip4RouteEntry.cs" />
     <Compile Include="Services\NetworkInformation\NativeMethods.cs" />
