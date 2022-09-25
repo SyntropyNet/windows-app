@@ -26,6 +26,8 @@ namespace SyntropyNet.WindowsApp.Application.Services {
         private static object _locker = new object();
         private static SdnRouter _instance;
 
+        public static bool Optimize = true;
+
         private SdnRouter() {
             InterfaceInfos = new Dictionary<WGInterfaceName, InterfaceInfo>();
         }
@@ -66,7 +68,11 @@ namespace SyntropyNet.WindowsApp.Application.Services {
         private Thread runnerThread;
         public delegate void FastestIpFoundHandler(object sender, FastestRouteFoundEventArgs eventArgs);
         public event FastestIpFoundHandler FastestIpFound;
+        public delegate void PingFinishedHandler(object sender);
+        public event PingFinishedHandler PingFinished;
         private Dictionary<WGInterfaceName, InterfaceInfo> InterfaceInfos { get; set; }
+
+        public WGInterfaceName FastestInterfaceName => _fastestInterfaceName;
 
         private IEnumerable<string> _GetCommonIps() {
             IEnumerable<IEnumerable<string>> allAllowedIps;
@@ -79,6 +85,14 @@ namespace SyntropyNet.WindowsApp.Application.Services {
         }
 
         private void _PingInterfaces() {
+
+            if (!Properties.Settings.Default.IsDynamic && !Optimize)
+            {
+                // Do not do a re-routing for Persistent mode, until Optimize button clicked.
+                return;
+            }
+            Optimize = false;
+
             if (InterfaceInfos == null || !InterfaceInfos.Any()) {
                 return;
             }
@@ -262,7 +276,7 @@ namespace SyntropyNet.WindowsApp.Application.Services {
                 while (true) {
                     // Call Ping logic
                     _PingInterfaces();
-
+                    PingFinished?.Invoke(this);
                     // Cooldown
                     Thread.Sleep(_pingDelayMs);
                 }

@@ -124,6 +124,7 @@ namespace SyntropyNet.WindowsApp.Views
             InitializeComponent();
             BrushConverter bc = new BrushConverter();
             addTokenBtn.Background = (Brush)bc.ConvertFrom("#0178d4");
+            btnOptimize.Background = (Brush)bc.ConvertFrom("#0178d4");
         }
 
         void OnClose(object sender, CancelEventArgs args)

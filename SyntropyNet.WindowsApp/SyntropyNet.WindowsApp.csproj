@@ -229,6 +229,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Converter\InverseBooleanToVisibilityConverter.cs" />
     <Compile Include="Converter\SpecialFolderPatternConverter.cs" />
     <Compile Include="Converter\StarWidthConverter.cs" />
     <Compile Include="Enums\TaskBarLocation.cs" />

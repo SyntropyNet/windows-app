@@ -5,6 +5,7 @@ using Prism.Mvvm;
 using SyntropyNet.WindowsApp.Application.Contracts;
 using SyntropyNet.WindowsApp.Application.Domain.Enums;
 using SyntropyNet.WindowsApp.Application.Domain.Enums.WireGuard;
+using SyntropyNet.WindowsApp.Application.Domain.Events;
 using SyntropyNet.WindowsApp.Application.Domain.Models;
 using SyntropyNet.WindowsApp.Application.Exceptions;
 using SyntropyNet.WindowsApp.Application.Models;
@@ -65,8 +66,28 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
             _WGConfigService.CreateInterfaceEvent += _WGConfigService_CreateInterfaceEvent;
             _WGConfigService.ErrorCreateInterfaceEvent += _WGConfigService_ErrorCreateInterfaceEvent;
 
+            SdnRouter pinger = SdnRouter.Instance;
+            SetFastestInterface(pinger.FastestInterfaceName.ToString().Replace("SYNTROPY_", ""));
+            pinger.FastestIpFound += _OnFastestIpFound;
+            pinger.PingFinished += (object sender) =>
+            {
+                SetOptimize(false);
+            };
+
             Host = _appSettings.DeviceName;
             Microsoft.Win32.SystemEvents.PowerModeChanged += this.SystemEvents_PowerModeChanged;
+        }
+
+
+
+        private void _OnFastestIpFound(object o, FastestRouteFoundEventArgs args)
+        {
+            if (args == null)
+            {
+                return;
+            }
+            string interfaceName = args.InterfaceName.ToString().Replace("SYNTROPY_","");
+            SetFastestInterface(interfaceName);
         }
 
         private bool WasStartedBeforeSuspending = false;
@@ -85,6 +106,17 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
                     WasStartedBeforeSuspending = false;
                 }
             }
+        }
+
+        public void SetFastestInterface(string name)
+        {
+            if (!_appContext.IsSynchronized)
+            {
+                _appContext.BeginInvoke(SetFastestInterface,name);
+                return;
+            }
+
+            PersistentText = $"Persistent (Current route: {name})";
         }
 
         public void ConnectionLost()
@@ -288,6 +320,58 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
                 if(SetProperty(ref _loggedIn, value))
                 {
                     AddTokenVisible = !value;
+                }
+            }
+        }
+
+        private bool _dynamic = Properties.Settings.Default.IsDynamic;
+        public bool Dynamic
+        {
+            get { return _dynamic; }
+            set
+            {
+                if (SetProperty(ref _dynamic, value))
+                {
+                    Properties.Settings.Default.IsDynamic = value;
+                    Properties.Settings.Default.Save();
+                    Persistent = !value;
+                }
+            }
+        }
+
+        private bool _persistent = !Properties.Settings.Default.IsDynamic;
+        public bool Persistent
+        {
+            get { return _persistent; }
+            set
+            {
+                if (SetProperty(ref _persistent, value))
+                {
+                    Dynamic = !value;
+                }
+            }
+        }
+
+        private string _persistentText = "Persistent";
+        public string PersistentText
+        {
+            get { return _persistentText; }
+            set
+            {
+                if (SetProperty(ref _persistentText, value))
+                {
+                }
+            }
+        }
+
+        private bool _optimizing = false;
+        public bool Optimizing
+        {
+            get { return _optimizing; }
+            set
+            {
+                if (SetProperty(ref _optimizing, value))
+                {
                 }
             }
         }
@@ -548,6 +632,35 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
                 }
             });
         }
+
+
+        private DelegateCommand _commandOptimize = null;
+        public DelegateCommand CommandOptimize =>
+            _commandOptimize ?? (_commandOptimize = new DelegateCommand(CommandOptimizeExecute));
+
+        private void CommandOptimizeExecute()
+        {
+            if (!Optimizing)
+            {
+                Optimizing = true;
+                SdnRouter.Optimize = true;
+            }
+        }
+
+        private delegate void SetOptimizeDelegate(bool value);
+        private void SetOptimize(bool value)
+        {
+            if (!_appContext.IsSynchronized)
+            {
+                SetOptimizeDelegate methodDelegate = SetOptimize;
+                _appContext.BeginInvoke(methodDelegate, value);
+                return;
+            }
+
+            Optimizing = value;
+        }
+
+
 
         private delegate void SetUserAuthenticationDelegate(bool value, string name);
         private void SetUserAuthentication(bool value,string name)
