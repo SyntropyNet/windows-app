@@ -11,6 +11,7 @@ using SyntropyNet.WindowsApp.Application.Exceptions;
 using SyntropyNet.WindowsApp.Application.Models;
 using SyntropyNet.WindowsApp.Application.Services;
 using SyntropyNet.WindowsApp.Application.Services.ApiWrapper;
+using SyntropyNet.WindowsApp.Application.Services.WireGuard;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -19,6 +20,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using Websocket.Client;
 using static SyntropyNet.WindowsApp.Application.Services.ApiWrapper.ApiWrapperService;
 
@@ -65,6 +67,7 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
             _apiService.IPChangeEvent += IPChanged;
             _WGConfigService.CreateInterfaceEvent += _WGConfigService_CreateInterfaceEvent;
             _WGConfigService.ErrorCreateInterfaceEvent += _WGConfigService_ErrorCreateInterfaceEvent;
+            _WGConfigService.ActiveRouteChanged += _ActiveRouteChanged;
 
             SdnRouter pinger = SdnRouter.Instance;
             SetFastestInterface(pinger.FastestInterfaceName.ToString().Replace("SYNTROPY_", ""));
@@ -79,6 +82,21 @@ namespace SyntropyNet.WindowsApp.Application.ViewModels
         }
 
 
+        private void _ActiveRouteChanged(object sender)
+        {
+            if (Dynamic)
+            {
+                return;
+            }
+
+            if(!_appContext.IsSynchronized)
+            {
+                _appContext.BeginInvoke(_ActiveRouteChanged, sender);
+                return;
+            }
+
+            CommandOptimizeExecute();
+        }
 
         private void _OnFastestIpFound(object o, FastestRouteFoundEventArgs args)
         {

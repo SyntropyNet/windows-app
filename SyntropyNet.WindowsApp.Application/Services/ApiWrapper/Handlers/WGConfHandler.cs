@@ -8,6 +8,7 @@ using SyntropyNet.WindowsApp.Application.Domain.Helpers;
 using SyntropyNet.WindowsApp.Application.Domain.Models.Messages;
 using SyntropyNet.WindowsApp.Application.Domain.Models.WireGuard;
 using SyntropyNet.WindowsApp.Application.Helpers;
+using SyntropyNet.WindowsApp.Application.Services.WireGuard;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -15,6 +16,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Windows.Markup;
 using Websocket.Client;
 
 namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
@@ -54,6 +56,21 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                     if (request.Data.Count() > 0)
                     {
                         WGRouteStatusRequest controllerRequest = new WGRouteStatusRequest();
+                        var doOptimize = true;
+                        List<Peer> activeIfPeers = _WGConfigService.GetPeerSections(SdnRouter.Instance.FastestInterfaceName).ToList();
+                        // Check if all peers of Active interface were removed
+                        // then do Optimize
+                        foreach(var aPeer in activeIfPeers)
+                        {
+                            if(!request.Data.Any(x => x.Fn == "remove_peer"
+                                && _WGConfigService.GetWGInterfaceNameFromString(x.Args.Ifname) == SdnRouter.Instance.FastestInterfaceName
+                                && x.Args.PublicKey == aPeer.PublicKey))
+                            {
+                                doOptimize = false;
+                                break;
+                            }
+                        }
+
 
                         foreach (var item in request.Data.OrderBy(x => x, new WGConfRequestDataComparer()))
                         {
@@ -63,6 +80,12 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                                     CreateInterface(request.Id, item);
                                     break;
                                 case "remove_interface":
+                                    // do an optimize if we remove the active interface
+                                    var currentInterfce = _WGConfigService.GetWGInterfaceNameFromString(item.Args.Ifname);
+                                    if(currentInterfce == SdnRouter.Instance.FastestInterfaceName)
+                                    {
+                                        doOptimize = true;
+                                    }
                                     RemoveInterace(item);
                                     break;
                                 case "add_peer":
@@ -89,6 +112,12 @@ namespace SyntropyNet.WindowsApp.Application.Services.ApiWrapper.Handlers
                                 _appSettings.DeviceIp,
                                 message);
                         }
+
+                        if (doOptimize)
+                        {
+                            _WGConfigService.ChangeActiveRouteEvent();
+                        }
+
                     }
                 }
                 catch (Exception ex)

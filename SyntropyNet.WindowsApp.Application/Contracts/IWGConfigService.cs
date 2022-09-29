@@ -14,6 +14,7 @@ namespace SyntropyNet.WindowsApp.Application.Contracts
         //event
         event Action<object, WGConfigServiceEventArgs> CreateInterfaceEvent;
         event Action<object, WGConfigServiceEventArgs> ErrorCreateInterfaceEvent;
+        event Action<object> ActiveRouteChanged;
         bool ActivityState { get; }
 
         void CreateInterfaces(bool updateKeys = false);
@@ -42,6 +43,7 @@ namespace SyntropyNet.WindowsApp.Application.Contracts
         IEnumerable<PeerDataFromPipe> GetPeersDataFromPipe(WGInterfaceName interfaceName);
         WGInterfaceName GetWGInterfaceNameFromString(string name);
         void RemoveInterface(WGInterfaceName interfaceName);
+        void ChangeActiveRouteEvent();
         void Dispose();
     }
 }
