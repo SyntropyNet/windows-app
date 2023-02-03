@@ -116,10 +116,22 @@ jobs:
       id: get_version
       uses: battila7/get-version-action@v2
 
-    - name: Send Notification
-      uses: peter-evans/repository-dispatch@v1
+    - name: Create Release
+      uses: actions/create-release@v1
+      id: create_release
       with:
-        token: ${{ secrets.SYNTROPY_TOKEN }}
-        repository: SyntropyNet/windows-application
-        event-type: build_application
-        client-payload: '{ "tag":"${{ github.ref }}", "run_id":"${{ github.run_id }}", "version":"${{ steps.get_version.outputs.version-without-v }}" }'
+        draft: false
+        prerelease: false
+        release_name: Release ${{ steps.get_version.outputs.version }}
+        tag_name: ${{ steps.get_version.outputs.version }}
+
+    - name: Upload Release Asset
+      id: upload-release-asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.SYNTROPY_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: MSIX Package/SyntropyNet.WindowsApp.MsixInstaller_${{ steps.get_version.outputs.version-without-v }}.0_Test/SyntropyNet.WindowsApp.MsixInstaller_${{ steps.get_version.outputs.version-without-v }}.0_x86_x64.appxbundle
+        asset_name: Syntropy_Windows_${{ steps.get_version.outputs.version-without-v }}.appxbundle
+        asset_content_type: application/appxbundle
