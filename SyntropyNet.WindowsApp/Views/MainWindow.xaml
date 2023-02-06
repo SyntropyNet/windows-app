@@ -9,7 +9,7 @@
         xmlns:convs="clr-namespace:SyntropyNet.WindowsApp.Converter"
         mc:Ignorable="d"
         ResizeMode="CanMinimize"
-        Title="" Height="475" Width="350"
+        Title="" Height="625" Width="350"
         BorderBrush="{DynamicResource AppBlueBrush}"
         BorderThickness="1"
         WindowStyle="None"
@@ -17,6 +17,7 @@
         Closing="OnClose" StateChanged="OnStateChanged" IsVisibleChanged="OnIsVisibleChanged">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVisConverter" />
+        <convs:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVisConverter" />
         <Color x:Key="AppGray">#e2e2e2</Color>
         <Color x:Key="AppBlue">#0178d4</Color>
         <SolidColorBrush x:Key="AppBlueBrush">#0178d4</SolidColorBrush>
@@ -382,6 +383,47 @@
                     </fa:ImageAwesome>
                     <Label Content="{Binding Error}" Foreground="DarkRed"></Label>
                 </StackPanel>
+            </StackPanel>
+            <StackPanel Margin="15 0 15 0" DockPanel.Dock="Top" Orientation="Vertical" HorizontalAlignment="Left">
+                <Label>Connection Type</Label>
+                <StackPanel Orientation="Horizontal" Visibility="{Binding StatusVisible, Converter={StaticResource BoolToVisConverter} }" IsEnabled="{Binding OnoffEnabled}">
+
+                    <RadioButton Margin="0 1 0 0" IsChecked="{Binding Dynamic}"></RadioButton>
+                    <StackPanel Orientation="Vertical" Width="300">
+                        <Label >Dynamic</Label>
+                        <TextBlock Margin="6 -5 0 0" FontSize="10px" TextWrapping="Wrap">Automatically finds the best route and switches between them dynamically to provide best connection.</TextBlock>
+                    </StackPanel>
+                    
+                </StackPanel>
+                <StackPanel Margin="0 10 0 0" Orientation="Horizontal" Visibility="{Binding StatusVisible, Converter={StaticResource BoolToVisConverter} }" IsEnabled="{Binding OnoffEnabled}">
+
+                    <RadioButton Margin="0 1 0 0" IsChecked="{Binding Persistent}"></RadioButton>
+                    <StackPanel Orientation="Vertical" Width="300">
+                        <Label Content="{Binding PersistentText}"></Label>
+                        <TextBlock Margin="6 -5 0 0" FontSize="10px" TextWrapping="Wrap">Sticks to the current route. Could be re-optimized manually.</TextBlock>
+                    </StackPanel>
+                </StackPanel>
+                <Button x:Name="btnOptimize" 
+                    Cursor="Hand"
+                    Foreground="White" 
+                    BorderThickness="0" 
+                    Height="36"
+                    Padding="5 5 5 5"
+                    Margin="0 10 0 0"
+                    Visibility="{Binding Persistent, Converter={StaticResource BoolToVisConverter} }"
+                    Command="{Binding CommandOptimize}">
+                    <StackPanel Orientation="Horizontal" >
+                        <Label Foreground="White"
+                               Visibility="{Binding Path=Optimizing, Converter={StaticResource InverseBoolToVisConverter} }" >
+                            Optimize
+                        </Label>
+                        <fa:ImageAwesome Icon="CircleOutlineNotch" Spin="True"
+                             SpinDuration="2" Width="18" Height="18"
+                             Visibility="{Binding Path=Optimizing, Converter={StaticResource BoolToVisConverter} }" 
+                             Margin="5 0 5 0" Foreground="White" />
+                    </StackPanel>
+                    
+                </Button>
             </StackPanel>
             <Separator Margin="15 15 15 10" DockPanel.Dock="Top" Background="LightGray"></Separator>
             <!-- Host-->

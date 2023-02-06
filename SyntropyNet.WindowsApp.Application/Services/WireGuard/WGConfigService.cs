@@ -29,6 +29,7 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
         //event
         public event Action<object, WGConfigServiceEventArgs> CreateInterfaceEvent;
         public event Action<object, WGConfigServiceEventArgs> ErrorCreateInterfaceEvent;
+        public event Action<object> ActiveRouteChanged;
 
         //Services
         private readonly INetworkInformationService _networkService;
@@ -869,6 +870,11 @@ namespace SyntropyNet.WindowsApp.Application.Services.WireGuard
                 return WGInterfaceName.SYNTROPY_SDN3;
             else
                 throw new NotFoundInterfaceException($"Interface with name '{name}' - not found.");
+        }
+
+        public void ChangeActiveRouteEvent()
+        {
+            ActiveRouteChanged?.Invoke(this);
         }
 
         public void Dispose()

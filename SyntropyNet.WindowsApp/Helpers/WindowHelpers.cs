@@ -18,6 +18,9 @@ namespace SyntropyNet.WindowsApp.Helpers
     public class WindowHelpers
     {
         private static readonly ILog log = LogManager.GetLogger(typeof(WindowHelpers));
+
+        private const int Width = 350;
+        private const int Height = 625;
         public static TaskBarLocation GetTaskBarLocation()
         {
             TaskBarLocation taskBarLocation = TaskBarLocation.BOTTOM;
@@ -63,7 +66,7 @@ namespace SyntropyNet.WindowsApp.Helpers
             switch (taskBarPos) { 
                 case TaskBarLocation.BOTTOM:
                     left = useCursor ? Cursor.Position.X - 320 : (int)(Screen.PrimaryScreen.WorkingArea.Right / scaleX) - 380;
-                    top = (int)(Screen.PrimaryScreen.WorkingArea.Bottom / scaleY) - 475 ;
+                    top = (int)(Screen.PrimaryScreen.WorkingArea.Bottom / scaleY) - Height;
                     break;
                 case TaskBarLocation.TOP:
                     left = useCursor ? Cursor.Position.X - 320 : (int)(Screen.PrimaryScreen.WorkingArea.Right / scaleX) - 380;
@@ -71,11 +74,11 @@ namespace SyntropyNet.WindowsApp.Helpers
                     break;
                 case TaskBarLocation.LEFT:
                     left = (int)(Screen.PrimaryScreen.WorkingArea.Left / scaleX);
-                    top = useCursor ? Cursor.Position.Y - 450 : (int)(Screen.PrimaryScreen.WorkingArea.Bottom / scaleY) - 480;
+                    top = useCursor ? Cursor.Position.Y - (Height - 25): (int)(Screen.PrimaryScreen.WorkingArea.Bottom / scaleY) - (Height + 5);
                     break;
                 case TaskBarLocation.RIGHT:
                     left = (int)(Screen.PrimaryScreen.WorkingArea.Right / scaleX) - 350;
-                    top = useCursor ? Cursor.Position.Y - 450 : (int)(Screen.PrimaryScreen.WorkingArea.Bottom / scaleY) - 480;
+                    top = useCursor ? Cursor.Position.Y - (Height - 25) : (int)(Screen.PrimaryScreen.WorkingArea.Bottom / scaleY) - (Height + 5);
                     break;
             }
 
