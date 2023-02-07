@@ -1,4 +1,5 @@
 [![Release Application](https://github.com/SyntropyNet/windows-app/actions/workflows/pipelines.yml/badge.svg)](https://github.com/SyntropyNet/windows-app/actions/workflows/pipelines.yml)
+[![GitHub license](http://img.shields.io/:license-mit-blue.svg?style=flat-square)](http://badges.mit-license.org)
 
 # Syntropy Windows Agent App
 
